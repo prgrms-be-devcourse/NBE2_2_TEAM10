@@ -17,9 +17,13 @@
 | release | 배포를 준비하는 브랜치 | release/{버전} |
 | hotfix | 긴급하게 수정이 필요한 버그를 고칠 때 사용하는 브랜치 | hotfix/{이슈명} |
 
-🔸 release 브랜치에서 모든 테스트가 통과하고 릴리즈 노트를 작성한 후 main 브랜치로 병합
+> release 브랜치에서 모든 테스트가 통과하고 릴리즈 노트를 작성한 후 main 브랜치로 병합
 
-🔸 hotfix 브랜치는 긴급 상황에서만 사용, 즉시 테스트 및 배포되어야 함
+> hotfix 브랜치는 긴급 상황에서만 사용, 즉시 테스트 및 배포되어야 함
+
+- 필요 시 작업 별로 구분하기 위해서 Issue Tracker ID 사용
+
+  `dev/feat/{기능명}/{#이슈번호}`
 
 ```
 ex)
@@ -31,6 +35,8 @@ dev/refactor/login
 release/1.0.0
 hotfix/login-error
 ```
+
+<br>
 
 ### Commit 컨벤션 _(Udacity Stryle 사용)_
 
@@ -46,6 +52,8 @@ hotfix/login-error
 
     - 제목과 본문 사이에 빈 줄 사용
     - body와 footer은 선택사항
+
+
 - **Type**
 
 | 타입 | 설명 |
@@ -60,23 +68,30 @@ hotfix/login-error
 | comment | 필요한 주석 추가 및 변경 |
 | remove | 파일, 폴더 삭제 |
 | rename | 파일, 폴더명 변경 |
-| design | CSS 등 사용자 UI 디자인 변경 |
+| design | CSS 등 사용자 UI 디자인 변경 |  
+
+
 - Subject (제목)
     - 50자 이내로 작성
     - 문장의 끝에 마침표를 사용하지 않음
     - 명령형
-    - 가시성이 높도록 최대한 한글을 사용
+    - 가시성이 높도록 최대한 한글을 사용  
+
+
 - Body (본문, 선택사항)
     - 설명과 맥락이 필요한 경우에만 사용
     - 커밋의 내용 과 이유를 설명 (어떻게X, 무엇을 또는 왜O)
     - 제목과 본문 사이에 빈 줄 사용
-    - 각 줄의 길이는 72자 이내
+    - 각 줄의 길이는 72자 이내  
+
+
 - Footer (꼬리말, 선택사항)
     - issue tracker ID 참조하는 데 사용
     - `유형: #이슈 번호` 형식
-    - 여러 개의 이슈 번호는 쉼표(,)로 구분
-- **Footer 규칙**
+    - 여러 개의 이슈 번호는 쉼표(,)로 구분  
 
+
+- **Footer 규칙**
 
 | 유형 | 설명 |
 | --- | --- |
@@ -88,7 +103,8 @@ hotfix/login-error
     ```
     ex)
     Fixes: #45 Related to: #34, #23
-    ```
+    ```  
+
 
 - Example Commit Message
 
@@ -102,6 +118,7 @@ hotfix/login-error
     Related to: #30, #50 - 토큰 발급 중 발생하는 오류 개선
     ```
 
+<br>
 
 ## GitHub 컨벤션
 
@@ -116,14 +133,19 @@ hotfix/login-error
 - **라벨(Label) 사용**
     - 이슈의 성격을 명확하게 구분하기 위해 라벨을 부여
 
-| 라벨 | 설명 |
-| --- | --- |
-| bug | 버그 수정과 관련된 이슈 또는 PR |
-| enhancement | 새로운 기능 추가 또는 기존 기능 개선 |
-| feature | 새 기능을 구현하는 작업 |
-| refactor | 코드 리팩토링 관련 작업 |
-| documentation | 문서 작업이나 문서 변경 관련 작업 |
-| chore | 빌드, 패키지 업데이트 등 관리 작업 |
+| 라벨               | 설명 |
+|------------------| --- |
+| ⚙️ setting       | 개발 환경 세팅 |
+| ✨ feature        | 기능 개발 |
+| 🌏 depoly        | 배포 관련 |
+| 🎨 css           | 마크업 및 스타일링 |
+| 🐞 bug           | 버그 관련 |
+| 📄 docs          | 문서 작성 및 수정 |
+| 🔧 refactor      | 코드 리팩토링 관련 |
+| ✅ test           | 테스트 관련 |
+| 💻 crossbrowsing | 브라우저 호환성 |
+| 📬  api          | 서버 API 통신 |
+| 🥰 accessibility | 웹접근 관련 |
 - **Issue와 GitHub Project, PR 연동**
     - 기능에 관련된 이슈라면 GitHub Projects나 PR과 연동하여 작업의 진행 상황을 실시간으로 공유
     - GitHub Projects와의 연동을 통해 각 기능의 상태(예: `To Do`, `In Progress`, `Done`)를 한눈에 확인할 수 있음
@@ -139,6 +161,8 @@ Labels: enhancement, high priority
 Project: Feature
 Linked Pull Request: #45
 ```
+
+<br>
 
 ### Pull Request (PR) 관리
 
