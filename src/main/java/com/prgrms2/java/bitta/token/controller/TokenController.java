@@ -1,7 +1,7 @@
-package com.prgrms2.java.bitta.security;
+package com.prgrms2.java.bitta.token.controller;
 
 import com.prgrms2.java.bitta.user.dto.UserDTO;
-import com.prgrms2.java.bitta.security.util.JWTUtil;
+import com.prgrms2.java.bitta.token.util.JWTUtil;
 import com.prgrms2.java.bitta.user.service.UserService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;

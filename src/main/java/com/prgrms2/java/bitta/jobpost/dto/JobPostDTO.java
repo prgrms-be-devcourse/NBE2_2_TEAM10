@@ -1,8 +1,8 @@
 package com.prgrms2.java.bitta.jobpost.dto;
 
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
-import com.prgrms2.java.bitta.xenum.Location;
-import com.prgrms2.java.bitta.xenum.PayStatus;
+import com.prgrms2.java.bitta.jobpost.entity.Location;
+import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 

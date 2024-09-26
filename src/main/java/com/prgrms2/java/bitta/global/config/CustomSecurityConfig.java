@@ -1,6 +1,6 @@
-package com.prgrms2.java.bitta.config;
+package com.prgrms2.java.bitta.global.config;
 
-import com.prgrms2.java.bitta.security.filter.JWTCheckFilter;
+import com.prgrms2.java.bitta.token.filter.JWTCheckFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

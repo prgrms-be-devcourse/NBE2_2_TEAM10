@@ -1,7 +1,6 @@
 package com.prgrms2.java.bitta.user.entity;
 
 
-import com.prgrms2.java.bitta.xenum.Role;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;

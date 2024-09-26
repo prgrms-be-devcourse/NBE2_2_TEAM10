@@ -1,8 +1,8 @@
-package com.prgrms2.java.bitta.security.filter;
+package com.prgrms2.java.bitta.token.filter;
 
 
-import com.prgrms2.java.bitta.security.auth.CustomUserPrincipal;
-import com.prgrms2.java.bitta.security.util.JWTUtil;
+import com.prgrms2.java.bitta.user.entity.CustomUserPrincipal;
+import com.prgrms2.java.bitta.token.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
