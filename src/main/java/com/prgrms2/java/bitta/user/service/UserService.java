@@ -2,7 +2,7 @@ package com.prgrms2.java.bitta.user.service;
 
 import com.prgrms2.java.bitta.user.dto.UserDTO;
 import com.prgrms2.java.bitta.user.entity.User;
-import com.prgrms2.java.bitta.gobal.exception.UserException;
+import com.prgrms2.java.bitta.user.exception.UserException;
 import com.prgrms2.java.bitta.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;

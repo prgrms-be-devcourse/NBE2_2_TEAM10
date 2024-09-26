@@ -1,4 +1,4 @@
-package com.prgrms2.java.bitta.gobal.exception;
+package com.prgrms2.java.bitta.user.exception;
 
 public enum UserException {
     NOT_FOUND("NOT_FOUND", 404),

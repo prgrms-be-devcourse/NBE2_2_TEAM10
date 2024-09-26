@@ -1,7 +1,5 @@
 package com.prgrms2.java.bitta.jobpost.entity;
 
-import com.prgrms2.java.bitta.xenum.Location;
-import com.prgrms2.java.bitta.xenum.PayStatus;
 import com.prgrms2.java.bitta.application.entity.PostApplication;
 import com.prgrms2.java.bitta.user.entity.User;
 import jakarta.persistence.*;

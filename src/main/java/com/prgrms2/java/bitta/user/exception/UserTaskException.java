@@ -1,4 +1,4 @@
-package com.prgrms2.java.bitta.gobal.exception;
+package com.prgrms2.java.bitta.user.exception;
 
 
 import lombok.AllArgsConstructor;

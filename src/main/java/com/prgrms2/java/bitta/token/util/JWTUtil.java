@@ -1,4 +1,4 @@
-package com.prgrms2.java.bitta.security.util;
+package com.prgrms2.java.bitta.token.util;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

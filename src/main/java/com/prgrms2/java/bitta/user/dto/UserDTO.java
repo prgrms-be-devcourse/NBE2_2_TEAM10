@@ -1,6 +1,6 @@
 package com.prgrms2.java.bitta.user.dto;
 
-import com.prgrms2.java.bitta.xenum.Role;
+import com.prgrms2.java.bitta.user.entity.Role;
 import com.prgrms2.java.bitta.user.entity.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
