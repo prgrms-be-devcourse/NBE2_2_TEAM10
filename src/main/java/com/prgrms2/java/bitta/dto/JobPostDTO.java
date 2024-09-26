@@ -1,7 +1,13 @@
 package com.prgrms2.java.bitta.dto;
 
+import com.prgrms2.java.bitta.entity.JobPost;
+import com.prgrms2.java.bitta.entity.Location;
+import com.prgrms2.java.bitta.entity.PayStatus;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Data
 @NoArgsConstructor
