@@ -35,3 +35,6 @@ out/
 
 ### VS Code ###
 .vscode/
+
+# ignore local profile.
+application-dev.properties
