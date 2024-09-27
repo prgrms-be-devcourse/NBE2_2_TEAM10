@@ -1,6 +1,6 @@
 package com.prgrms2.java.bitta.feed.entity;
 
-import com.prgrms2.java.bitta.user.entity.User;
+import com.prgrms2.java.bitta.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 public class Feed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Setter(AccessLevel.NONE)
     private Long feedId;
 
     private String title;
@@ -25,8 +24,8 @@ public class Feed {
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @JoinColumn(name = "member_id")
+    private Member member;
 
     @CreatedDate
     @Column(updatable = false, nullable = false)

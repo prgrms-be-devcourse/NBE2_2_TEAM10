@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class JobPostDTO {
     private Long jobPostId;
-    private Long userId;
+    private Long memberId;
 
     private String title;
     private String description;
@@ -28,7 +28,7 @@ public class JobPostDTO {
 
     public JobPostDTO(JobPost jobPost) {
         this.jobPostId = jobPostId;
-        this.userId = userId;
+        this.memberId = jobPost.getMember().getMemberId();
         this.title = title;
         this.description = description;
         this.location = location;

@@ -1,7 +1,7 @@
 package com.prgrms2.java.bitta.jobpost.entity;
 
 import com.prgrms2.java.bitta.application.entity.PostApplication;
-import com.prgrms2.java.bitta.user.entity.User;
+import com.prgrms2.java.bitta.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -28,8 +28,8 @@ public class JobPost {
     private Long jobPostId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="user_id", nullable = false)
-    private User user;              // 게시글 작성자
+    @JoinColumn(name="member_id", nullable = false)
+    private Member member;              // 게시글 작성자
 
     @Column(length = 100, nullable = false)
     private String title;           // 게시글 제목

@@ -33,7 +33,7 @@ public interface FeedService {
                 .title(feed.getTitle())
                 .content(feed.getContent())
                 .createdAt(feed.getCreatedAt())
-                .userId(feed.getUser().getUserId())
+                .memberId(feed.getMember().getMemberId())
                 .build();
     }
 }
