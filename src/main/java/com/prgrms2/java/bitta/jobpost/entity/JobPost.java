@@ -1,6 +1,6 @@
 package com.prgrms2.java.bitta.jobpost.entity;
 
-import com.prgrms2.java.bitta.application.entity.PostApplication;
+import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -62,7 +62,7 @@ public class JobPost {
 
     // 해당 게시글에 대한 신청 목록 가져야함 (임시로 application 엔티티 만듦)
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<PostApplication> postApplication = new ArrayList<>();
+    private List<Apply> apply = new ArrayList<>();
 
     public void changeTitle(String title) {
         this.title = title;

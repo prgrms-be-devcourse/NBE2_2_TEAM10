@@ -1,4 +1,4 @@
-package com.prgrms2.java.bitta.application.entity;
+package com.prgrms2.java.bitta.apply.entity;
 
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.member.entity.Member;
@@ -19,7 +19,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "application")
 @EntityListeners(AuditingEntityListener.class)
-public class PostApplication {
+public class Apply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long applicationId;

@@ -1,7 +1,7 @@
 package com.prgrms2.java.bitta.member.entity;
 
 
-import com.prgrms2.java.bitta.application.entity.PostApplication;
+import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,7 +46,7 @@ public class Member {
     private List<Feed> feeds = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PostApplication> postApplications = new ArrayList<>();
+    private List<Apply> applies = new ArrayList<>();
 
 
     public void changeMemberName(String memberName) {
@@ -83,13 +83,13 @@ public class Member {
         feed.setMember(null);  // 연관관계 해제
     }
 
-    public void addPostApplication(PostApplication postApplication) {
-        this.postApplications.add(postApplication);
-        postApplication.setMember(this);  // 양방향 연관관계 설정
+    public void addPostApplication(Apply apply) {
+        this.applies.add(apply);
+        apply.setMember(this);  // 양방향 연관관계 설정
     }
 
-    public void removePostApplication(PostApplication postApplication) {
-        this.postApplications.remove(postApplication);
-        postApplication.setMember(null);  // 연관관계 해제
+    public void removePostApplication(Apply apply) {
+        this.applies.remove(apply);
+        apply.setMember(null);  // 연관관계 해제
     }
 }

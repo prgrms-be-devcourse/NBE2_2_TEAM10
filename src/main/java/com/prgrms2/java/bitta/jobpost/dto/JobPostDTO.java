@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 public class JobPostDTO {
     private Long jobPostId;
-    private Long memberId;
+    private Long userId;
 
     private String title;
     private String description;
@@ -28,7 +28,7 @@ public class JobPostDTO {
 
     public JobPostDTO(JobPost jobPost) {
         this.jobPostId = jobPostId;
-        this.memberId = jobPost.getMember().getMemberId();
+        this.userId = userId;
         this.title = title;
         this.description = description;
         this.location = location;
@@ -38,14 +38,14 @@ public class JobPostDTO {
         this.endDate = endDate;
         this.isClosed = isClosed;
     }
-
-    public JobPost toEntity() {
-        JobPost jobPost = JobPost.builder().title(title)
-                .description(description)
-                .location(location)
-                .payStatus(payStatus)
-                .startDate(startDate)
-                .endDate(endDate).build();
-        return jobPost;
-    }
+//
+//    public JobPost toEntity() {
+//        JobPost jobPost = JobPost.builder().title(title)
+//                .description(description)
+//                .location(location)
+//                .payStatus(payStatus)
+//                .startDate(startDate)
+//                .endDate(endDate).build();
+//        return jobPost;
+//    }
 }

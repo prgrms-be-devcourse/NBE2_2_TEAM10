@@ -1,6 +1,6 @@
 package com.prgrms2.java.bitta.member.dto;
 
-import com.prgrms2.java.bitta.application.dto.PostApplicationDTO;
+import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.entity.Role;
@@ -30,7 +30,7 @@ public class MemberDTO {
     private String profilePicture;
     private LocalDateTime createdAt;
     private List<FeedDTO> feeds;
-    private List<PostApplicationDTO> postApplications;
+    private List<ApplyDTO> postApplications;
 
     public MemberDTO(Member member) {
         this.memberId = member.getMemberId();
@@ -46,8 +46,8 @@ public class MemberDTO {
         this.feeds = member.getFeeds().stream()
                 .map(FeedDTO::new)
                 .collect(Collectors.toList());
-        this.postApplications = member.getPostApplications().stream()
-                .map(PostApplicationDTO::new)
+        this.postApplications = member.getApplies().stream()
+                .map(ApplyDTO::new)
                 .collect(Collectors.toList());
 
     }
