@@ -35,4 +35,8 @@ public class UserService {                              /**로그인 로직*/
         User user = foundUser.orElseThrow(UserException.BAD_CREDENTIALS::get);
         return new UserDTO(user);
     }
+
+    public UserDTO register(UserDTO userDTO) {
+
+    }
 }
