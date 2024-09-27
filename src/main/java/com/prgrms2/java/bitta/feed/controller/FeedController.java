@@ -47,14 +47,14 @@ public class FeedController {
                                         @RequestParam(value = "photo", required = false) List<MultipartFile> photos) {
         //feedDto = null 은 @RequestBody 가 이미 체크하기에 한번 더 할 필요는 없어 보입니다.
         if (photos != null && photos.size() > 4) {
-            return ResponseEntity.badRequest().body("4개 이상의 사진 (에러 메시지는 따로 만드는게 좋을거 같아요)");
+            return ResponseEntity.badRequest().body("4개 이상의 사진");
         }
 
          Feed feed = feedService.insert(feedDto);
 
     if (photos != null) {
         try {
-            // Upload and associate photos with the feed
+
             photoService.uploadPhotos(photos, feed);
         } catch (IOException e) {
             return ResponseEntity.status(500).body("사진 업로드 에러");
@@ -64,6 +64,46 @@ public class FeedController {
     return ResponseEntity.ok("사진 업로드 완료");
     }
 
+    @PostMapping("/{id}/photos")
+    public ResponseEntity<?> updatePhotos(@PathVariable("id") Long feedId,
+                                               @RequestParam("photos") List<MultipartFile> photos) {
+
+        if (photos.size() > 4) {
+            return ResponseEntity.badRequest().body("4개 이상의 사진");
+        }
+
+        Optional<FeedDTO> feedDto = feedService.read(feedId);
+
+        if (feedDto.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Feed feed = feedService.dtoToEntity(feedDto.get());
+
+        try {
+            photoService.uploadPhotos(photos, feed);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("사진 업로드 에러");
+        }
+
+        return ResponseEntity.ok("사진 업로드 성공");
+    }
+
+    @DeleteMapping("/{id}/photos")
+    public ResponseEntity<?> deletePhotos(@PathVariable("id") Long feedId) {
+
+        Optional<FeedDTO> feedDto = feedService.read(feedId);
+
+        if (feedDto.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Feed feed = feedService.dtoToEntity(feedDto.get());
+
+        photoService.deletePhotosByFeed(feed);
+
+        return ResponseEntity.ok("사진 삭제");
+    }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> modifyFeed(@PathVariable("id") Long feedId, @RequestBody FeedDTO feedDto) {

@@ -21,7 +21,7 @@ public class PhotoService {
     }
 
     public String uploadFile(MultipartFile file) throws IOException {
-        String filePath = "uploads/" + file.getOriginalFilename();
+        String filePath = " " + file.getOriginalFilename(); //file path. 자료 저장을 어디다 하냐에 바꾸면 됩니다.
         File dest = new File(filePath);
         file.transferTo(dest);
 
