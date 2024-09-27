@@ -11,7 +11,7 @@ public interface FeedService {
 
     List<FeedDTO> readAll();
 
-    String insert(FeedDTO feedDto);
+    Feed insert(FeedDTO feedDto);
 
     Optional<FeedDTO> update(FeedDTO feedDto);
 

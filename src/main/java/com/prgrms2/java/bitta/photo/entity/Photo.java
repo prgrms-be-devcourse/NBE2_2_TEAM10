@@ -27,8 +27,8 @@ public class Photo {
 
     //이곳에 있던 user 필드 삭제. feed 가 이미 user 에게 연결되어 있고, 사진은 feed 로만 연결되어도 문제 없을거 같아요
 
-    @ManyToOne
-    @JoinColumn(name = "feed_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "feed_id", nullable = false)
     private Feed feed;
 
     @CreatedDate

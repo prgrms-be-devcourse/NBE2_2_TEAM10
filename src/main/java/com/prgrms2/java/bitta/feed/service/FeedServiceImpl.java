@@ -36,10 +36,10 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     @Transactional
-    public String insert(FeedDTO feedDTO) {
+    public Feed insert(FeedDTO feedDTO) {
         Feed feed = dtoToEntity(feedDTO);
-        feedRepository.save(feed);
-        return "Feed created successfully";
+        return feedRepository.save(feed);
+
     }
 
     @Override

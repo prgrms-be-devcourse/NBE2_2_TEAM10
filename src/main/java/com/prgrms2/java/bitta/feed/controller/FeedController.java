@@ -1,11 +1,15 @@
 package com.prgrms2.java.bitta.feed.controller;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
+import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.service.FeedService;
+import com.prgrms2.java.bitta.photo.service.PhotoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,6 +18,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FeedController {
     private final FeedService feedService;
+    private final PhotoService photoService;
 
     @GetMapping
     public ResponseEntity<?> getFeed() {
@@ -38,13 +43,27 @@ public class FeedController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createFeed(@RequestBody FeedDTO feedDto) {
-        if (feedDto == null) {
-            return ResponseEntity.badRequest().build();
+    public ResponseEntity<?> createFeed(@RequestBody FeedDTO feedDto,
+                                        @RequestParam(value = "photo", required = false) List<MultipartFile> photos) {
+        //feedDto = null 은 @RequestBody 가 이미 체크하기에 한번 더 할 필요는 없어 보입니다.
+        if (photos != null && photos.size() > 4) {
+            return ResponseEntity.badRequest().body("4개 이상의 사진 (에러 메시지는 따로 만드는게 좋을거 같아요)");
         }
 
-        return ResponseEntity.ok(feedService.insert(feedDto));
+         Feed feed = feedService.insert(feedDto);
+
+    if (photos != null) {
+        try {
+            // Upload and associate photos with the feed
+            photoService.uploadPhotos(photos, feed);
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("사진 업로드 에러");
+        }
     }
+
+    return ResponseEntity.ok("사진 업로드 완료");
+    }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<?> modifyFeed(@PathVariable("id") Long feedId, @RequestBody FeedDTO feedDto) {
