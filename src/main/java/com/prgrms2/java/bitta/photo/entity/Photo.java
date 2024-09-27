@@ -25,9 +25,7 @@ public class Photo {
 
     private String photoUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    //이곳에 있던 user 필드 삭제. feed 가 이미 user 에게 연결되어 있고, 사진은 feed 로만 연결되어도 문제 없을거 같아요
 
     @ManyToOne
     @JoinColumn(name = "feed_id")
