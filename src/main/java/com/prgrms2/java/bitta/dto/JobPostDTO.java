@@ -27,16 +27,16 @@ public class JobPostDTO {
     private boolean isClosed;
 
     public JobPostDTO(JobPost jobPost) {
-        this.jobPostId = jobPostId;
-        this.userId = userId;
-        this.title = title;
-        this.description = description;
-        this.location = location;
-        this.payStatus = payStatus;
-        this.updateAt = updateAt;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.isClosed = isClosed;
+        this.jobPostId = jobPost.getJobPostId();
+        this.userId = jobPost.getUser().getUserId();
+        this.title = jobPost.getTitle();
+        this.description = jobPost.getDescription();
+        this.location = jobPost.getLocation();
+        this.payStatus = jobPost.getPayStatus();
+        this.updateAt = jobPost.getUpdatedAt();
+        this.startDate = jobPost.getStartDate();
+        this.endDate = jobPost.getEndDate();
+        this.isClosed = jobPost.isClosed();
     }
 
     public JobPost toEntity() {

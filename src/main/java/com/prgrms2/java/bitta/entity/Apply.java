@@ -18,7 +18,7 @@ import java.util.List;
 @Entity
 @Table(name = "application")
 @EntityListeners(AuditingEntityListener.class)
-public class PostApplication {
+public class Apply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long applicationId;
@@ -32,10 +32,6 @@ public class PostApplication {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
-
-    // User의 Feed 목록도 가져옴 (1:N 관계)
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Feed> feeds;
 
     @CreatedDate
     private LocalDateTime appliedAt;
