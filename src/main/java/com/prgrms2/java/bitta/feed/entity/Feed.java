@@ -24,7 +24,7 @@ public class Feed {
 
     private String content;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL) //User 삭제시 Feed 또한 같이 삭제되게
     @JoinColumn(name = "user_id")
     private User user;
 
