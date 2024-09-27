@@ -1,6 +1,6 @@
 package com.prgrms2.java.bitta.feed.service;
 
-import com.prgrms2.java.bitta.feed.dto.FeedDTO;
+import com.prgrms2.java.bitta.feed.dto.FeedDto;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import org.springframework.stereotype.Service;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
@@ -23,19 +23,19 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<FeedDTO> read(Long id) {
+    public Optional<FeedDto> read(Long id) {
         return feedRepository.findById(id).map(this::entityToDto);
     }
 
     @Override
     @Transactional(readOnly = true)
-    public List<FeedDTO> readAll() {
+    public List<FeedDto> readAll() {
         return feedRepository.findAll().stream().map(this::entityToDto).collect(Collectors.toList());
     }
 
     @Override
     @Transactional
-    public String insert(FeedDTO feedDto) {
+    public String insert(FeedDto feedDto) {
         Feed feed = dtoToEntity(feedDto);
         feedRepository.save(feed);
         return "피드 생성";
@@ -43,7 +43,7 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     @Transactional
-    public Optional<FeedDTO> update(FeedDTO feedDto) {
+    public Optional<FeedDto> update(FeedDto feedDto) {
         Optional<Feed> feedOpt = feedRepository.findById(feedDto.getFeedId());
 
         if (feedOpt.isPresent()) {

@@ -7,7 +7,7 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class FeedDTO {
+public class FeedDto {
     private Long feedId;
 
     private String title;
