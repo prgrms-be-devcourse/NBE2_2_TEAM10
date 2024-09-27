@@ -1,12 +1,10 @@
 package com.prgrms2.java.bitta.service;
 
 import com.prgrms2.java.bitta.dto.JobPostDTO;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 public interface JobPostService {
-
     static JobPostDTO register(JobPostDTO jobPostDTO) {
         return null;
     }
