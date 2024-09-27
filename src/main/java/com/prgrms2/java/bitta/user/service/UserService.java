@@ -37,6 +37,6 @@ public class UserService {                              /**로그인 로직*/
     }
 
     public UserDTO register(UserDTO userDTO) {
-
+        return null;
     }
 }
