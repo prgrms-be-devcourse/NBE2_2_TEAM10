@@ -1,5 +1,6 @@
 package com.prgrms2.java.bitta.user.dto;
 
+import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.user.entity.Role;
 import com.prgrms2.java.bitta.user.entity.User;
 import lombok.AllArgsConstructor;
@@ -9,7 +10,9 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -26,6 +29,10 @@ public class UserDTO {
     private String profilePicture;
     private LocalDateTime createdAt;
 
+    // 추가된 필드
+    private List<FeedDTO> feeds;
+    //private List<PostApplicationDTO> postApplications;
+
     public UserDTO(User user) {
         this.userId = user.getUserId();
         this.username = user.getUsername();
@@ -35,9 +42,17 @@ public class UserDTO {
         this.role = user.getRole();
         this.profilePicture = user.getProfilePicture();
         this.createdAt = user.getCreatedAt();
+
+        // Feed와 PostApplication 정보도 가져옴
+//        this.feeds = user.getFeeds().stream()
+//                .map(FeedDTO::new)
+//                .collect(Collectors.toList());
+//        this.postApplications = user.getPostApplications().stream()
+//                .map(PostApplicationDTO::new)
+//                .collect(Collectors.toList());
     }
 
-    //JWT
+    // JWT
     public Map<String, Object> getPayload() {
         Map<String, Object> payloadMap = new HashMap<>();
         payloadMap.put("userId", userId);

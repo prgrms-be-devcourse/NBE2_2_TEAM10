@@ -36,9 +36,6 @@ public class PostApplication {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // User의 Feed 목록도 가져옴 (1:N 관계)
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
-    private List<Feed> feeds;
 
     @CreatedDate
     private LocalDateTime appliedAt;

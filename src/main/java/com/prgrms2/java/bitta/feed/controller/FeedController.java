@@ -1,6 +1,6 @@
 package com.prgrms2.java.bitta.feed.controller;
 
-import com.prgrms2.java.bitta.feed.dto.FeedDto;
+import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.service.FeedService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -17,18 +17,18 @@ public class FeedController {
 
     @GetMapping
     public ResponseEntity<?> getFeed() {
-        List<FeedDto> feedDtoList = feedService.readAll();
+        List<FeedDTO> feedDTOList = feedService.readAll();
 
-        if (feedDtoList.isEmpty()) {
+        if (feedDTOList.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
 
-        return ResponseEntity.ok(feedDtoList);
+        return ResponseEntity.ok(feedDTOList);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<?> getFeedById(@PathVariable("id") Long feedId) {
-        Optional<FeedDto> feedDto = feedService.read(feedId);
+        Optional<FeedDTO> feedDto = feedService.read(feedId);
 
         if (feedDto.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -38,7 +38,7 @@ public class FeedController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createFeed(@RequestBody FeedDto feedDto) {
+    public ResponseEntity<?> createFeed(@RequestBody FeedDTO feedDto) {
         if (feedDto == null) {
             return ResponseEntity.badRequest().build();
         }
@@ -47,7 +47,7 @@ public class FeedController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> modifyFeed(@PathVariable("id") Long feedId, @RequestBody FeedDto feedDto) {
+    public ResponseEntity<?> modifyFeed(@PathVariable("id") Long feedId, @RequestBody FeedDTO feedDto) {
         if (feedDto == null) {
             return ResponseEntity.badRequest().build();
         }
