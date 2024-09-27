@@ -7,14 +7,10 @@ import java.time.LocalDateTime;
 
 @Data
 @Builder
-public class FeedDto {
+public class FeedDTO {
     private Long feedId;
-
     private String title;
-
     private String content;
-
     private Long userId;
-
     private LocalDateTime createdAt;
 }
