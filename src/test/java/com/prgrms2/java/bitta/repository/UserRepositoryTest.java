@@ -1,7 +1,7 @@
 package com.prgrms2.java.bitta.repository;
 
 import com.prgrms2.java.bitta.user.repository.UserRepository;
-import com.prgrms2.java.bitta.xenum.Role;
+import com.prgrms2.java.bitta.user.entity.Role;
 import com.prgrms2.java.bitta.user.entity.User;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;

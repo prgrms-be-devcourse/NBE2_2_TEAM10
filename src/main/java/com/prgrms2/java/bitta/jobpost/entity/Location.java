@@ -1,4 +1,4 @@
-package com.prgrms2.java.bitta.xenum;
+package com.prgrms2.java.bitta.jobpost.entity;
 
 public enum Location {
     SEOUL, BUSAN, INCHEON, DAEJEON,

@@ -1,6 +1,6 @@
-package com.prgrms2.java.bitta.advice;
+package com.prgrms2.java.bitta.user.controller.advice;
 
-import com.prgrms2.java.bitta.gobal.exception.UserTaskException;
+import com.prgrms2.java.bitta.user.exception.UserTaskException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
