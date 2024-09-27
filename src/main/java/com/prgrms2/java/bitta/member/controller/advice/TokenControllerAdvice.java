@@ -1,6 +1,6 @@
-package com.prgrms2.java.bitta.user.controller.advice;
+package com.prgrms2.java.bitta.member.controller.advice;
 
-import com.prgrms2.java.bitta.user.exception.UserTaskException;
+import com.prgrms2.java.bitta.member.exception.MemberTaskException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;
@@ -20,8 +20,8 @@ public class TokenControllerAdvice {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(errMap);
     }
 
-    @ExceptionHandler(UserTaskException.class)
-    public ResponseEntity<?> handleArgsException(UserTaskException e) {
+    @ExceptionHandler(MemberTaskException.class)
+    public ResponseEntity<?> handleArgsException(MemberTaskException e) {
         Map<String, Object> errMap = new HashMap<>();           //비어있는 맵 생성
         errMap.put("error",e.getMessage());
 

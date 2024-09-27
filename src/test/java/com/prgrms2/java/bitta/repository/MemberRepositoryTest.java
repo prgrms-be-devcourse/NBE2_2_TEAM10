@@ -1,8 +1,8 @@
 package com.prgrms2.java.bitta.repository;
 
-import com.prgrms2.java.bitta.user.repository.UserRepository;
-import com.prgrms2.java.bitta.user.entity.Role;
-import com.prgrms2.java.bitta.user.entity.User;
+import com.prgrms2.java.bitta.member.entity.Member;
+import com.prgrms2.java.bitta.member.repository.MemberRepository;
+import com.prgrms2.java.bitta.member.entity.Role;
 import lombok.extern.log4j.Log4j2;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,26 +21,26 @@ import static org.junit.jupiter.api.Assertions.*;
 @SpringBootTest
 @ActiveProfiles("dev")
 @Log4j2
-class UserRepositoryTest {
+class MemberRepositoryTest {
     @Autowired
-    private UserRepository userRepository;
+    private MemberRepository memberRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Test
     public void 회원삽입(){
         IntStream.rangeClosed(1,10).forEach(i -> {
-            User user = User.builder()
-                    .username("username" + i)
+            Member member = Member.builder()
+                    .memberName("membername" + i)
                     .password(passwordEncoder.encode("1111"))
-                    .email("user"+i+"@prgrms2.com")
+                    .email("member"+i+"@prgrms2.com")
                     .location("서울시"+i+"번지")
                     .profilePicture(i+".jpg")
                     .role(Role.Actor)
                     .build();
-            User savedUser = userRepository.save(user);
-            assertNotNull(savedUser);
-            log.info("----------"+savedUser.toString());
+            Member savedMember = memberRepository.save(member);
+            assertNotNull(savedMember);
+            log.info("----------"+ savedMember.toString());
         });
     }
 
@@ -48,7 +48,7 @@ class UserRepositoryTest {
     public void 회원조회(){
         String email = "user1@prgrms2.com";
 
-        Optional<User> foundUser = userRepository.findByEmail(email);
+        Optional<Member> foundUser = memberRepository.findByEmail(email);
         assertNotNull(foundUser);
         assertEquals(email, foundUser.get().getEmail());
 
@@ -61,9 +61,9 @@ class UserRepositoryTest {
     @Commit
     public void 회원삭제(){
         String email = "user10@prgrms2.com";
-        Optional<User> foundUser = userRepository.findByEmail(email);
+        Optional<Member> foundUser = memberRepository.findByEmail(email);
         if(foundUser.isPresent()) {
-            userRepository.deleteByEmail(email);
+            memberRepository.deleteByEmail(email);
         } else {
             throw new UsernameNotFoundException("User not found");
         }

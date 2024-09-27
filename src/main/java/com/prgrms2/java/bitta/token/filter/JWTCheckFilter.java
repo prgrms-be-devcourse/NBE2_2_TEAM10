@@ -1,7 +1,7 @@
 package com.prgrms2.java.bitta.token.filter;
 
 
-import com.prgrms2.java.bitta.user.entity.CustomUserPrincipal;
+import com.prgrms2.java.bitta.member.entity.CustomMemberPrincipal;
 import com.prgrms2.java.bitta.token.util.JWTUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -73,7 +73,7 @@ public class JWTCheckFilter extends OncePerRequestFilter {
             //토큰을 이용하여 인증된 정보 저장
             UsernamePasswordAuthenticationToken authToken
                     = new UsernamePasswordAuthenticationToken(
-                    new CustomUserPrincipal(email),
+                    new CustomMemberPrincipal(email),
                     null,
                     Arrays.stream(roles)
                             .map( role
