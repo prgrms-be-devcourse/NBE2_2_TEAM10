@@ -1,7 +1,6 @@
 package com.prgrms2.java.bitta.jobpost.service;
 
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 

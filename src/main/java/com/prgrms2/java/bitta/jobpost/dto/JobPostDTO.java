@@ -38,14 +38,14 @@ public class JobPostDTO {
         this.endDate = endDate;
         this.isClosed = isClosed;
     }
-
-    public JobPost toEntity() {
-        JobPost jobPost = JobPost.builder().title(title)
-                .description(description)
-                .location(location)
-                .payStatus(payStatus)
-                .startDate(startDate)
-                .endDate(endDate).build();
-        return jobPost;
-    }
+//
+//    public JobPost toEntity() {
+//        JobPost jobPost = JobPost.builder().title(title)
+//                .description(description)
+//                .location(location)
+//                .payStatus(payStatus)
+//                .startDate(startDate)
+//                .endDate(endDate).build();
+//        return jobPost;
+//    }
 }

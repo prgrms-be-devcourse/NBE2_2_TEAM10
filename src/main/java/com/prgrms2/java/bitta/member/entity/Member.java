@@ -1,7 +1,7 @@
-package com.prgrms2.java.bitta.user.entity;
+package com.prgrms2.java.bitta.member.entity;
 
 
-import com.prgrms2.java.bitta.application.entity.PostApplication;
+import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import jakarta.persistence.*;
 import lombok.*;
@@ -17,15 +17,15 @@ import java.util.List;
 @NoArgsConstructor
 @Getter
 @ToString
-@Table(name = "user")
+@Table(name = "member")
 @Builder
 @EntityListeners(AuditingEntityListener.class)
-public class User {
+public class Member {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long userId;
+    private Long memberId;
 
-    private String username;
+    private String memberName;
 
     @Column(unique = true)
     private String email;
@@ -42,15 +42,15 @@ public class User {
     @CreatedDate
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Feed> feeds = new ArrayList<>();
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<PostApplication> postApplications = new ArrayList<>();
+    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Apply> applies = new ArrayList<>();
 
 
-    public void changeUsername(String username) {
-        this.username = username;
+    public void changeMemberName(String memberName) {
+        this.memberName = memberName;
     }
 
     public void changeEmail(String email) {
@@ -75,21 +75,21 @@ public class User {
 
     public void addFeed(Feed feed) {
         this.feeds.add(feed);
-        feed.setUser(this);  // 양방향 연관관계 설정
+        feed.setMember(this);  // 양방향 연관관계 설정
     }
 
     public void removeFeed(Feed feed) {
         this.feeds.remove(feed);
-        feed.setUser(null);  // 연관관계 해제
+        feed.setMember(null);  // 연관관계 해제
     }
 
-    public void addPostApplication(PostApplication postApplication) {
-        this.postApplications.add(postApplication);
-        postApplication.setUser(this);  // 양방향 연관관계 설정
+    public void addPostApplication(Apply apply) {
+        this.applies.add(apply);
+        apply.setMember(this);  // 양방향 연관관계 설정
     }
 
-    public void removePostApplication(PostApplication postApplication) {
-        this.postApplications.remove(postApplication);
-        postApplication.setUser(null);  // 연관관계 해제
+    public void removePostApplication(Apply apply) {
+        this.applies.remove(apply);
+        apply.setMember(null);  // 연관관계 해제
     }
 }

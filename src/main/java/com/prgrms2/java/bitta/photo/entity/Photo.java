@@ -1,6 +1,6 @@
 package com.prgrms2.java.bitta.photo.entity;
 
-import com.prgrms2.java.bitta.user.entity.User;
+import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +27,7 @@ public class Photo {
 
     @ManyToOne
     @JoinColumn(name = "user_id")
-    private User user;
+    private Member member;
 
     @ManyToOne
     @JoinColumn(name = "feed_id")
