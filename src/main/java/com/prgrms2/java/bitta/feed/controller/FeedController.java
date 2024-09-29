@@ -20,7 +20,7 @@ public class FeedController {
         List<FeedDTO> feedDTOList = feedService.readAll();
 
         if (feedDTOList.isEmpty()) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.notFound().build();
         }
 
         return ResponseEntity.ok(feedDTOList);
