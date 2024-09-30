@@ -2,71 +2,92 @@ package com.prgrms2.java.bitta.feed.service;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.entity.Feed;
+import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
+import com.prgrms2.java.bitta.member.service.MemberService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class FeedServiceImpl implements FeedService {
-
     private final FeedRepository feedRepository;
 
-    // Constructor for dependency injection
-    public FeedServiceImpl(FeedRepository feedRepository) {
-        this.feedRepository = feedRepository;
-    }
+    private final MemberService memberService;
 
     @Override
     @Transactional(readOnly = true)
-    public Optional<FeedDTO> read(Long id) {
-        return feedRepository.findById(id).map(this::entityToDto);  // Ensure consistent method reference
+    public FeedDTO read(Long id) {
+        Feed feed = feedRepository.findById(id)
+                .orElseThrow(FeedException.CANNOT_FOUND::get);
+
+        return entityToDto(feed);
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<FeedDTO> readAll() {
-        return feedRepository.findAll().stream()
-                .map(this::entityToDto)  // Consistent method reference
-                .collect(Collectors.toList());
+        List<Feed> feeds = feedRepository.findAll();
+
+        if (feeds.isEmpty()) {
+            throw FeedException.CANNOT_FOUND.get();
+        }
+
+        return feeds.stream().map(this::entityToDto).toList();
     }
 
     @Override
     @Transactional
-    public String insert(FeedDTO feedDTO) {
+    public void insert(FeedDTO feedDTO) {
+        if (feedDTO.getId() != null) {
+            throw FeedException.BAD_REQUEST.get();
+        }
+
         Feed feed = dtoToEntity(feedDTO);
+
         feedRepository.save(feed);
-        return "Feed created successfully";
     }
 
     @Override
     @Transactional
-    public Optional<FeedDTO> update(FeedDTO feedDTO) {
-        Optional<Feed> feedOpt = feedRepository.findById(feedDTO.getFeedId());
+    public void update(FeedDTO feedDTO) {
+        Feed feed = feedRepository.findById(feedDTO.getId())
+                .orElseThrow(FeedException.CANNOT_FOUND::get);
 
-        if (feedOpt.isPresent()) {
-            Feed feed = feedOpt.get();
-            feed.setTitle(feedDTO.getTitle());
-            feed.setContent(feedDTO.getContent());
-            feedRepository.save(feed);
-            return Optional.of(entityToDto(feed));
-        }
+        feed.setTitle(feedDTO.getTitle());
+        feed.setContent(feedDTO.getContent());
 
-        return Optional.empty();
+        feedRepository.save(feed);
     }
 
     @Override
     @Transactional
-    public boolean delete(Long id) {
-        if (feedRepository.existsById(id)) {
-            feedRepository.deleteById(id);
-            return true;
+    public void delete(Long id) {
+        if (feedRepository.deleteByIdAndReturnCount(id) == 0) {
+            throw FeedException.CANNOT_DELETE.get();
         }
-        return false;
     }
 
+    private Feed dtoToEntity(FeedDTO feedDto) {
+        return Feed.builder()
+                .id(feedDto.getId())
+                .title(feedDto.getTitle())
+                .content(feedDto.getContent())
+                .createdAt(feedDto.getCreatedAt())
+                .member(memberService.getByEmail(feedDto.getEmail()))
+                .build();
+    }
 
+    private FeedDTO entityToDto(Feed feed) {
+        return FeedDTO.builder()
+                .id(feed.getId())
+                .title(feed.getTitle())
+                .content(feed.getContent())
+                .createdAt(feed.getCreatedAt())
+                .email(feed.getMember().getEmail())
+                .build();
+    }
 }
