@@ -17,14 +17,18 @@ import java.time.LocalDateTime;
 public class Feed {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long feedId;
+    @Setter(AccessLevel.NONE)
+    private Long id;
 
+    @Column(nullable = false, length = 50)
     private String title;
 
+    @Lob
+    @Column(nullable = false)
     private String content;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @CreatedDate
