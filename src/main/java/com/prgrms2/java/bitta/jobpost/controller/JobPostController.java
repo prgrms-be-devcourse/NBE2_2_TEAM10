@@ -5,7 +5,6 @@ import com.prgrms2.java.bitta.jobpost.service.JobPostService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.http.ResponseEntity;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,29 +18,28 @@ public class JobPostController {
     private final JobPostService jobPostService;
 
     @GetMapping
-    public ResponseEntity<List<JobPostDTO>> findAll(@Validated JobPostDTO jobPostDTO) {
-        return ResponseEntity.ok(jobPostService.getList(jobPostDTO));
+    public ResponseEntity<List<JobPostDTO>> findAll() {
+        return ResponseEntity.ok(jobPostService.getList());
     }
 
     @PostMapping
-    public ResponseEntity<JobPostDTO> createJobPost(@Validated @RequestBody JobPostDTO jobPostDTO) {
-        return ResponseEntity.ok(JobPostService.register(jobPostDTO));
+    public ResponseEntity<JobPostDTO> registerJobPost(@RequestBody JobPostDTO jobPostDTO) {
+        return ResponseEntity.ok(jobPostService.register(jobPostDTO));
     }
 
-    @GetMapping("/{jobPostId}")
-    public ResponseEntity<JobPostDTO> readJobPost(@PathVariable("jobPostId") Long jobPostId) {
-        return ResponseEntity.ok(jobPostService.read(jobPostId));
+    @GetMapping("/{id}")
+    public ResponseEntity<JobPostDTO> readJobPost(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(jobPostService.read(id));
     }
 
-    @PutMapping("/{jobPostId}")
-    public ResponseEntity<JobPostDTO> updateJobPost(@Validated @RequestBody JobPostDTO jobPostDTO, @PathVariable("jobPostId") Long jobPostId) {
+    @PutMapping("/{id}")
+    public ResponseEntity<JobPostDTO> modifyJobPost(@RequestBody JobPostDTO jobPostDTO, @PathVariable("id") Long id) {
         return ResponseEntity.ok(jobPostService.modify(jobPostDTO));
     }
 
-    @DeleteMapping("/{jobPostId}")
-    public ResponseEntity<Map<String, String>> deleteJobPost(@PathVariable("jobPostId") Long jobPostId) {
-        jobPostService.remove(jobPostId);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Map<String, String>> deleteJobPost(@PathVariable("id") Long id) {
+        jobPostService.remove(id);
         return ResponseEntity.ok(Map.of("message", "success"));
     }
-
 }

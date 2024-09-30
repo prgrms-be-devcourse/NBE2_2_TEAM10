@@ -23,7 +23,7 @@ public class ApplyDTO {
     // PostApplication 엔티티로부터 DTO를 생성하는 생성자
     public ApplyDTO(Apply apply) {
         this.applicationId = apply.getApplicationId();
-        this.jobPostId = apply.getJobPost().getJobPostId();
+        this.jobPostId = apply.getJobPost().getId();
         this.memberId = apply.getMember().getMemberId();
         this.appliedAt = apply.getAppliedAt();
     }
