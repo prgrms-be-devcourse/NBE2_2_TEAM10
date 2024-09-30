@@ -1,7 +1,6 @@
 package com.prgrms2.java.bitta.feed.dto;
 
-import com.prgrms2.java.bitta.feed.entity.Feed;
-import com.prgrms2.java.bitta.member.entity.Member;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,27 +13,21 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 public class FeedDTO {
-    private Long feedId;
+    @Min(value = 1, message = "ID는 음수가 될 수 없습니다.")
+    private Long id;
+
+    @NotBlank(message = "제목은 비워둘 수 없습니다.")
+    @Size(min = 1, max = 50, message = "제목은 1 ~ 50자 이하여야 합니다.")
     private String title;
-    private String content;
-    private Long memberId;
+
+    @NotNull
+    @Builder.Default
+    private String content = "";
+
+    @NotBlank(message = "이메일은 비워둘 수 없습니다.")
+    @Email(message = "올바른 이메일 형식이어야 합니다.")
+    private String email;
+
+    @PastOrPresent(message = "생성일자는 현재 시점 혹은 이전이어야 합니다.")
     private LocalDateTime createdAt;
-
-    public FeedDTO(Feed feed) {
-        this.feedId = feed.getFeedId();
-        this.title = feed.getTitle();
-        this.content = feed.getContent();
-        this.memberId = feed.getMember().getMemberId();
-        this.createdAt = feed.getCreatedAt();
-    }
-
-    public Feed toEntity(Member member) {
-        Feed feed = Feed.builder()
-                .title(title)         // title을 넘겨줌
-                .content(content)     // content를 넘겨줌
-                .member(member)       // Member 객체를 넘겨줌
-                .createdAt(createdAt) // createdAt을 넘겨줌
-                .build();
-        return feed;
-    }
 }
