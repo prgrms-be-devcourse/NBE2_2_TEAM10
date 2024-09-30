@@ -39,6 +39,10 @@ public class MemberService {                              /**로그인 로직*/
         return new MemberDTO(member);
     }
 
+    public Member getByEmail(String email) {
+        return memberRepository.findByEmail(email).orElseThrow(MemberException.NOT_FOUND::get);
+    }
+
     public MemberDTO register(MemberDTO memberDTO) {      /**가입*/
         try{
             Member member = memberDTO.toEntity();

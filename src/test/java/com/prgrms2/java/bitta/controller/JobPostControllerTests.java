@@ -7,11 +7,9 @@ import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
 import com.prgrms2.java.bitta.jobpost.service.JobPostService;
 import com.prgrms2.java.bitta.token.util.JWTUtil;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
@@ -35,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @WebMvcTest(JobPostController.class)
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
+@AutoConfigureMockMvc(addFilters = false)
 public class JobPostControllerTests {
     @MockBean
     private JobPostService jobPostService;
@@ -48,40 +47,40 @@ public class JobPostControllerTests {
     @Autowired
     private ObjectMapper objectMapper;
 
-    private static JobPostDTO jobPostDto;
+    private JobPostDTO jobPostDto;
 
-    private static List<JobPostDTO> jobPostDtoList;
+    private List<JobPostDTO> jobPostDtoList;
 
-    @BeforeAll
-    static void initialize() {
-        jobPostDto = new JobPostDTO();
-
-        jobPostDto.setJobPostId(1L);
-        jobPostDto.setUserId(1L);
-        jobPostDto.setTitle("Title");
-        jobPostDto.setDescription("Description");
-        jobPostDto.setLocation(Location.SEOUL);
-        jobPostDto.setPayStatus(PayStatus.FREE);
-        jobPostDto.setUpdateAt(LocalDateTime.now());
-        jobPostDto.setStartDate(LocalDate.now());
-        jobPostDto.setEndDate(LocalDate.now().plusDays(7));
-        jobPostDto.setClosed(false);
+    @BeforeEach
+    void initialize() {
+        jobPostDto = JobPostDTO.builder()
+                .id(1L)
+                .userId(1L)
+                .title("Title")
+                .description("Description")
+                .location(Location.SEOUL)
+                .payStatus(PayStatus.FREE)
+                .updateAt(LocalDateTime.now().withNano(0))
+                .startDate(LocalDate.now())
+                .endDate(LocalDate.now().plusDays(7))
+                .isClosed(false)
+                .build();
 
         jobPostDtoList = new ArrayList<>();
 
         IntStream.rangeClosed(1, 5).forEach(i -> {
-            JobPostDTO _jobPostDto = new JobPostDTO();
-
-            _jobPostDto.setJobPostId((long) i);
-            _jobPostDto.setUserId(1L);
-            _jobPostDto.setTitle("Title" + i);
-            _jobPostDto.setDescription("Description" + i);
-            _jobPostDto.setLocation(Location.SEOUL);
-            _jobPostDto.setPayStatus(PayStatus.FREE);
-            _jobPostDto.setUpdateAt(LocalDateTime.now());
-            _jobPostDto.setStartDate(LocalDate.now());
-            _jobPostDto.setEndDate(LocalDate.now().plusDays(7));
-            _jobPostDto.setClosed(false);
+            JobPostDTO _jobPostDto = JobPostDTO.builder()
+                    .id((long) i)
+                    .userId(1L)
+                    .title("Title" + i)
+                    .description("Description" + i)
+                    .location(Location.SEOUL)
+                    .payStatus(PayStatus.FREE)
+                    .updateAt(LocalDateTime.now().withNano(0))
+                    .startDate(LocalDate.now())
+                    .endDate(LocalDate.now().plusDays(7))
+                    .isClosed(false)
+                    .build();
 
             jobPostDtoList.add(_jobPostDto);
         });
@@ -91,15 +90,15 @@ public class JobPostControllerTests {
         List<ResultMatcher> resultMatchers = new ArrayList<>();
         String prefix = "$.";
 
-        resultMatchers.add(jsonPath(prefix + "jobPostId").value(jobPostDto.getJobPostId()));
+        resultMatchers.add(jsonPath(prefix + "id").value(jobPostDto.getId()));
         resultMatchers.add(jsonPath(prefix + "userId").value(jobPostDto.getUserId()));
         resultMatchers.add(jsonPath(prefix + "title").value(jobPostDto.getTitle()));
         resultMatchers.add(jsonPath(prefix + "description").value(jobPostDto.getDescription()));
-        resultMatchers.add(jsonPath(prefix + "location").value(jobPostDto.getLocation()));
-        resultMatchers.add(jsonPath(prefix + "payStatus").value(jobPostDto.getPayStatus()));
-        resultMatchers.add(jsonPath(prefix + "updateAt").value(jobPostDto.getUpdateAt()));
-        resultMatchers.add(jsonPath(prefix + "startDate").value(jobPostDto.getStartDate()));
-        resultMatchers.add(jsonPath(prefix + "endDate").value(jobPostDto.getEndDate()));
+        resultMatchers.add(jsonPath(prefix + "location").value(jobPostDto.getLocation().toString()));
+        resultMatchers.add(jsonPath(prefix + "payStatus").value(jobPostDto.getPayStatus().toString()));
+        resultMatchers.add(jsonPath(prefix + "updateAt").value(jobPostDto.getUpdateAt().withNano(0).toString()));
+        resultMatchers.add(jsonPath(prefix + "startDate").value(jobPostDto.getStartDate().toString()));
+        resultMatchers.add(jsonPath(prefix + "endDate").value(jobPostDto.getEndDate().toString()));
         resultMatchers.add(jsonPath(prefix + "isClosed").value(jobPostDto.isClosed()));
 
         return resultMatchers.toArray(ResultMatcher[]::new);
@@ -109,18 +108,18 @@ public class JobPostControllerTests {
         List<ResultMatcher> resultMatchers = new ArrayList<>();
 
         for (int i = 0; i < jobPostDtoList.size(); i++) {
-            JobPostDTO jobPostDto = new JobPostDTO();
+            JobPostDTO jobPostDto = jobPostDtoList.get(i);
             String prefix = String.format("$[%d].", i);
 
-            resultMatchers.add(jsonPath(prefix + "jobPostId").value(jobPostDto.getJobPostId()));
+            resultMatchers.add(jsonPath(prefix + "id").value(jobPostDto.getId()));
             resultMatchers.add(jsonPath(prefix + "userId").value(jobPostDto.getUserId()));
             resultMatchers.add(jsonPath(prefix + "title").value(jobPostDto.getTitle()));
             resultMatchers.add(jsonPath(prefix + "description").value(jobPostDto.getDescription()));
-            resultMatchers.add(jsonPath(prefix + "location").value(jobPostDto.getLocation()));
-            resultMatchers.add(jsonPath(prefix + "payStatus").value(jobPostDto.getPayStatus()));
-            resultMatchers.add(jsonPath(prefix + "updateAt").value(jobPostDto.getUpdateAt()));
-            resultMatchers.add(jsonPath(prefix + "startDate").value(jobPostDto.getStartDate()));
-            resultMatchers.add(jsonPath(prefix + "endDate").value(jobPostDto.getEndDate()));
+            resultMatchers.add(jsonPath(prefix + "location").value(jobPostDto.getLocation().toString()));
+            resultMatchers.add(jsonPath(prefix + "payStatus").value(jobPostDto.getPayStatus().toString()));
+            resultMatchers.add(jsonPath(prefix + "updateAt").value(jobPostDto.getUpdateAt().withNano(0).toString()));
+            resultMatchers.add(jsonPath(prefix + "startDate").value(jobPostDto.getStartDate().toString()));
+            resultMatchers.add(jsonPath(prefix + "endDate").value(jobPostDto.getEndDate().toString()));
             resultMatchers.add(jsonPath(prefix + "isClosed").value(jobPostDto.isClosed()));
         }
 
@@ -130,8 +129,7 @@ public class JobPostControllerTests {
     @Test
     @DisplayName("포스트 전체 조회 (성공)")
     void findAll_PostExists_ReturnList() throws Exception {
-        given(jobPostService.getList(any(JobPostDTO.class)))
-                .willReturn(jobPostDtoList);
+        given(jobPostService.getList()).willReturn(jobPostDtoList);
 
         String content = objectMapper.writeValueAsString(jobPostDto);
 
@@ -182,7 +180,7 @@ public class JobPostControllerTests {
     @Test
     @DisplayName("포스트 등록 (성공)")
     void createJobPost_PostNotDuplicated_ReturnResultDto() throws Exception {
-        given(JobPostService.register(any(JobPostDTO.class)))
+        given(jobPostService.register(any(JobPostDTO.class)))
                 .willReturn(jobPostDto);
 
         String content = objectMapper.writeValueAsString(jobPostDto);
