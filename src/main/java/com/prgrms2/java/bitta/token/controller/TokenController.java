@@ -1,8 +1,8 @@
 package com.prgrms2.java.bitta.token.controller;
 
-import com.prgrms2.java.bitta.user.dto.UserDTO;
+import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.token.util.JWTUtil;
-import com.prgrms2.java.bitta.user.service.UserService;
+import com.prgrms2.java.bitta.member.service.MemberService;
 import io.jsonwebtoken.ExpiredJwtException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
@@ -17,22 +17,25 @@ import java.util.Map;
 @RequestMapping("/api/v1/token")
 @Log4j2
 public class TokenController {
-    private final UserService userService;
+    private final MemberService memberService;
     private final JWTUtil jwtUtil;
 
-    @PostMapping("/make")
-    public ResponseEntity<Map<String, Object>> makeToken(@RequestBody UserDTO userDTO) {
-        log.info("Making token");
+    @PostMapping("/login")
+    public ResponseEntity<Map<String, String>> login(@RequestBody MemberDTO memberDTO) {
+        log.info("Logging in user");
 
-        //사용자 정보 가져오기
-        UserDTO foundUserDTO = userService.read(userDTO.getEmail(), userDTO.getPassword());
-        log.info("Found member: " + foundUserDTO);
+        // 사용자 정보 가져오기
+        MemberDTO foundMemberDTO = memberService.read(memberDTO.getEmail(), memberDTO.getPassword());
+        if (foundMemberDTO == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "이메일 또는 비밀번호가 잘못되었습니다."));
+        }
+        log.info("Found member: " + foundMemberDTO);
 
-        //토큰 생성
-        Map<String, Object> payloadMap = foundUserDTO.getPayload();
-        String accessToken = jwtUtil.createToken(payloadMap, 60); //1분 유효
-        String refreshToken = jwtUtil.createToken(Map.of("email", foundUserDTO.getEmail()),60 * 24 * 7);
-        log.info("Refresh token: " + refreshToken);
+        // 토큰 생성
+        Map<String, Object> payloadMap = foundMemberDTO.getPayload();
+        String accessToken = jwtUtil.createToken(payloadMap, 60); // 1분 유효
+        String refreshToken = jwtUtil.createToken(Map.of("email", foundMemberDTO.getEmail()), 60 * 24 * 7);
         log.info("Access token: " + accessToken);
 
         return ResponseEntity.ok(Map.of("accessToken", accessToken, "refreshToken", refreshToken));
@@ -40,12 +43,10 @@ public class TokenController {
 
     // 리프레시 토큰 발행 시 - 예외 상황 코드와 메시지 전송
     public ResponseEntity<Map<String, String>> handleException(String message, int status) {
-        return ResponseEntity.status(status)                //1. 엑세스 토큰이 없는 경우      400
-                .body(Map.of("error", message));        //2. 리프레시 토큰이 없는 경우    400
-        //3. mid가 없는 경우              400
-        //4. 리프레시 토큰이 만료된 경우  400
-        //5. 그외 예외 발생               400
+        return ResponseEntity.status(status) // 400
+                .body(Map.of("error", message));
     }
+
     //리프레시 토큰 검증
     @PostMapping("/refresh")
     public ResponseEntity<Map<String, String>> refreshToken(@RequestHeader("Authorization")String headerAuth,
@@ -100,8 +101,8 @@ public class TokenController {
         }
         log.info("--- make new token ---");
         //액세스 토큰과 리프레시 토큰 생성하여 mid와 반환
-        UserDTO foundUserDTO = userService.read(email);
-        Map<String, Object> payloadMap = foundUserDTO.getPayload();
+        MemberDTO foundMemberDTO = memberService.read(email);
+        Map<String, Object> payloadMap = foundMemberDTO.getPayload();
         String newAccessToken = jwtUtil.createToken(payloadMap, 60); //1분 유효
         String newRefreshToken = jwtUtil.createToken(Map.of("email", email),60 * 24 * 7);
 
@@ -143,8 +144,8 @@ public class TokenController {
                     return sendResponse("INVALID REFRESH TOKEN email");
                 }
                 log.info("--- 4. 새로운 토큰 생성");
-                UserDTO foundUserDTO = userService.read(email);
-                Map<String, Object> payloadMap = foundUserDTO.getPayload();
+                MemberDTO foundMemberDTO = memberService.read(email);
+                Map<String, Object> payloadMap = foundMemberDTO.getPayload();
                 String newAccessToken = jwtUtil.createToken(payloadMap, 60);
                 String newFreshToken = jwtUtil.createToken(Map.of("email", email),60 * 24 * 7);
 

@@ -1,23 +1,18 @@
 package com.prgrms2.java.bitta.jobpost.service;
 
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
-import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-@Service
 public interface JobPostService {
+    JobPostDTO register(JobPostDTO jobPostDTO);
 
-    static JobPostDTO register(JobPostDTO jobPostDTO) {
-        return null;
-    }
+    void remove(Long id);
 
-    JobPostDTO read(Long jobPostId);
+    JobPostDTO read(Long id);
 
     JobPostDTO modify(JobPostDTO jobPostDTO);
 
-    void remove(Long jobPostId);
-
-    List<JobPostDTO> getList(JobPostDTO jobPostDTO);
+    List<JobPostDTO> getList();
 }
 

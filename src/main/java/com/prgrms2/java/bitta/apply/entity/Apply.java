@@ -1,8 +1,7 @@
-package com.prgrms2.java.bitta.application.entity;
+package com.prgrms2.java.bitta.apply.entity;
 
-import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
-import com.prgrms2.java.bitta.user.entity.User;
+import com.prgrms2.java.bitta.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,7 +11,6 @@ import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Data
 @Builder
@@ -21,7 +19,7 @@ import java.util.List;
 @Entity
 @Table(name = "application")
 @EntityListeners(AuditingEntityListener.class)
-public class PostApplication {
+public class Apply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long applicationId;
@@ -33,9 +31,8 @@ public class PostApplication {
 
     // Application은 특정 User의 신청 정보 (N:1 관계)
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
-
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @CreatedDate
     private LocalDateTime appliedAt;

@@ -1,8 +1,12 @@
 package com.prgrms2.java.bitta.jobpost.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
+import com.prgrms2.java.bitta.member.entity.Member;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,9 +14,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Data
-@NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class JobPostDTO {
-    private Long jobPostId;
+    private Long id;
     private Long userId;
 
     private String title;
@@ -24,28 +29,31 @@ public class JobPostDTO {
     private LocalDate startDate;
     private LocalDate endDate;
 
+    @JsonProperty("isClosed")
     private boolean isClosed;
 
     public JobPostDTO(JobPost jobPost) {
-        this.jobPostId = jobPostId;
-        this.userId = userId;
-        this.title = title;
-        this.description = description;
-        this.location = location;
-        this.payStatus = payStatus;
-        this.updateAt = updateAt;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.isClosed = isClosed;
+        this.id = jobPost.getId();
+        this.userId = jobPost.getMember().getMemberId();
+        this.title = jobPost.getTitle();
+        this.description = jobPost.getDescription();
+        this.location = jobPost.getLocation();
+        this.payStatus = jobPost.getPayStatus();
+        this.updateAt = jobPost.getUpdatedAt();
+        this.startDate = jobPost.getStartDate();
+        this.endDate = jobPost.getEndDate();
+        this.isClosed = jobPost.isClosed();
     }
 
     public JobPost toEntity() {
-        JobPost jobPost = JobPost.builder().title(title)
+        return JobPost.builder().id(id)
+                .title(title)
                 .description(description)
                 .location(location)
                 .payStatus(payStatus)
+                .updatedAt(updateAt)
                 .startDate(startDate)
-                .endDate(endDate).build();
-        return jobPost;
+                .endDate(endDate)
+                .build();
     }
 }

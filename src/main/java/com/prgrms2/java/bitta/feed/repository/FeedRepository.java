@@ -10,6 +10,6 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FeedRepository extends JpaRepository<Feed, Long> {
     @Modifying
-    @Query("DELETE FROM Feed f WHERE f.feedId = :feedId")
-    Long deleteByFeedIdAndReturnCount(@Param("feedId") Long feedId);
+    @Query("DELETE FROM Feed f WHERE f.id = :id")
+    Long deleteByIdAndReturnCount(@Param("id") Long id);
 }
