@@ -1,13 +1,12 @@
-package com.prgrms2.java.bitta.global.config;
+package com.prgrms2.java.bitta.security;
 
-import com.prgrms2.java.bitta.token.filter.JWTCheckFilter;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -18,33 +17,27 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
-@EnableMethodSecurity
-public class CustomSecurityConfig {
-    private JWTCheckFilter jwtCheckFilter;
+@EnableWebSecurity
+@RequiredArgsConstructor
+public class SecurityConfig {
 
-    @Autowired
-    public void setJwtCheckFilter(JWTCheckFilter jwtCheckFilter) {
-        this.jwtCheckFilter = jwtCheckFilter;
-    }
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http.formLogin(login -> login.disable())        //로그인 X
-                .logout(logout -> logout.disable())     //로그아웃 X
-                .csrf( csrf -> csrf.disable())          //csrf 세션단위 관리 X
-                .sessionManagement( sess                //세션 사용 X
-                        -> sess.sessionCreationPolicy(SessionCreationPolicy.NEVER));
-        //JWTCheckFilter
-        http.addFilterBefore(jwtCheckFilter, UsernamePasswordAuthenticationFilter.class);
-
-        http.cors(cors -> {
-            cors.configurationSource(corsConfigurationSource());
-        });
-
-        return http.build();
+    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+        return httpSecurity
+                .httpBasic(basic -> basic.disable())
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/members/sign-in").permitAll()
+                        .requestMatchers("/members/sign-up").permitAll()
+                        .requestMatchers("/members/test").hasRole("USER")
+                        .anyRequest().authenticated())
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
-    //CORS 설정 관련 처리 -------------------------------------
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration corsConfig = new CorsConfiguration();
@@ -73,6 +66,8 @@ public class CustomSecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        // BCrypt Encoder 사용
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
+
 }

@@ -4,8 +4,8 @@ import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
+import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
-import com.prgrms2.java.bitta.member.util.MemberProvider;
 import com.prgrms2.java.bitta.photo.entity.Photo;
 import com.prgrms2.java.bitta.photo.service.PhotoService;
 import com.prgrms2.java.bitta.video.entity.Video;
@@ -127,7 +127,7 @@ public class FeedServiceImpl implements FeedService {
                 .title(feed.getTitle())
                 .content(feed.getContent())
                 .createdAt(feed.getCreatedAt())
-                .id(feed.getMember().getMemberId())
+                .id(feed.getMember().getId())
                 .photoUrls(feed.getPhotos().stream()
                         .map(Photo::getPhotoUrl).toList())
                 .videoUrls(feed.getVideos().stream()

@@ -2,7 +2,7 @@ package com.prgrms2.java.bitta.feed.controller;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.service.FeedService;
-import com.prgrms2.java.bitta.member.service.MemberService;
+import com.prgrms2.java.bitta.member.service.MemberServiceImpl;
 import com.prgrms2.java.bitta.photo.service.PhotoService;
 import com.prgrms2.java.bitta.video.service.VideoService;
 import jakarta.validation.Valid;
@@ -25,7 +25,7 @@ public class FeedController {
     private final FeedService feedService;
     private final PhotoService photoService;
     private final VideoService videoService;
-    private final MemberService memberService;
+    private final MemberServiceImpl memberServiceImpl;
 
 
 
