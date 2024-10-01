@@ -14,13 +14,9 @@ public interface FeedService {
 
     List<FeedDTO> readAll(Member member);
 
-    void insert(FeedDTO feedDto, List<MultipartFile> photos, List<MultipartFile> videos);
+    void insert(FeedDTO feedDto, List<MultipartFile> files);
 
-    void update(FeedDTO feedDto, List<MultipartFile> photos, List<MultipartFile> videos);
+    void update(FeedDTO feedDto, List<MultipartFile> filesToUpload, List<String> filepathsToDelete);
 
     void delete(Long id);
-
-
-
-
 }
