@@ -1,6 +1,7 @@
 package com.prgrms2.java.bitta.feed.service;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
+import com.prgrms2.java.bitta.member.entity.Member;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -11,13 +12,15 @@ public interface FeedService {
 
     List<FeedDTO> readAll();
 
+    List<FeedDTO> readAll(Member member);
+
     void insert(FeedDTO feedDto);
 
     void update(FeedDTO feedDto);
 
     void delete(Long id);
 
-    //photo, video
     void addPhotosToFeed(Long feedId, List<MultipartFile> photos) throws IOException;
+
     void addVideosToFeed(Long feedId, List<MultipartFile> videos) throws IOException;
 }
