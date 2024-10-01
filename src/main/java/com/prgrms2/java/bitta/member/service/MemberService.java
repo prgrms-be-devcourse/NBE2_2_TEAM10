@@ -1,5 +1,9 @@
 package com.prgrms2.java.bitta.member.service;
 
+import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
+import com.prgrms2.java.bitta.apply.service.ApplyService;
+import com.prgrms2.java.bitta.feed.dto.FeedDTO;
+import com.prgrms2.java.bitta.feed.service.FeedService;
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.exception.MemberException;
@@ -13,6 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,8 @@ import java.util.Optional;
 public class MemberService {                              /**로그인 로직*/
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
+    private final FeedService feedService;
+    private final ApplyService applyService;
     private JWTUtil jwtUtil;
 
     public MemberDTO read(String email, String password) {
@@ -30,24 +37,21 @@ public class MemberService {                              /**로그인 로직*/
         if (!passwordEncoder.matches(password, member.getPassword())) {
             throw MemberException.BAD_CREDENTIALS.get();
         }
-    return new MemberDTO(member);
+        return entityToDto(member);
     }
 
     public MemberDTO read(String email) {                 /**단순 조회 로직*/
         Optional<Member> foundMember = memberRepository.findByEmail(email);
         Member member = foundMember.orElseThrow(MemberException.BAD_CREDENTIALS::get);
-        return new MemberDTO(member);
-    }
 
-    public Member getByEmail(String email) {
-        return memberRepository.findByEmail(email).orElseThrow(MemberException.NOT_FOUND::get);
+        return entityToDto(member);
     }
 
     public MemberDTO register(MemberDTO memberDTO) {      /**가입*/
         try{
-            Member member = memberDTO.toEntity();
-            memberRepository.save(member);
-            return new MemberDTO(member);
+            Member member = dtoToEntity(memberDTO);
+            member = memberRepository.save(member);
+            return entityToDto(member);
         } catch (Exception e){
             log.error("===="+e.getMessage());
             throw MemberException.NOT_REGISTER.get();
@@ -66,7 +70,7 @@ public class MemberService {                              /**로그인 로직*/
             member.changeProfilePicture(memberDTO.getProfilePicture());
             member.changeRole(memberDTO.getRole());
 
-            return new MemberDTO(member);
+            return entityToDto(member);
         } catch (Exception e){
             log.error("===="+e.getMessage());
             throw MemberException.NOT_MODIFIED.get();
@@ -89,5 +93,33 @@ public class MemberService {                              /**로그인 로직*/
             log.error("===="+e.getMessage());
             throw MemberException.REMOVE_FAILED.get();
         }
+    }
+
+    private MemberDTO entityToDto(Member member) {
+        return MemberDTO.builder()
+                .memberId(member.getMemberId())
+                .memberName(member.getMemberName())
+                .password(member.getPassword())
+                .email(member.getEmail())
+                .location(member.getLocation())
+                .role(member.getRole())
+                .profilePicture(member.getProfilePicture())
+                .createdAt(member.getCreatedAt())
+                .feeds(feedService.readAll(member))
+                .postApplications(applyService.readAll(member))
+                .build();
+    }
+
+    private Member dtoToEntity(MemberDTO memberDTO) {
+        return Member.builder()
+                .memberId(memberDTO.getMemberId())
+                .memberName(memberDTO.getMemberName())
+                .password(memberDTO.getPassword())
+                .email(memberDTO.getEmail())
+                .location(memberDTO.getLocation())
+                .role(memberDTO.getRole())
+                .profilePicture(memberDTO.getProfilePicture())
+                .createdAt(memberDTO.getCreatedAt())
+                .build();
     }
 }

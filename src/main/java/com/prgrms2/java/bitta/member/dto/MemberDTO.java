@@ -20,7 +20,6 @@ import java.util.stream.Collectors;
 @AllArgsConstructor
 @NoArgsConstructor
 public class MemberDTO {
-
     private Long memberId;
     private String memberName;
     private String password;
@@ -31,39 +30,6 @@ public class MemberDTO {
     private LocalDateTime createdAt;
     private List<FeedDTO> feeds;
     private List<ApplyDTO> postApplications;
-
-    public MemberDTO(Member member) {
-        this.memberId = member.getMemberId();
-        this.memberName = member.getMemberName();
-        this.password = member.getPassword();
-        this.email = member.getEmail();
-        this.location = member.getLocation();
-        this.role = member.getRole();
-        this.profilePicture = member.getProfilePicture();
-        this.createdAt = member.getCreatedAt();
-
-        // Feed와 PostApplication 정보도 가져옴
-        this.feeds = member.getFeeds().stream()
-                .map(FeedDTO::new)
-                .collect(Collectors.toList());
-        this.postApplications = member.getApplies().stream()
-                .map(ApplyDTO::new)
-                .collect(Collectors.toList());
-
-    }
-
-    public Member toEntity(){
-        return Member.builder()
-                .memberId(memberId)
-                .memberName(memberName)
-                .password(password)
-                .email(email)
-                .location(location)
-                .role(role)
-                .profilePicture(profilePicture)
-                .createdAt(createdAt)
-                .build();
-    }
 
     // JWT
     public Map<String, Object> getPayload() {

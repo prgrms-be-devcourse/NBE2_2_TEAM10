@@ -31,29 +31,4 @@ public class JobPostDTO {
 
     @JsonProperty("isClosed")
     private boolean isClosed;
-
-    public JobPostDTO(JobPost jobPost) {
-        this.id = jobPost.getId();
-        this.userId = jobPost.getMember().getMemberId();
-        this.title = jobPost.getTitle();
-        this.description = jobPost.getDescription();
-        this.location = jobPost.getLocation();
-        this.payStatus = jobPost.getPayStatus();
-        this.updateAt = jobPost.getUpdatedAt();
-        this.startDate = jobPost.getStartDate();
-        this.endDate = jobPost.getEndDate();
-        this.isClosed = jobPost.isClosed();
-    }
-
-    public JobPost toEntity() {
-        return JobPost.builder().id(id)
-                .title(title)
-                .description(description)
-                .location(location)
-                .payStatus(payStatus)
-                .updatedAt(updateAt)
-                .startDate(startDate)
-                .endDate(endDate)
-                .build();
-    }
 }
