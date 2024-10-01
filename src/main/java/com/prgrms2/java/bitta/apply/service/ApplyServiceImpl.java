@@ -4,8 +4,8 @@ import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
 import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.apply.repository.ApplyRepository;
 import com.prgrms2.java.bitta.jobpost.util.JobPostProvider;
+import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
-import com.prgrms2.java.bitta.member.util.MemberProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -41,7 +41,7 @@ public class ApplyServiceImpl implements ApplyService {
     private ApplyDTO entityToDto(Apply apply) {
         return ApplyDTO.builder()
                 .applicationId(apply.getApplicationId())
-                .memberId(apply.getMember().getMemberId())
+                .memberId(apply.getMember().getId())
                 .jobPostId(apply.getJobPost().getId())
                 .appliedAt(apply.getAppliedAt())
                 .build();
