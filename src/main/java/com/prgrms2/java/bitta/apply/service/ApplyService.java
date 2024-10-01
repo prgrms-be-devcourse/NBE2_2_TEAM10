@@ -7,4 +7,10 @@ import java.util.List;
 
 public interface ApplyService {
     List<ApplyDTO> readAll(Member member);
+
+    ApplyDTO register(ApplyDTO applyDTO);
+
+    void delete(Long id);
+
+    ApplyDTO read(Long id);
 }
