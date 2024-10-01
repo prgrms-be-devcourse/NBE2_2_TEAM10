@@ -15,6 +15,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -28,6 +29,7 @@ public class MemberServiceImpl implements MemberService{
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final ProfileImageService profileImageService;
 
     @Transactional
     @Override
@@ -52,9 +54,43 @@ public class MemberServiceImpl implements MemberService{
         }
         // Password 암호화
         String encodedPassword = passwordEncoder.encode(signUpDTO.getPassword());
+
+        // 기본 프로필 이미지 설정
+        String defaultProfileImg = profileImageService.getDefaultProfileImage();
+
         List<String> roles = new ArrayList<>();
         roles.add("USER");  // USER 권한 부여
-        return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
+
+        // 회원 가입 시 기본 프로필 이미지 추가
+        Member newMember = signUpDTO.toEntity(encodedPassword, roles);
+        newMember.setProfileImg(defaultProfileImg);
+
+        return MemberDTO.toDTO(memberRepository.save(newMember));
+        //return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
+    }
+
+    // 프로필 이미지 수정
+    @Transactional
+    public void updateProfileImage(Long id, MultipartFile file) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        // 파일 저장 후 경로 설정
+        String profileImagePath = profileImageService.saveProfileImage(file);
+        member.setProfileImg(profileImagePath);
+
+        memberRepository.save(member);
+    }
+
+    // 프로필 이미지 삭제(기본 이미지로 재설정)
+    @Transactional
+    public void resetProfileImageToDefault(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+
+        member.setProfileImg(profileImageService.getDefaultProfileImage());
+
+        memberRepository.save(member);
     }
 
 }
