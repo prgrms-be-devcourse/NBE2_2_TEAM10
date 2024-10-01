@@ -42,19 +42,16 @@ public class Feed {
     @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Photo> photos = new ArrayList<>();
 
-    // 비디오 리스트
     @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Video> videos = new ArrayList<>();
 
-    // 사진 추가 메서드
     public void addPhoto(Photo photo) {
-        this.photos.add(photo);
+        photos.add(photo);
         photo.setFeed(this);
     }
 
-    // 비디오 추가 메서드
     public void addVideo(Video video) {
-        this.videos.add(video);
+        videos.add(video);
         video.setFeed(this);
     }
 }
