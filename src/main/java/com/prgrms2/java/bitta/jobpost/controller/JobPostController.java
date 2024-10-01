@@ -12,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/jobPost")
+@RequestMapping("/api/v1/jobpost")
 @Log4j2
 public class JobPostController {
     private final JobPostService jobPostService;
