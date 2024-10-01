@@ -14,13 +14,13 @@ public interface FeedService {
 
     List<FeedDTO> readAll(Member member);
 
-    void insert(FeedDTO feedDto);
+    void insert(FeedDTO feedDto, List<MultipartFile> photos, List<MultipartFile> videos);
 
-    void update(FeedDTO feedDto);
+    void update(FeedDTO feedDto, List<MultipartFile> photos, List<MultipartFile> videos);
 
     void delete(Long id);
 
-    void addPhotosToFeed(Long feedId, List<MultipartFile> photos) throws IOException;
 
-    void addVideosToFeed(Long feedId, List<MultipartFile> videos) throws IOException;
+
+
 }

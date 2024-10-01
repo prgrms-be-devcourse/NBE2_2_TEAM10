@@ -1,4 +1,4 @@
-package com.prgrms2.java.bitta.member.util;
+package com.prgrms2.java.bitta.member.dto;
 
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.repository.MemberRepository;

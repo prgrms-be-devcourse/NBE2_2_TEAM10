@@ -5,15 +5,13 @@ import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.exception.JobPostException;
 import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
-import com.prgrms2.java.bitta.member.repository.MemberRepository;
-import com.prgrms2.java.bitta.member.util.MemberProvider;
+import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -101,7 +99,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .startDate(jobPost.getStartDate())
                 .endDate(jobPost.getEndDate())
                 .updateAt(jobPost.getUpdatedAt())
-                .userId(jobPost.getMember().getMemberId())
+                .userId(jobPost.getMember().getId())
                 .build();
     }
 
