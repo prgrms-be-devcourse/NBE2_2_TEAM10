@@ -48,7 +48,7 @@ public class FeedDTO {
         this.email = feed.getMember().getEmail();
         this.createdAt = feed.getCreatedAt();
 
-        
+
         this.photoUrls = feed.getPhotos().stream()
                 .map(Photo::getPhotoUrl)
                 .toList();
