@@ -5,17 +5,14 @@ import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
 import java.util.List;
 
 public interface JobPostService {
+    JobPostDTO register(JobPostDTO jobPostDTO);
 
-    static JobPostDTO register(JobPostDTO jobPostDTO) {
-        return null;
-    }
+    void remove(Long id);
 
-    JobPostDTO read(Long jobPostId);
+    JobPostDTO read(Long id);
 
     JobPostDTO modify(JobPostDTO jobPostDTO);
 
-    void remove(Long jobPostId);
-
-    List<JobPostDTO> getList(JobPostDTO jobPostDTO);
+    List<JobPostDTO> getList();
 }
 
