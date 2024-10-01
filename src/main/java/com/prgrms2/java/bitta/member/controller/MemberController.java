@@ -10,10 +10,8 @@ import com.prgrms2.java.bitta.security.SecurityUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @Slf4j
 @RestController
@@ -44,4 +42,16 @@ public class MemberController {
         return ResponseEntity.ok(savedMember);
     }
 
+    @PostMapping("/{id}/profile-image")
+    public ResponseEntity<String> updateProfileImage(@PathVariable Long id,
+                                                     @RequestParam("file") MultipartFile file) {
+        memberService.updateProfileImage(id, file);
+        return ResponseEntity.ok("프로필이미지 수정이 완료되었습니다.");
+    }
+
+    @DeleteMapping("/{id}/profile-image")
+    public ResponseEntity<String> deleteProfileImage(@PathVariable Long id) {
+        memberService.resetProfileImageToDefault(id);
+        return ResponseEntity.ok("프로필이미지가 삭제되었습니다.");
+    }
 }
