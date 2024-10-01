@@ -42,9 +42,32 @@ public class MemberController {
         return ResponseEntity.ok(savedMember);
     }
 
+    @GetMapping("/{id}")
+    public ResponseEntity<MemberDTO> getMemberById(@PathVariable Long id) {
+        MemberDTO memberDTO = memberService.getMemberById(id);
+        return ResponseEntity.ok(memberDTO);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<MemberDTO> updateMemberById(@PathVariable Long id, @RequestBody MemberDTO memberDTO) {
+        MemberDTO updatedMember = memberService.updateMember(id, memberDTO);
+        return ResponseEntity.ok(updatedMember);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteMemberById(@PathVariable Long id) {
+        memberService.deleteMember(id);
+        return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
+    }
+
     @PostMapping("/{id}/profile-image")
     public ResponseEntity<String> updateProfileImage(@PathVariable Long id,
                                                      @RequestParam("file") MultipartFile file) {
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("파일이 없습니다.");
+        }
+
+        // 파일 크기 및 형식 검증 로직을 service에서 처리
         memberService.updateProfileImage(id, file);
         return ResponseEntity.ok("프로필이미지 수정이 완료되었습니다.");
     }

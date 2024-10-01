@@ -69,6 +69,43 @@ public class MemberServiceImpl implements MemberService{
         //return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
     }
 
+    @Override
+    public MemberDTO getMemberById(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id));
+        return MemberDTO.toDTO(member);  // MemberDTO의 toDTO 메서드 사용
+    }
+
+    @Transactional
+    @Override
+    public MemberDTO updateMember(Long id, MemberDTO memberDTO) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id));
+
+        // 각 필드를 수동으로 업데이트
+        member.setUsername(memberDTO.getUsername());
+        member.setNickname(memberDTO.getNickname());
+        member.setAddress(memberDTO.getAddress());
+        member.setProfileImg(memberDTO.getProfileImg());
+
+        // 프로필 이미지가 null이거나 비어 있을 경우 기본 이미지를 설정
+        if (memberDTO.getProfileImg() == null || memberDTO.getProfileImg().isEmpty()) {
+            member.setProfileImg(profileImageService.getDefaultProfileImage()); // 기본 이미지 설정
+        } else {
+            member.setProfileImg(memberDTO.getProfileImg());
+        }
+
+        return MemberDTO.toDTO(member);  // MemberDTO의 toDTO 메서드 사용
+     }
+
+    @Transactional
+    @Override
+    public void deleteMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id));
+        memberRepository.delete(member);
+    }
+
     // 프로필 이미지 수정
     @Transactional
     public void updateProfileImage(Long id, MultipartFile file) {
