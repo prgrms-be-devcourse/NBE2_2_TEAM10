@@ -25,11 +25,7 @@ public class Photo {
 
     private String photoUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Member member;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feed_id")
     private Feed feed;
 
