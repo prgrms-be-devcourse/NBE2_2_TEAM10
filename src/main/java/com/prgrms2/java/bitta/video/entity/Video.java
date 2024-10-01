@@ -27,11 +27,7 @@ public class Video {
 
     private String videoUrl;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Member member;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "feed_id")
     private Feed feed;
 

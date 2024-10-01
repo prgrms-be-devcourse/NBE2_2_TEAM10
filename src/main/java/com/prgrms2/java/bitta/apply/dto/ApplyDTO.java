@@ -19,22 +19,4 @@ public class ApplyDTO {
     private Long jobPostId;
     private Long memberId;
     private LocalDateTime appliedAt;
-
-    // PostApplication 엔티티로부터 DTO를 생성하는 생성자
-    public ApplyDTO(Apply apply) {
-        this.applicationId = apply.getApplicationId();
-        this.jobPostId = apply.getJobPost().getId();
-        this.memberId = apply.getMember().getMemberId();
-        this.appliedAt = apply.getAppliedAt();
-    }
-
-    // DTO에서 PostApplication 엔티티로 변환하는 메서드
-    public Apply toEntity(Member member, JobPost jobPost) {
-        return Apply.builder()
-                .applicationId(applicationId) // applicationId가 필요하지 않다면 제거
-                .jobPost(jobPost)
-                .member(member)
-                .appliedAt(appliedAt)
-                .build();
-    }
 }

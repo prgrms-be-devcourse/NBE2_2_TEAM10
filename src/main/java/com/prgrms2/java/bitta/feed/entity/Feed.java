@@ -1,12 +1,16 @@
 package com.prgrms2.java.bitta.feed.entity;
 
 import com.prgrms2.java.bitta.member.entity.Member;
+import com.prgrms2.java.bitta.photo.entity.Photo;
+import com.prgrms2.java.bitta.video.entity.Video;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 @Builder
@@ -34,4 +38,20 @@ public class Feed {
     @CreatedDate
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
+
+    @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Photo> photos = new ArrayList<>();
+
+    @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Video> videos = new ArrayList<>();
+
+    public void addPhoto(Photo photo) {
+        photos.add(photo);
+        photo.setFeed(this);
+    }
+
+    public void addVideo(Video video) {
+        videos.add(video);
+        video.setFeed(this);
+    }
 }
