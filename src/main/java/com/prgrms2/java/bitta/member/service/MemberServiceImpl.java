@@ -72,62 +72,48 @@ public class MemberServiceImpl implements MemberService{
     @Override
     public MemberDTO getMemberById(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
         return MemberDTO.toDTO(member);  // MemberDTO의 toDTO 메서드 사용
     }
 
-    @Transactional
     @Override
-    public MemberDTO updateMember(Long id, MemberDTO memberDTO) {
+    public MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
 
-        // 각 필드를 수동으로 업데이트
+        // 회원 정보 업데이트
         member.setUsername(memberDTO.getUsername());
         member.setNickname(memberDTO.getNickname());
         member.setAddress(memberDTO.getAddress());
-        member.setProfileImg(memberDTO.getProfileImg());
 
-        // 프로필 이미지가 null이거나 비어 있을 경우 기본 이미지를 설정
-        if (memberDTO.getProfileImg() == null || memberDTO.getProfileImg().isEmpty()) {
-            member.setProfileImg(profileImageService.getDefaultProfileImage()); // 기본 이미지 설정
-        } else {
-            member.setProfileImg(memberDTO.getProfileImg());
+        // 프로필 이미지 수정/삭제
+        if (removeProfileImage) {
+            member.setProfileImg(profileImageService.getDefaultProfileImage());
+        } else if (profileImage != null && !profileImage.isEmpty()) {
+            String profileImageUrl = profileImageService.saveProfileImage(profileImage);
+            member.setProfileImg(profileImageUrl);
         }
 
-        return MemberDTO.toDTO(member);  // MemberDTO의 toDTO 메서드 사용
-     }
+        return MemberDTO.toDTO(memberRepository.save(member));
+    }
 
     @Transactional
     @Override
     public void deleteMember(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found with ID: " + id));
+                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
         memberRepository.delete(member);
-    }
-
-    // 프로필 이미지 수정
-    @Transactional
-    public void updateProfileImage(Long id, MultipartFile file) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
-        // 파일 저장 후 경로 설정
-        String profileImagePath = profileImageService.saveProfileImage(file);
-        member.setProfileImg(profileImagePath);
-
-        memberRepository.save(member);
     }
 
     // 프로필 이미지 삭제(기본 이미지로 재설정)
     @Transactional
+    @Override
     public void resetProfileImageToDefault(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
 
         member.setProfileImg(profileImageService.getDefaultProfileImage());
 
         memberRepository.save(member);
     }
-
 }

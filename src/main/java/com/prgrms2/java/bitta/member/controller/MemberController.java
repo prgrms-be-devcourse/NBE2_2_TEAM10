@@ -44,13 +44,15 @@ public class MemberController {
 
     @GetMapping("/{id}")
     public ResponseEntity<MemberDTO> getMemberById(@PathVariable Long id) {
-        MemberDTO memberDTO = memberService.getMemberById(id);
-        return ResponseEntity.ok(memberDTO);
+        return ResponseEntity.ok(memberService.getMemberById(id));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<MemberDTO> updateMemberById(@PathVariable Long id, @RequestBody MemberDTO memberDTO) {
-        MemberDTO updatedMember = memberService.updateMember(id, memberDTO);
+    public ResponseEntity<MemberDTO> updateMemberById(@PathVariable Long id,
+                                                      @RequestBody MemberDTO memberDTO,
+                                                      @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+                                                      @RequestParam(value = "removeProfileImage", defaultValue = "false") boolean removeProfileImage) {
+        MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
         return ResponseEntity.ok(updatedMember);
     }
 
@@ -58,23 +60,5 @@ public class MemberController {
     public ResponseEntity<String> deleteMemberById(@PathVariable Long id) {
         memberService.deleteMember(id);
         return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
-    }
-
-    @PostMapping("/{id}/profile-image")
-    public ResponseEntity<String> updateProfileImage(@PathVariable Long id,
-                                                     @RequestParam("file") MultipartFile file) {
-        if (file.isEmpty()) {
-            return ResponseEntity.badRequest().body("파일이 없습니다.");
-        }
-
-        // 파일 크기 및 형식 검증 로직을 service에서 처리
-        memberService.updateProfileImage(id, file);
-        return ResponseEntity.ok("프로필이미지 수정이 완료되었습니다.");
-    }
-
-    @DeleteMapping("/{id}/profile-image")
-    public ResponseEntity<String> deleteProfileImage(@PathVariable Long id) {
-        memberService.resetProfileImageToDefault(id);
-        return ResponseEntity.ok("프로필이미지가 삭제되었습니다.");
     }
 }

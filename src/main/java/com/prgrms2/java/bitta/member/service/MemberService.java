@@ -11,9 +11,7 @@ public interface MemberService {
     MemberDTO signUp(SignUpDTO signUpDTO);
 
     MemberDTO getMemberById(Long id);
-    MemberDTO updateMember(Long id, MemberDTO memberDTO);
+    MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage);
     void deleteMember(Long id);
-
-    void updateProfileImage(Long id, MultipartFile file);
     void resetProfileImageToDefault(Long id);
 }
