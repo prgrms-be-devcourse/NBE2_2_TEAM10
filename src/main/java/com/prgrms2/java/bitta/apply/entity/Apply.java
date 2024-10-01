@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 public class Apply {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long applicationId;
+    private Long id;
 
     // Application은 특정 JobPost에 속함 (N:1 관계)
     @ManyToOne(fetch = FetchType.LAZY)

@@ -1,3 +1,4 @@
+
 package com.prgrms2.java.bitta.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -210,7 +211,7 @@ public class FeedControllerTests {
     @Test
     @DisplayName("피드 수정 (성공)")
     void modifyFeed_FeedDtoIsNotEmpty_ReturnFeedDto() throws Exception {
-        doNothing().when(feedService).update(any(FeedDTO.class));
+        doNothing().when(feedService).update(any(FeedDTO.class), photos, videos);
 
         String content = objectMapper.writeValueAsString(feedDTO);
 
@@ -227,7 +228,7 @@ public class FeedControllerTests {
     @DisplayName("피드 수정 (실패) :: 검색 결과 없음")
     void modifyFeed_FeedDtoIsNotEmpty_HttpStatusBadRequest() throws Exception {
         doThrow(FeedException.CANNOT_FOUND.get())
-                .when(feedService).update(any(FeedDTO.class));
+                .when(feedService).update(any(FeedDTO.class), photos, videos);
 
         String content = objectMapper.writeValueAsString(feedDTO);
 

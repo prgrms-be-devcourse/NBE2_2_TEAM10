@@ -1,46 +1,47 @@
 package com.prgrms2.java.bitta.member.entity;
 
-
 import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Entity
-@AllArgsConstructor
-@NoArgsConstructor
 @Getter
-@ToString
-@Table(name = "member")
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @Builder
+@Table(name = "member")
+@EqualsAndHashCode(of = "id")
 @EntityListeners(AuditingEntityListener.class)
-public class Member {
+public class Member implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long memberId;
+    @Column(name = "member_id")
+    private Long id;
 
-    private String memberName;
+    @Column(nullable = false)
+    private String username;
 
-    @Column(unique = true)
-    private String email;
-
+    @Column(nullable = false)
     private String password;
 
-    private String location;
+    @Column(nullable = false)
+    private String nickname;
 
-    private String profilePicture;
+    @Column(nullable = false)
+    private String address;
 
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    @CreatedDate
-    private LocalDateTime createdAt;
+    @Column(nullable = false)
+    private String profileImg = "/images/default_avatar.png";
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Feed> feeds = new ArrayList<>();
@@ -48,29 +49,42 @@ public class Member {
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Apply> applies = new ArrayList<>();
 
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Builder.Default
+    private List<String> roles = new ArrayList<>();
 
-    public void changeMemberName(String memberName) {
-        this.memberName = memberName;
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return this.roles.stream()
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
-    public void changeEmail(String email) {
-        this.email = email;
+    @Override
+    public String getUsername() {
+        return this.username;
     }
 
-    public void changePassword(String password) {
-        this.password = password;
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
     }
 
-    public void changeLocation(String location) {
-        this.location = location;
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
     }
 
-    public void changeProfilePicture(String profilePicture) {
-        this.profilePicture = profilePicture;
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
     }
 
-    public void changeRole(Role role) {
-        this.role = role;
+    @Override
+    public boolean isEnabled() {
+        return true;
     }
 
     public void addFeed(Feed feed) {
@@ -91,5 +105,9 @@ public class Member {
     public void removePostApplication(Apply apply) {
         this.applies.remove(apply);
         apply.setMember(null);  // 연관관계 해제
+    }
+
+    public void setProfileImg(String profileImg) {
+        this.profileImg = profileImg;
     }
 }
