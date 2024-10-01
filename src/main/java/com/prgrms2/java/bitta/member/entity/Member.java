@@ -40,7 +40,8 @@ public class Member implements UserDetails {
     @Column(nullable = false)
     private String address;
 
-    private String profileImg;
+    @Column(nullable = false)
+    private String profileImg = "/images/default_avatar.png";
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Feed> feeds = new ArrayList<>();
