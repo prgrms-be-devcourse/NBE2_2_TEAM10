@@ -63,19 +63,36 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     @Transactional
-    public void insert(FeedDTO feedDTO) {
+    public void insert(FeedDTO feedDTO ,List<MultipartFile> photos, List<MultipartFile> videos) {
         if (feedDTO.getId() != null) {
             throw FeedException.BAD_REQUEST.get();
         }
 
         Feed feed = dtoToEntity(feedDTO);
-
         feedRepository.save(feed);
+
+        // Handle photos
+        if (photos != null && !photos.isEmpty()) {
+            try {
+                photoService.uploadPhotos(photos, feed);
+            } catch (IOException e) {
+                throw new RuntimeException("사진 업로드 실패", e);
+            }
+        }
+
+        // Handle videos
+        if (videos != null && !videos.isEmpty()) {
+            try {
+                videoService.uploadVideos(videos, feed);
+            } catch (IOException e) {
+                throw new RuntimeException("비디오 업로드 실패", e);
+            }
+        }
     }
 
     @Override
     @Transactional
-    public void update(FeedDTO feedDTO) {
+    public void update(FeedDTO feedDTO, List<MultipartFile> photos, List<MultipartFile> videos) {
         Feed feed = feedRepository.findById(feedDTO.getId())
                 .orElseThrow(FeedException.CANNOT_FOUND::get);
 
@@ -83,6 +100,24 @@ public class FeedServiceImpl implements FeedService {
         feed.setContent(feedDTO.getContent());
 
         feedRepository.save(feed);
+
+        // Handle photos
+        if (photos != null && !photos.isEmpty()) {
+            try {
+                photoService.uploadPhotos(photos, feed);
+            } catch (IOException e) {
+                throw new RuntimeException("사진 업로드 실패", e);
+            }
+        }
+
+        // Handle videos
+        if (videos != null && !videos.isEmpty()) {
+            try {
+                videoService.uploadVideos(videos, feed);
+            } catch (IOException e) {
+                throw new RuntimeException("비디오 업로드 실패", e);
+            }
+        }
     }
 
     @Override
@@ -93,22 +128,7 @@ public class FeedServiceImpl implements FeedService {
         }
     }
 
-    //photo and video
-    @Override
-    @Transactional
-    public void addPhotosToFeed(Long feedId, List<MultipartFile> photos) throws IOException {
-        Feed feed = feedRepository.findById(feedId)
-                .orElseThrow(FeedException.CANNOT_FOUND::get);
-        photoService.uploadPhotos(photos, feed);
-    }
 
-    @Override
-    @Transactional
-    public void addVideosToFeed(Long feedId, List<MultipartFile> videos) throws IOException {
-        Feed feed = feedRepository.findById(feedId)
-                .orElseThrow(FeedException.CANNOT_FOUND::get);
-        videoService.uploadVideos(videos, feed);
-    }
 
 
     private Feed dtoToEntity(FeedDTO feedDto) {
