@@ -1,19 +1,19 @@
-package com.prgrms2.java.bitta.jobpost.exception;
+package com.prgrms2.java.bitta.apply.exception;
 
-public enum JobPostException {
+public enum ApplyException {
     NOT_FOUND("NOT_FOUND", 404),
     NOT_REGISTERED("NOT_REGISTERED", 400),
     NOT_MODIFIED("NOT_MODIFIED", 400),
     NOT_REMOVED("NOT_REMOVED", 400),
     NOT_FETCHED("NOT_FETCHED", 400);
 
-    private JobPostTaskException jobPostTaskException;
+    private ApplyTaskException applyTaskException;
 
-    JobPostException(String message, int code) {
-        jobPostTaskException = new JobPostTaskException(message, code);
+    ApplyException(String message, int code) {
+        applyTaskException = new ApplyTaskException(message, code);
     }
 
-    public JobPostTaskException get() {
-        return jobPostTaskException;
+    public ApplyTaskException get() {
+        return applyTaskException;
     }
 }
