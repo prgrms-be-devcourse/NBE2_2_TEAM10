@@ -23,11 +23,6 @@ import java.util.Map;
 @Validated
 public class FeedController {
     private final FeedService feedService;
-    private final PhotoService photoService;
-    private final VideoService videoService;
-    private final MemberService memberService;
-
-
 
     @GetMapping
     public ResponseEntity<?> getFeed() {
@@ -44,17 +39,21 @@ public class FeedController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createFeed(@RequestBody @Valid FeedDTO feedDto) {
-        feedService.insert(feedDto);
+    public ResponseEntity<?> createFeed(@RequestBody @Valid FeedDTO feedDto,
+                                        @RequestParam(value = "photos", required = false) List<MultipartFile> photos,
+                                        @RequestParam(value = "videos", required = false) List<MultipartFile> videos) {
+        feedService.insert(feedDto, photos, videos);
 
         return ResponseEntity.ok().body(Map.of("message", "피드가 등록되었습니다."));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> modifyFeed(@PathVariable("id") @Min(1) Long id, @RequestBody @Valid FeedDTO feedDTO) {
+    public ResponseEntity<?> modifyFeed(@PathVariable("id") @Min(1) Long id, @RequestBody @Valid FeedDTO feedDTO,
+                                        @RequestParam(value = "photos", required = false) List<MultipartFile> photos,
+                                        @RequestParam(value = "videos", required = false) List<MultipartFile> videos) {
         feedDTO.setId(id);
 
-        feedService.update(feedDTO);
+        feedService.update(feedDTO, photos, videos);
 
         return ResponseEntity.ok().body(Map.of("message", "피드가 수정되었습니다."));
     }
@@ -66,27 +65,5 @@ public class FeedController {
         return ResponseEntity.ok().body(Map.of("message", "피드가 삭제되었습니다."));
     }
 
-
-    @PostMapping("/{id}/photos")
-    public ResponseEntity<?> addPhotosToFeed(@PathVariable("id") Long feedId, @RequestParam("photos") List<MultipartFile> photos) {
-        try {
-            feedService.addPhotosToFeed(feedId, photos);
-            return ResponseEntity.ok().body(Map.of("message", "사진이 업로드되었습니다."));
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("사진 업로드 실패");
-        }
-
-    }
-
-    @PostMapping("/{id}/videos")
-    public ResponseEntity<?> addVideosToFeed(@PathVariable("id") Long feedId, @RequestParam("videos") List<MultipartFile> videos) {
-        try {
-            feedService.addVideosToFeed(feedId, videos);
-            return ResponseEntity.ok().body(Map.of("message", "비디오가 업로드되었습니다."));
-        } catch (IOException e) {
-            return ResponseEntity.status(500).body("비디오 업로드 실패");
-        }
-
-    }
 }
 
