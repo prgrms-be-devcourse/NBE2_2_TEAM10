@@ -5,16 +5,23 @@ import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
 import com.prgrms2.java.bitta.member.service.MemberService;
+import com.prgrms2.java.bitta.photo.service.PhotoService;
+import com.prgrms2.java.bitta.video.service.VideoService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 public class FeedServiceImpl implements FeedService {
     private final FeedRepository feedRepository;
+
+    private final PhotoService photoService;
+    private final VideoService videoService;
 
     private final MemberService memberService;
 
@@ -70,6 +77,24 @@ public class FeedServiceImpl implements FeedService {
             throw FeedException.CANNOT_DELETE.get();
         }
     }
+
+    //photo and video
+    @Override
+    @Transactional
+    public void addPhotosToFeed(Long feedId, List<MultipartFile> photos) throws IOException {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(FeedException.CANNOT_FOUND::get);
+        photoService.uploadPhotos(photos, feed);
+    }
+
+    @Override
+    @Transactional
+    public void addVideosToFeed(Long feedId, List<MultipartFile> videos) throws IOException {
+        Feed feed = feedRepository.findById(feedId)
+                .orElseThrow(FeedException.CANNOT_FOUND::get);
+        videoService.uploadVideos(videos, feed);
+    }
+
 
     private Feed dtoToEntity(FeedDTO feedDto) {
         return Feed.builder()
