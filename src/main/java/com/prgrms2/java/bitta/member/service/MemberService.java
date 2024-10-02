@@ -10,6 +10,8 @@ public interface MemberService {
     JwtToken signIn(String username, String password);
     MemberDTO signUp(SignUpDTO signUpDTO);
 
-    void updateProfileImage(Long id, MultipartFile file);
+    MemberDTO getMemberById(Long id);
+    MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage);
+    void deleteMember(Long id);
     void resetProfileImageToDefault(Long id);
 }

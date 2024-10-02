@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -104,9 +105,5 @@ public class Member implements UserDetails {
     public void removePostApplication(Apply apply) {
         this.applies.remove(apply);
         apply.setMember(null);  // 연관관계 해제
-    }
-
-    public void setProfileImg(String profileImg) {
-        this.profileImg = profileImg;
     }
 }

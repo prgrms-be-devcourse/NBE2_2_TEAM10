@@ -33,6 +33,15 @@ public class MemberController {
     private final MemberService memberService;
 
     @Operation(
+            summary = "테스트",
+            description = "SecurityUtil 로부터 회원아이디를 얻는 테스트용 API입니다."
+    )
+    @PostMapping("/test")
+    public String test() {
+        return SecurityUtil.getCurrentUsername();
+    }
+
+    @Operation(
             summary = "로그인",
             description = "아이디와 비밀번호를 검증하고, 토큰을 반환합니다."
     )
@@ -44,15 +53,6 @@ public class MemberController {
         log.info("request username = {}, password = {}", username, password);
         log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
         return jwtToken;
-    }
-
-    @Operation(
-            summary = "테스트",
-            description = "SecurityUtil 로부터 회원아이디를 얻는 테스트용 API입니다."
-    )
-    @PostMapping("/test")
-    public String test() {
-        return SecurityUtil.getCurrentUsername();
     }
 
     @Operation(
@@ -75,58 +75,27 @@ public class MemberController {
         return ResponseEntity.ok(savedMember);
     }
 
-    @Operation(
-            summary = "프로필 이미지 수정",
-            description = "회원의 프로필 이미지를 수정합니다.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "프로필 이미지를 성공적으로 수정했습니다.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(example = MEMBER_SUCCESS_UPDATE_PROFILE_IMAGE)
-                            )
-                    ),
-            }
-    )
-    @Parameter(
-            name = "id",
-            description = "프로필 이미지를 수정할 회원의 ID",
-            required = true,
-            example = "1",
-            schema = @Schema(type = "integer")
-    )
-    @PostMapping("/{id}/profile-image")
-    public ResponseEntity<?> updateProfileImage(@PathVariable Long id,
-                                                     @RequestParam("file") MultipartFile file) {
-        memberService.updateProfileImage(id, file);
-        return ResponseEntity.ok(Map.of("message", "프로필이미지 수정이 완료되었습니다."));
+
+
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<MemberDTO> getMemberById(@PathVariable Long id) {
+        return ResponseEntity.ok(memberService.getMemberById(id));
+    }
+    
+    @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    public ResponseEntity<MemberDTO> updateMemberById(@PathVariable Long id,
+                                                      @RequestPart("dto") MemberDTO memberDTO,
+                                                      @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+                                                      @RequestPart(value = "removeProfileImage", required = false) boolean removeProfileImage) {
+        MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
+        return ResponseEntity.ok(updatedMember);
     }
 
-    @Operation(
-            summary = "프로필 이미지 삭제",
-            description = "회원의 프로필 이미지를 삭제합니다.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "프로필 이미지를 성공적으로 수정했습니다.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(example = MEMBER_SUCCESS_DELETE_PROFILE_IMAGE)
-                            )
-                    ),
-            }
-    )
-    @Parameter(
-            name = "id",
-            description = "프로필 이미지를 삭제할 회원의 ID",
-            required = true,
-            example = "1",
-            schema = @Schema(type = "integer")
-    )
-    @DeleteMapping("/{id}/profile-image")
-    public ResponseEntity<?> deleteProfileImage(@PathVariable Long id) {
-        memberService.resetProfileImageToDefault(id);
-        return ResponseEntity.ok(Map.of("message", "프로필이미지가 삭제되었습니다."));
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteMemberById(@PathVariable Long id) {
+        memberService.deleteMember(id);
+        return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
     }
 }
