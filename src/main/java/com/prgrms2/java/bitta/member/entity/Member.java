@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -40,6 +41,7 @@ public class Member implements UserDetails {
     @Column(nullable = false)
     private String address;
 
+    @Column(nullable = false)
     private String profileImg = "/images/default_avatar.png";
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -104,18 +106,5 @@ public class Member implements UserDetails {
     public void removePostApplication(Apply apply) {
         this.applies.remove(apply);
         apply.setMember(null);  // 연관관계 해제
-    }
-
-    public void setProfileImg(String profileImg) {
-        this.profileImg = profileImg;
-    }
-
-    public void setUsername(String username) {
-    }
-
-    public void setNickname(String nickname) {
-    }
-
-    public void setAddress(String address) {
     }
 }
