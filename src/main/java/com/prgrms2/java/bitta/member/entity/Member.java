@@ -41,7 +41,6 @@ public class Member implements UserDetails {
     @Column(nullable = false)
     private String address;
 
-    @Column(nullable = false)
     private String profileImg = "/images/default_avatar.png";
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

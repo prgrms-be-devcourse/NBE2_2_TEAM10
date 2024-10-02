@@ -8,6 +8,11 @@ import java.io.IOException;
 import java.util.List;
 
 public interface PhotoService {
+    Photo upload(MultipartFile file) throws IOException;
+
+    void delete(String filepath);
+
     List<Photo> uploadPhotos(List<MultipartFile> files, Feed feed) throws IOException;
+
     void deletePhotosByFeed(Feed feed);
 }
