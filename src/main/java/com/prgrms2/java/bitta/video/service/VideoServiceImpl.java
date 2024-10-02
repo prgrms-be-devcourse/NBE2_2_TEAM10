@@ -60,10 +60,6 @@ public class VideoServiceImpl implements VideoService {
 
         for (MultipartFile file : files) {
 
-            if (file.getSize() > 500 * 1024 * 1024) {
-                throw new IllegalArgumentException("비디오의 크기는 500mb 를 넘을 수 없습니다");
-            }
-
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String filePath = "uploads/videos/" + fileName;
 
