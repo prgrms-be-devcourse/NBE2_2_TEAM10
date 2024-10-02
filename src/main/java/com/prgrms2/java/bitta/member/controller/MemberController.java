@@ -83,12 +83,12 @@ public class MemberController {
     public ResponseEntity<MemberDTO> getMemberById(@PathVariable Long id) {
         return ResponseEntity.ok(memberService.getMemberById(id));
     }
-
-    @PutMapping("/{id}")
+    
+    @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ResponseEntity<MemberDTO> updateMemberById(@PathVariable Long id,
-                                                      @RequestBody MemberDTO memberDTO,
-                                                      @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
-                                                      @RequestParam(value = "removeProfileImage", defaultValue = "false") boolean removeProfileImage) {
+                                                      @RequestPart("dto") MemberDTO memberDTO,
+                                                      @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+                                                      @RequestPart(value = "removeProfileImage", required = false) boolean removeProfileImage) {
         MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
         return ResponseEntity.ok(updatedMember);
     }
