@@ -33,6 +33,15 @@ public class MemberController {
     private final MemberService memberService;
 
     @Operation(
+            summary = "테스트",
+            description = "SecurityUtil 로부터 회원아이디를 얻는 테스트용 API입니다."
+    )
+    @PostMapping("/test")
+    public String test() {
+        return SecurityUtil.getCurrentUsername();
+    }
+
+    @Operation(
             summary = "로그인",
             description = "아이디와 비밀번호를 검증하고, 토큰을 반환합니다."
     )
@@ -44,15 +53,6 @@ public class MemberController {
         log.info("request username = {}, password = {}", username, password);
         log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
         return jwtToken;
-    }
-
-    @Operation(
-            summary = "테스트",
-            description = "SecurityUtil 로부터 회원아이디를 얻는 테스트용 API입니다."
-    )
-    @PostMapping("/test")
-    public String test() {
-        return SecurityUtil.getCurrentUsername();
     }
 
     @Operation(
@@ -75,27 +75,9 @@ public class MemberController {
         return ResponseEntity.ok(savedMember);
     }
 
-    @Operation(
-            summary = "프로필 이미지 수정",
-            description = "회원의 프로필 이미지를 수정합니다.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "프로필 이미지를 성공적으로 수정했습니다.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(example = MEMBER_SUCCESS_UPDATE_PROFILE_IMAGE)
-                            )
-                    ),
-            }
-    )
-    @Parameter(
-            name = "id",
-            description = "프로필 이미지를 수정할 회원의 ID",
-            required = true,
-            example = "1",
-            schema = @Schema(type = "integer")
-    )
+
+
+
 
     @GetMapping("/{id}")
     public ResponseEntity<MemberDTO> getMemberById(@PathVariable Long id) {
