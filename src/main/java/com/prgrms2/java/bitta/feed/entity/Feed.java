@@ -39,9 +39,11 @@ public class Feed {
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
 
+    @Builder.Default
     @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Photo> photos = new ArrayList<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Video> videos = new ArrayList<>();
 
@@ -53,5 +55,10 @@ public class Feed {
     public void addVideo(Video video) {
         videos.add(video);
         video.setFeed(this);
+    }
+
+    public void clearFiles() {
+        photos.clear();
+        videos.clear();
     }
 }

@@ -8,7 +8,8 @@ public enum FeedException {
     CANNOT_INSERT(400, "피드를 등록할 수 없습니다."),
     CANNOT_FOUND(404, "피드가 존재하지 않습니다."),
     CANNOT_MODIFY(400, "피드를 수정할 수 없습니다."),
-    CANNOT_DELETE(404, "삭제할 피드가 존재하지 않습니다");
+    CANNOT_DELETE(404, "삭제할 피드가 존재하지 않습니다"),
+    INTERNAL_ERROR(500, "서버 내부에 오류가 발생했습니다.");
 
     private FeedTaskException feedTaskException;
 

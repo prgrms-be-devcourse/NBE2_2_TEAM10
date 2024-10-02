@@ -8,7 +8,12 @@ import java.io.IOException;
 import java.util.List;
 
 public interface VideoService {
+    Video upload(MultipartFile file) throws IOException;
+
+    void delete(String filepath);
+
     List<Video> uploadVideos(List<MultipartFile> files, Feed feed) throws IOException;
+
     void deleteVideosByFeed(Feed feed);
 }
 
