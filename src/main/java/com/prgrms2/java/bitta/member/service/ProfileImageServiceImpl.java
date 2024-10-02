@@ -31,10 +31,9 @@ public class ProfileImageServiceImpl implements ProfileImageService {
                 directory.mkdirs();
             }
 
-            // 파일 저장
-            String filename = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
             Path filepath = Paths.get(imageDirectory + filename);
-            Files.write(filepath, file.getBytes());
+            file.transferTo(filepath.toFile());
 
             return "/profile/images/" + filename;
         } catch (IOException e) {
