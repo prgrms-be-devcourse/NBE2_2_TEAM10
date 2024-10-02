@@ -19,22 +19,4 @@ public class FeedControllerAdvice {
         return ResponseEntity.status(e.getCode())
                 .body(Map.of("error", e.getMessage()));
     }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<?> handleArgsException(MethodArgumentNotValidException e) {
-        return ResponseEntity.status(e.getStatusCode())
-                .body(Map.of("error", "잘못된 요청입니다.", "reason", e.getMessage()));
-    }
-
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<?> handleArgsException(ConstraintViolationException e) {
-        return ResponseEntity.badRequest()
-                .body(Map.of("error", "잘못된 요청입니다.", "reason", "ID는 음수가 될 수 없습니다."));
-    }
-
-    @ExceptionHandler(MaxUploadSizeExceededException.class)
-    public ResponseEntity<?> handleFileSizeLimitExceeded(MaxUploadSizeExceededException e) {
-        return ResponseEntity.status(413) // Payload Too Large
-                .body(Map.of("error", "Payload Too Large", "reason", "파일의 크기가 허용된 한도를 초과했습니다"));
-    }
 }
