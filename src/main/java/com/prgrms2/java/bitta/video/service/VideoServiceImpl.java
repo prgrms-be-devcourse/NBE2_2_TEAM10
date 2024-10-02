@@ -51,7 +51,15 @@ public class VideoServiceImpl implements VideoService {
 
     @Transactional
     public List<Video> uploadVideos(List<MultipartFile> files, Feed feed) throws IOException {
+
+        List<Video> existingVideos = videoRepository.findByFeed(feed);
+
+        if (existingVideos.size() + files.size() > 1) {
+            throw new IllegalArgumentException("비디오는 한개만 업로드 할 수 있습니다");
+        }
+
         for (MultipartFile file : files) {
+
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String filePath = "uploads/videos/" + fileName;
 

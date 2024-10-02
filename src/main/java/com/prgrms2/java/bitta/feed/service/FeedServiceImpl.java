@@ -97,6 +97,12 @@ public class FeedServiceImpl implements FeedService {
     @Override
     @Transactional
     public void delete(Long id) {
+
+        Feed feed = feedRepository.findById(id).orElseThrow(FeedException.CANNOT_FOUND::get);
+
+        photoService.deletePhotosByFeed(feed);
+        videoService.deleteVideosByFeed(feed);
+
         if (feedRepository.deleteByIdAndReturnCount(id) == 0) {
             throw FeedException.CANNOT_DELETE.get();
         }
