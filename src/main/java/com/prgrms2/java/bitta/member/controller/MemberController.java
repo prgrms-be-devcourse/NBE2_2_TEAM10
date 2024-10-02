@@ -1,6 +1,5 @@
 package com.prgrms2.java.bitta.member.controller;
 
-
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.SignInDTO;
 import com.prgrms2.java.bitta.member.dto.SignUpDTO;
@@ -8,7 +7,6 @@ import com.prgrms2.java.bitta.member.service.MemberService;
 import com.prgrms2.java.bitta.security.JwtToken;
 import com.prgrms2.java.bitta.security.SecurityUtil;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -18,8 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Map;
+import org.springframework.http.MediaType;
 
 import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 
@@ -74,10 +71,6 @@ public class MemberController {
         MemberDTO savedMember = memberService.signUp(signUpDTO);
         return ResponseEntity.ok(savedMember);
     }
-
-
-
-
 
     @GetMapping("/{id}")
     public ResponseEntity<MemberDTO> getMemberById(@PathVariable Long id) {
