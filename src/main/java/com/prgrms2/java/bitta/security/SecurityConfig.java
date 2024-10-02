@@ -33,6 +33,8 @@ public class SecurityConfig {
                         .requestMatchers("/members/sign-in").permitAll()
                         .requestMatchers("/members/sign-up").permitAll()
                         .requestMatchers("/members/test").hasRole("USER")
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/webjars/**").permitAll()
+                        .requestMatchers("/images/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();

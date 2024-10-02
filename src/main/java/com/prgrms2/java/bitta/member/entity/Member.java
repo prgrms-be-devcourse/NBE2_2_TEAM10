@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Entity
 @Getter
+@Setter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
@@ -40,7 +41,7 @@ public class Member implements UserDetails {
     @Column(nullable = false)
     private String address;
 
-    private String profileImg;
+    private String profileImg = "/images/default_avatar.png";
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Feed> feeds = new ArrayList<>();

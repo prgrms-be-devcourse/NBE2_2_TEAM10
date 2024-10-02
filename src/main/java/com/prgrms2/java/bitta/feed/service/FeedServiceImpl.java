@@ -4,8 +4,8 @@ import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
-import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
+import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.photo.entity.Photo;
 import com.prgrms2.java.bitta.photo.service.PhotoService;
 import com.prgrms2.java.bitta.video.entity.Video;
@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Service
 @RequiredArgsConstructor
@@ -51,6 +52,7 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public List<FeedDTO> readAll(Member member) {
         List<Feed> feeds = feedRepository.findAllByMember(member);
 
@@ -63,71 +65,76 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     @Transactional
-    public void insert(FeedDTO feedDTO ,List<MultipartFile> photos, List<MultipartFile> videos) {
+    public void insert(FeedDTO feedDTO, List<MultipartFile> files) {
         if (feedDTO.getId() != null) {
             throw FeedException.BAD_REQUEST.get();
         }
 
         Feed feed = dtoToEntity(feedDTO);
+
+        files.forEach(file -> uploadFile(feed, file));
+
         feedRepository.save(feed);
-
-        // Handle photos
-        if (photos != null && !photos.isEmpty()) {
-            try {
-                photoService.uploadPhotos(photos, feed);
-            } catch (IOException e) {
-                throw new RuntimeException("사진 업로드 실패", e);
-            }
-        }
-
-        // Handle videos
-        if (videos != null && !videos.isEmpty()) {
-            try {
-                videoService.uploadVideos(videos, feed);
-            } catch (IOException e) {
-                throw new RuntimeException("비디오 업로드 실패", e);
-            }
-        }
     }
 
     @Override
     @Transactional
-    public void update(FeedDTO feedDTO, List<MultipartFile> photos, List<MultipartFile> videos) {
+    public void update(FeedDTO feedDTO, List<MultipartFile> filesToUpload, List<String> filepathsToDelete) {
         Feed feed = feedRepository.findById(feedDTO.getId())
                 .orElseThrow(FeedException.CANNOT_FOUND::get);
 
         feed.setTitle(feedDTO.getTitle());
         feed.setContent(feedDTO.getContent());
 
+        filepathsToDelete.forEach(this::deleteFile);
+
+        feed.clearFiles();
+        filesToUpload.forEach(file -> uploadFile(feed, file));
+        
         feedRepository.save(feed);
-
-        // Handle photos
-        if (photos != null && !photos.isEmpty()) {
-            try {
-                photoService.uploadPhotos(photos, feed);
-            } catch (IOException e) {
-                throw new RuntimeException("사진 업로드 실패", e);
-            }
-        }
-
-        // Handle videos
-        if (videos != null && !videos.isEmpty()) {
-            try {
-                videoService.uploadVideos(videos, feed);
-            } catch (IOException e) {
-                throw new RuntimeException("비디오 업로드 실패", e);
-            }
-        }
     }
 
     @Override
     @Transactional
     public void delete(Long id) {
+
+        Feed feed = feedRepository.findById(id).orElseThrow(FeedException.CANNOT_FOUND::get);
+
+        photoService.deletePhotosByFeed(feed);
+        videoService.deleteVideosByFeed(feed);
+
         if (feedRepository.deleteByIdAndReturnCount(id) == 0) {
             throw FeedException.CANNOT_DELETE.get();
         }
     }
 
+    private void uploadFile(Feed feed, MultipartFile file) {
+        try {
+            if (file.getContentType().startsWith("image/")) {
+                Photo photo = photoService.upload(file);
+                feed.addPhoto(photo);
+            }
+
+            if (file.getContentType().startsWith("video/")) {
+                Video video = videoService.upload(file);
+                feed.addVideo(video);
+            }
+        } catch (IOException e) {
+            throw FeedException.INTERNAL_ERROR.get();
+        }
+    }
+
+    private void deleteFile(String filepath) {
+        try {
+            if (filepath.contains("photos")) {
+                photoService.delete(filepath);
+            } else {
+                videoService.delete(filepath);
+            }
+        } catch (NoSuchElementException e) {
+            throw FeedException.INTERNAL_ERROR.get();
+        }
+    }
 
 
 
