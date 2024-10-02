@@ -27,7 +27,7 @@ public class PhotoServiceImpl implements PhotoService{
     @Transactional
     public Photo upload(MultipartFile file) throws IOException {
         String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        String filepath = fileRootPath + "uploads/videos/" + filename;
+        String filepath = fileRootPath + "uploads/photos/" + filename;
 
         file.transferTo(new File(filepath));
 
@@ -51,7 +51,19 @@ public class PhotoServiceImpl implements PhotoService{
 
     @Transactional
     public List<Photo> uploadPhotos(List<MultipartFile> files, Feed feed) throws IOException {
+
+        List<Photo> existingPhotos = photoRepository.findByFeed(feed);
+
+        if (existingPhotos.size() + files.size() > 4) {
+            throw new IllegalArgumentException("사진은 4만 업로드 할 수 있습니다");
+        }
+
         for (MultipartFile file : files) {
+
+            if (file.getSize() > 10 * 1024 * 1024) {
+                throw new IllegalArgumentException("사진의 크기는 10mb 를 넘을 수 없습니다");
+            }
+
             String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
             String filePath = "uploads/photos/" + fileName;
 
@@ -72,6 +84,7 @@ public class PhotoServiceImpl implements PhotoService{
     @Transactional
     public void deletePhotosByFeed(Feed feed) {
         List<Photo> photos = photoRepository.findByFeed(feed);
+
         photoRepository.deleteAll(photos);
     }
 }
