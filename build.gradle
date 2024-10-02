@@ -59,9 +59,6 @@ dependencies {
     testImplementation 'com.h2database:h2:2.3.232'
     testImplementation 'org.projectlombok:lombok'
     testAnnotationProcessor 'org.projectlombok:lombok'
-
-    //profile img file upload
-    implementation 'commons-fileupload:commons-fileupload:1.4'
 }
 
 tasks.named('test') {
