@@ -41,18 +41,20 @@ public class Member implements UserDetails {
     @Column(nullable = false)
     private String address;
 
-    private String profileImg = "/images/default_avatar.png";
+    @Builder.Default
+    private String profile = "/images/default_avatar.png";
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Feed> feeds = new ArrayList<>();
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
     private List<Apply> applies = new ArrayList<>();
 
     @ElementCollection(fetch = FetchType.EAGER)
     @Builder.Default
     private List<String> roles = new ArrayList<>();
-
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -65,7 +67,6 @@ public class Member implements UserDetails {
     public String getUsername() {
         return this.username;
     }
-
 
     @Override
     public boolean isAccountNonExpired() {
@@ -105,5 +106,15 @@ public class Member implements UserDetails {
     public void removePostApplication(Apply apply) {
         this.applies.remove(apply);
         apply.setMember(null);  // 연관관계 해제
+    }
+
+    @Builder
+    public Member(String username, String password, String nickname, String address, String profile, List<String> roles) {
+        this.username = username;
+        this.password = password;
+        this.nickname = nickname;
+        this.address = address;
+        this.profile = profile != null ? profile : "/images/default_avatar.png";
+        this.roles = roles;
     }
 }

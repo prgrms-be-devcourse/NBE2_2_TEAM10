@@ -16,6 +16,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,7 +33,7 @@ public class MemberServiceImpl implements MemberService{
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final ProfileImageService profileImageService;
+    private final String defaultProfileImg = "/images/default_avatar.png";
 
     @Transactional
     @Override
@@ -51,49 +56,69 @@ public class MemberServiceImpl implements MemberService{
         if (memberRepository.existsByUsername(signUpDTO.getUsername())) {
             throw new IllegalArgumentException("이미 사용 중인 사용자 이름입니다.");
         }
+
         // Password 암호화
         String encodedPassword = passwordEncoder.encode(signUpDTO.getPassword());
 
-        // 기본 프로필 이미지 설정
-        String defaultProfileImg = profileImageService.getDefaultProfileImage();
-
+        // USER 권한 부여
         List<String> roles = new ArrayList<>();
-        roles.add("USER");  // USER 권한 부여
+        roles.add("USER");
 
-        // 회원 가입 시 기본 프로필 이미지 추가
-        Member newMember = signUpDTO.toEntity(encodedPassword, roles);
-        newMember.setProfileImg(defaultProfileImg);
-
-        return MemberDTO.toDTO(memberRepository.save(newMember));
-        //return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
+        return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
     }
 
     @Override
     public MemberDTO getMemberById(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
-        return MemberDTO.toDTO(member);  // MemberDTO의 toDTO 메서드 사용
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        String profile = member.getProfile() != null ? member.getProfile() : defaultProfileImg;
+
+        return new MemberDTO(member);
     }
 
+    @Transactional
     @Override
-    public MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) {
+    public MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) throws IOException {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
-        // 회원 정보 업데이트
-        member.setUsername(memberDTO.getUsername());
+        if (removeProfileImage || profileImage == null) {
+            member.setProfile(defaultProfileImg);
+        } else {
+            String imagePath = saveProfileImage(profileImage);
+            member.setProfile(imagePath);
+        }
+
         member.setNickname(memberDTO.getNickname());
         member.setAddress(memberDTO.getAddress());
 
-        // 프로필 이미지 수정/삭제
-        if (removeProfileImage) {
-            member.setProfileImg(profileImageService.getDefaultProfileImage());
-        } else if (profileImage != null && !profileImage.isEmpty()) {
-            String profileImageUrl = profileImageService.saveProfileImage(profileImage);
-            member.setProfileImg(profileImageUrl);
+        return MemberDTO.toDTO(member);
+    }
+
+    private String saveProfileImage(MultipartFile profileImage) throws IOException {
+        String directory = System.getProperty("user.dir") + "/uploads/profile_images/";
+        Path uploadPath = Paths.get(directory);
+
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
         }
 
-        return MemberDTO.toDTO(memberRepository.save(member));
+        String fileName = System.currentTimeMillis() + "_" + profileImage.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+        profileImage.transferTo(filePath.toFile());
+
+        return directory + fileName;
+    }
+
+
+    public void deleteProfileImage(String profileImg) {
+        if (!profileImg.equals(defaultProfileImg)) {
+            File file = new File(profileImg);
+            if (file.exists()) {
+                file.delete();
+            }
+        }
     }
 
     @Transactional

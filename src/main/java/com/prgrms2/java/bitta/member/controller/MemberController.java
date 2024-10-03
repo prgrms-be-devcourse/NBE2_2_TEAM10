@@ -1,5 +1,6 @@
 package com.prgrms2.java.bitta.member.controller;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.SignInDTO;
 import com.prgrms2.java.bitta.member.dto.SignUpDTO;
@@ -13,10 +14,12 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.http.MediaType;
+
+import java.io.IOException;
 
 import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 
@@ -28,6 +31,7 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final ObjectMapper objectMapper;
 
     @Operation(
             summary = "테스트",
@@ -115,13 +119,19 @@ public class MemberController {
                     )
             }
     )
-    @PutMapping(value = "/{id}", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
     public ResponseEntity<MemberDTO> updateMemberById(@PathVariable Long id,
-                                                      @RequestPart("dto") MemberDTO memberDTO,
-                                                      @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
-                                                      @RequestPart(value = "removeProfileImage", required = false) boolean removeProfileImage) {
-        MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
-        return ResponseEntity.ok(updatedMember);
+                                                      @RequestParam("dto") String dtoJson,
+                                                      @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+                                                      @RequestParam(value = "removeProfileImage", required = false, defaultValue = "false") Boolean removeProfileImage) {
+        try {
+            MemberDTO memberDTO = objectMapper.readValue(dtoJson, MemberDTO.class);
+            MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
+            return ResponseEntity.ok(updatedMember);
+        } catch (IOException e) {
+            log.error("Failed to update member profile", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
     @Operation(
