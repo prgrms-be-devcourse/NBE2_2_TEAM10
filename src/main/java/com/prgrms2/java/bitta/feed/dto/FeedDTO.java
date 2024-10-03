@@ -32,7 +32,7 @@ public class FeedDTO {
 
     @Schema(title = "회원 ID (FK)", description = "회원의 고유 ID 입니다.", example = "1", minimum = "1")
     @Min(value = 1, message = "ID는 음수가 될 수 없습니다.")
-    @NotBlank(message = "회원 ID는 누락될 수 없습니다.")
+    @NotNull(message = "회원 ID는 누락될 수 없습니다.")
     private Long memberId;
 
     @Schema(title = "피드 생성일시", description = "피드가 생성된 날짜 및 시간입니다.", example = "2023-09-24T14:45:00")
