@@ -7,7 +7,6 @@ import com.prgrms2.java.bitta.member.repository.MemberRepository;
 import com.prgrms2.java.bitta.security.JwtToken;
 import com.prgrms2.java.bitta.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -103,17 +102,5 @@ public class MemberServiceImpl implements MemberService{
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
         memberRepository.delete(member);
-    }
-
-    // 프로필 이미지 삭제(기본 이미지로 재설정)
-    @Transactional
-    @Override
-    public void resetProfileImageToDefault(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
-
-        member.setProfileImg(profileImageService.getDefaultProfileImage());
-
-        memberRepository.save(member);
     }
 }
