@@ -35,6 +35,9 @@ public class MemberServiceImpl implements MemberService{
     private final PasswordEncoder passwordEncoder;
     private final String defaultProfileImg = "/images/default_avatar.png";
 
+    @Value("${file.root.path}")
+    private String fileRootPath;
+    
     @Transactional
     @Override
     public JwtToken signIn(String username, String password) {
@@ -97,7 +100,7 @@ public class MemberServiceImpl implements MemberService{
     }
 
     private String saveProfileImage(MultipartFile profileImage) throws IOException {
-        String directory = System.getProperty("user.dir") + "/uploads/profile_images/";
+        String directory = fileRootPath + "/uploads/profile_images/";
         Path uploadPath = Paths.get(directory);
 
         if (!Files.exists(uploadPath)) {
