@@ -1,4 +1,3 @@
-
 package com.prgrms2.java.bitta.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
