@@ -1,6 +1,5 @@
 package com.prgrms2.java.bitta.video.service;
 
-import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.video.entity.Video;
 import com.prgrms2.java.bitta.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,37 +48,16 @@ public class VideoServiceImpl implements VideoService {
         }
     }
 
-    @Transactional
-    public List<Video> uploadVideos(List<MultipartFile> files, Feed feed) throws IOException {
+    @Override
+    public void delete(Long feedId) {
+        List<String> videoUrls = videoRepository.findVideoUrlByFeedId(feedId);
 
-        List<Video> existingVideos = videoRepository.findByFeed(feed);
+        videoUrls.forEach(url -> {
+            File file = new File(url);
 
-        if (existingVideos.size() + files.size() > 1) {
-            throw new IllegalArgumentException("비디오는 한개만 업로드 할 수 있습니다");
-        }
-
-        for (MultipartFile file : files) {
-
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            String filePath = "uploads/videos/" + fileName;
-
-            File dest = new File(filePath);
-            file.transferTo(dest);
-
-            Video video = Video.builder()
-                    .videoUrl(filePath)
-                    .fileSize(file.getSize())
-                    .feed(feed)
-                    .build();
-
-            videoRepository.save(video);
-        }
-        return videoRepository.findByFeed(feed);
-    }
-
-    @Transactional
-    public void deleteVideosByFeed(Feed feed) {
-        List<Video> videos = videoRepository.findByFeed(feed);
-        videoRepository.deleteAll(videos);
+            if (file.exists()) {
+                file.delete();
+            }
+        });
     }
 }

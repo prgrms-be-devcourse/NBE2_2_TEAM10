@@ -1,6 +1,5 @@
 package com.prgrms2.java.bitta.photo.service;
 
-import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.photo.entity.Photo;
 import com.prgrms2.java.bitta.photo.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,42 +48,16 @@ public class PhotoServiceImpl implements PhotoService{
         }
     }
 
-    @Transactional
-    public List<Photo> uploadPhotos(List<MultipartFile> files, Feed feed) throws IOException {
+    @Override
+    public void delete(Long feedId) {
+        List<String> photoUrls = photoRepository.findPhotoUrlByFeedId(feedId);
 
-        List<Photo> existingPhotos = photoRepository.findByFeed(feed);
+        photoUrls.forEach(url -> {
+            File file = new File(url);
 
-        if (existingPhotos.size() + files.size() > 4) {
-            throw new IllegalArgumentException("사진은 4만 업로드 할 수 있습니다");
-        }
-
-        for (MultipartFile file : files) {
-
-            if (file.getSize() > 10 * 1024 * 1024) {
-                throw new IllegalArgumentException("사진의 크기는 10mb 를 넘을 수 없습니다");
+            if (file.exists()) {
+                file.delete();
             }
-
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            String filePath = "uploads/photos/" + fileName;
-
-            File dest = new File(filePath);
-            file.transferTo(dest);
-
-            Photo photo = Photo.builder()
-                    .photoUrl(filePath)
-                    .fileSize(file.getSize())
-                    .feed(feed)
-                    .build();
-
-            photoRepository.save(photo);
-        }
-        return photoRepository.findByFeed(feed);
-    }
-
-    @Transactional
-    public void deletePhotosByFeed(Feed feed) {
-        List<Photo> photos = photoRepository.findByFeed(feed);
-
-        photoRepository.deleteAll(photos);
+        });
     }
 }
