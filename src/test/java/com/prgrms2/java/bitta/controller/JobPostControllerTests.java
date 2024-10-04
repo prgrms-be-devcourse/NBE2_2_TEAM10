@@ -3,7 +3,7 @@ package com.prgrms2.java.bitta.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prgrms2.java.bitta.jobpost.controller.JobPostController;
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
-import com.prgrms2.java.bitta.jobpost.dto.PageRequestDTO;
+import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
 import com.prgrms2.java.bitta.jobpost.exception.JobPostException;
@@ -161,7 +161,7 @@ public class JobPostControllerTests {
         mockMvc.perform(get("/api/v1/job-post/1"))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("NOT_FOUND"));
+                .andExpect(jsonPath("$.error").value("게시글을 찾을 수 없습니다"));
     }
 
     @Test
@@ -182,11 +182,12 @@ public class JobPostControllerTests {
     @Test
     @DisplayName("JobPost 등록 (실패) :: 유효성 검증 실패로 BadRequest 반환")
     void createJobPost_DtoValidationFails_HttpStatusBadRequest() throws Exception {
+        // 필수 값들을 유효하지 않게 설정하여 유효성 검증 실패 유도
         JobPostDTO invalidJobPostDTO = new JobPostDTO(
+                null,
                 1L,
-                1L,
-                "aaa",
-                "bbbb",
+                null,
+                " ",
                 Location.BUSAN,
                 PayStatus.PAID,
                 LocalDateTime.now(),
@@ -197,11 +198,14 @@ public class JobPostControllerTests {
 
         mockMvc.perform(post("/api/v1/job-post")
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(invalidJobPostDTO))
+                        .content(objectMapper.writeValueAsString(invalidJobPostDTO))  // 유효하지 않은 DTO 전송
                         .with(csrf()))
-                .andDo(print())
+                .andDo(print())  // 요청 및 응답 출력
                 .andExpect(status().isBadRequest());
+
     }
+
+
 
     @Test
     @DisplayName("일거리 수정 (성공)")
@@ -230,10 +234,10 @@ public class JobPostControllerTests {
                         .content(content))
                 .andDo(print())
                 .andExpect(status().isNotFound())
-                .andExpect(jsonPath("$.error").value("NOT_FOUND"));
+                .andExpect(jsonPath("$.error").value("게시글을 찾을 수 없습니다"));
     }
 
-    @Test
+    @Test // 수정 예정
     @DisplayName("일거리 삭제 (성공)")
     void deleteJobPost_PostExists_ReturnSuccessMessage() throws Exception {
         doNothing().when(jobPostService).remove(anyLong());
@@ -241,7 +245,7 @@ public class JobPostControllerTests {
         mockMvc.perform(delete("/api/v1/job-post/1"))
                 .andDo(print())
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("delete success"));
+                .andExpect(jsonPath("$.message").value("삭제가 완료되었습니다"));
     }
 
     @Test
@@ -252,7 +256,7 @@ public class JobPostControllerTests {
         mockMvc.perform(delete("/api/v1/job-post/1"))
                 .andDo(print())
                 .andExpect(status().isBadRequest())  // NOT_REMOVED 예외가 400이라면
-                .andExpect(jsonPath("$.error").value("NOT_REMOVED"));
+                .andExpect(jsonPath("$.error").value("게시글을 삭제할 수 없습니다"));
     }
 
 }

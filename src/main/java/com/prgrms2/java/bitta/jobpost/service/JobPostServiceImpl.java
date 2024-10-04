@@ -2,7 +2,7 @@ package com.prgrms2.java.bitta.jobpost.service;
 
 import com.prgrms2.java.bitta.apply.util.ApplyProvider;
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
-import com.prgrms2.java.bitta.jobpost.dto.PageRequestDTO;
+import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.exception.JobPostException;
 import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
@@ -14,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -25,17 +24,6 @@ public class JobPostServiceImpl implements JobPostService {
     private final MemberProvider memberProvider;
     private final ApplyProvider applyProvider;
 
-//    @Override
-//    public List<JobPostDTO> getList() {
-//        List<JobPostDTO> jobPost = jobPostRepository.getList();
-//
-//        if (jobPost.isEmpty()) {
-//            throw JobPostException.NOT_FOUND.get();
-//        }
-//
-//        return jobPost;
-//    }
-
     @Override
     public Page<JobPostDTO> getList(PageRequestDTO pageRequestDTO) {
         Sort sort = Sort.by("id").descending();
@@ -44,12 +32,6 @@ public class JobPostServiceImpl implements JobPostService {
         return jobPostRepository.getList(pageable);
     }
 
-    //    @Override
-//    public JobPostDTO register(JobPostDTO jobPostDTO) {
-//        JobPost jobPost = jobPostDTO.toEntity();
-//        jobPost = jobPostRepository.save(jobPost);
-//        return new JobPostDTO(jobPost);
-//    }
     @Override
     public JobPostDTO register(JobPostDTO jobPostDTO) {
         try {

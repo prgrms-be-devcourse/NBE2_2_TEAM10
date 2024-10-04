@@ -5,6 +5,7 @@ import com.prgrms2.java.bitta.apply.controller.ApplyController;
 import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
 import com.prgrms2.java.bitta.apply.exception.ApplyException;
 import com.prgrms2.java.bitta.apply.service.ApplyService;
+import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
 import com.prgrms2.java.bitta.member.entity.Member;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.TestInstance;
@@ -128,20 +129,23 @@ public class ApplyControllerTests {
     @Test
     @DisplayName("지원서 등록 (성공)")
     void registerApply_ApplicationRegistered_ReturnMessage() throws Exception {
+        // 테스트 응답으로 사용할 Map 생성
         Map<String, Object> response = new HashMap<>();
         response.put("message", "1님 지원 완료"); // memberId를 1로 가정
         response.put("data", applyDTO);
 
+        // applyService.register()가 Map을 반환하도록 설정
         when(applyService.register(any(ApplyDTO.class)))
-                .thenReturn(ResponseEntity.ok(response));
+                .thenReturn(response);
 
+        // 테스트 실행
         mockMvc.perform(post("/api/v1/apply")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(applyDTO)) // DTO를 JSON으로 변환해 요청에 전달
-                        .with(csrf()))
+                        .with(csrf())) // CSRF 보호 적용
                 .andDo(print()) // 응답 출력
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.message").value("1님 지원 완료"));
+                .andExpect(status().isOk()) // 200 OK 응답 기대
+                .andExpect(jsonPath("$.message").value("1님 지원 완료")); // message 필드 검증
     }
 
 
@@ -155,7 +159,7 @@ public class ApplyControllerTests {
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.message")
-                        .value("delete complete"));
+                        .value("삭제가 완료되었습니다"));
     }
 
     @Test
@@ -169,7 +173,7 @@ public class ApplyControllerTests {
                 .andDo(print())
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error")
-                        .value("NOT_FOUND"));
+                        .value("지원서를 찾을 수 없습니다"));
     }
 }
 

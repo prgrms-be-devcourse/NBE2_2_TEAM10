@@ -10,7 +10,7 @@ import java.util.Map;
 public interface ApplyService {
     List<ApplyDTO> readAll(Member member);
 
-    ResponseEntity<Map<String, Object>> register(ApplyDTO applyDTO);
+    Map<String, Object> register(ApplyDTO applyDTO);
 
     void delete(Long id);
 

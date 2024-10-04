@@ -19,8 +19,7 @@ public interface JobPostRepository extends JpaRepository<JobPost, Long> {
     @Query("DELETE FROM JobPost j WHERE j.id = :id")
     Long deleteByIdAndReturnCount(Long id);
 
-//    @Query("SELECT j FROM JobPost j WHERE j.id = :id")
-//    List<JobPostDTO> getList();
+
     @Query("SELECT j FROM JobPost j ORDER BY 'id' DESC ")
     Page<JobPostDTO> getList(Pageable pageable);
 

@@ -6,10 +6,7 @@ import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
 import com.prgrms2.java.bitta.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.FutureOrPresent;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,11 +30,11 @@ public class JobPostDTO {
     private Long memberId;
 
     @Schema(title = "일거리 제목", description = "일거리 제목입니다.", example = "Job Title")
-    @NotNull(message = "제목 입력은 필수적 입니다")
+    @NotBlank(message = "제목 입력은 필수적 입니다")
     private String title;
 
     @Schema(title = "일거리 내용", description = "일거리 내용입니다.", example = "Job Content")
-    @NotNull(message = "설명 입력은 필수적 입니다")
+    @NotBlank(message = "설명 입력은 필수적 입니다")
     private String description;
 
     @Schema(title = "출근지", description = "출근 지역입니다.", example = "SEOUL")
@@ -52,11 +49,9 @@ public class JobPostDTO {
     private LocalDateTime updateAt;
 
     @Schema(title = "시작일", description = "일이 시작하는 날짜입니다.", example = "2023-09-24")
-    @FutureOrPresent(message = "시작 일자는 오늘부터 설정해야 합니다")
     private LocalDate startDate;
 
     @Schema(title = "종료일", description = "일이 종료되는 날짜입니다.", example = "2023-09-24")
-    @FutureOrPresent(message = "종료 일자는 시작일자와 동일하거나 이후 일자로 설정해야 합니다")
     private LocalDate endDate;
 
     @Schema(title = "종료여부", description = "일이 종료되었는지 여부입니다.", example = "true")

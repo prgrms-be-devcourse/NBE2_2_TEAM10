@@ -70,7 +70,7 @@ public class FeedServiceTests {
                 .username("Username")
                 .password("Password")
                 .address("Address")
-                .profileImg("ImageUrl")
+//                .profileImg("ImageUrl")
                 .build();
 
         feed = Feed.builder()

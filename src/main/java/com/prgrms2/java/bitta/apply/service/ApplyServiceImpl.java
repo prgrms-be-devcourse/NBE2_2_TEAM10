@@ -9,7 +9,6 @@ import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -33,29 +32,17 @@ public class ApplyServiceImpl implements ApplyService {
         return applies.stream().map(this::entityToDto).toList();
     }
 
-//    @Override
-//    public ApplyDTO register(ApplyDTO applyDTO) {
-//        try {
-//            Apply apply = dtoToEntity(applyDTO);
-//            apply = applyRepository.save(apply);
-//            return entityToDto(apply);
-//        } catch (Exception e) {
-//            log.error(e.getMessage());
-//            throw ApplyException.NOT_REGISTERED.get();
-//        }
-//    }
-
     @Override
-    public ResponseEntity<Map<String, Object>> register(ApplyDTO applyDTO) {
+    public Map<String, Object> register(ApplyDTO applyDTO) {
         try {
             Apply apply = dtoToEntity(applyDTO);
             apply = applyRepository.save(apply);
 
             Map<String, Object> response = new HashMap<>();
-            response.put("message", apply.getMember().getId() + "님 지원 완료");
+            response.put("message", apply.getMember().getNickname() + "님 지원 완료");
             response.put("data", entityToDto(apply));
 
-            return ResponseEntity.ok(response);
+            return response;
         } catch (Exception e) {
             log.error(e.getMessage());
             throw ApplyException.NOT_REGISTERED.get();

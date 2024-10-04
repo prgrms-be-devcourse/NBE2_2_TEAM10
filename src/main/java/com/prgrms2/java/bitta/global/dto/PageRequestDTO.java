@@ -1,4 +1,4 @@
-package com.prgrms2.java.bitta.jobpost.dto;
+package com.prgrms2.java.bitta.global.dto;
 
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;

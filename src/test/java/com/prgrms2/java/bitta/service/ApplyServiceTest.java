@@ -15,11 +15,11 @@ import com.prgrms2.java.bitta.jobpost.util.JobPostProvider;
 import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.ResponseEntity;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -49,7 +49,6 @@ class ApplyServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // 테스트용 Member 객체 생성
         member = Member.builder()
                 .id(1L)
                 .username("testUser")
@@ -58,7 +57,6 @@ class ApplyServiceTest {
                 .address("testAddress")
                 .build();
 
-        // 테스트용 JobPost 객체 생성
         jobPost = JobPost.builder()
                 .id(100L)
                 .member(member)
@@ -70,7 +68,6 @@ class ApplyServiceTest {
                 .endDate(LocalDate.of(2024, 1, 10))
                 .build();
 
-        // 테스트용 ApplyDTO 및 Apply 엔티티 생성
         applyDTO = ApplyDTO.builder()
                 .id(1L)
                 .memberId(member.getId())
@@ -86,22 +83,20 @@ class ApplyServiceTest {
                 .build();
     }
 
-    // 등록 테스트
     @Test
+    @DisplayName("등록 테스트")
     void registerApplyTest() {
-        // JobPostProvider의 getById 메서드 Mock 설정
         when(jobPostProvider.getById(anyLong())).thenReturn(jobPost);
         when(applyRepository.save(any(Apply.class))).thenReturn(apply);
 
-        ResponseEntity<Map<String, Object>> response = applyService.register(applyDTO);
+        Map<String, Object> response = applyService.register(applyDTO);
 
-        assertThat(response.getStatusCodeValue()).isEqualTo(200);
-        assertThat(response.getBody().get("message")).isEqualTo(apply.getId() + "님 지원 완료");
-        assertThat(((ApplyDTO) response.getBody().get("data")).getId()).isEqualTo(apply.getId());
+        assertThat(response.get("message")).isEqualTo(apply.getMember().getNickname() + "님 지원 완료");
+        assertThat(((ApplyDTO) response.get("data")).getId()).isEqualTo(apply.getId());
     }
 
-    // 단일 조회 테스트
     @Test
+    @DisplayName("단일 조회 테스트")
     void readApplyTest() {
         when(applyRepository.getApplyDTO(anyLong())).thenReturn(Optional.of(applyDTO));
 
@@ -110,8 +105,8 @@ class ApplyServiceTest {
         assertThat(foundDTO.getId()).isEqualTo(applyDTO.getId());
     }
 
-    // 회원별 조회 테스트
     @Test
+    @DisplayName("회원별 조회 테스트")
     void readByIdAndMemberTest() {
         when(applyRepository.findByIdAndMember(anyLong(), any(Member.class))).thenReturn(Optional.of(apply));
 
@@ -120,8 +115,8 @@ class ApplyServiceTest {
         assertThat(foundDTO.getId()).isEqualTo(apply.getId());
     }
 
-    // 삭제 테스트
     @Test
+    @DisplayName("삭제 테스트")
     void deleteApplyTest() {
         when(applyRepository.deleteByIdAndReturnCount(anyLong())).thenReturn(1);
 

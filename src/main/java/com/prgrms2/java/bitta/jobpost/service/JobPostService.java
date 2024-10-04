@@ -1,10 +1,8 @@
 package com.prgrms2.java.bitta.jobpost.service;
 
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
-import com.prgrms2.java.bitta.jobpost.dto.PageRequestDTO;
+import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import org.springframework.data.domain.Page;
-
-import java.util.List;
 
 public interface JobPostService {
     JobPostDTO register(JobPostDTO jobPostDTO);
@@ -15,7 +13,6 @@ public interface JobPostService {
 
     JobPostDTO modify(JobPostDTO jobPostDTO);
 
-//    List<JobPostDTO> getList();
     Page<JobPostDTO> getList(PageRequestDTO pageRequestDTO);
 }
 

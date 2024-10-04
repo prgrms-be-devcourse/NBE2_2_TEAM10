@@ -4,10 +4,11 @@ import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
-import com.prgrms2.java.bitta.jobpost.dto.PageRequestDTO;
+import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
 import com.prgrms2.java.bitta.jobpost.service.JobPostServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -37,7 +38,6 @@ class JobPostServiceTest {
     void setUp() {
         MockitoAnnotations.openMocks(this);
 
-        // 테스트용 JobPostDTO 객체 생성
         jobPostDTO1 = JobPostDTO.builder()
                 .id(1L)
                 .title("Job Post 1")
@@ -52,7 +52,6 @@ class JobPostServiceTest {
 
         jobPostDTOList = Arrays.asList(jobPostDTO1, jobPostDTO2);
 
-        // PageRequestDTO 설정 (페이지 1, 사이즈 10)
         pageRequestDTO = PageRequestDTO.builder()
                 .page(1)
                 .size(10)
@@ -60,24 +59,20 @@ class JobPostServiceTest {
     }
 
     @Test
+    @DisplayName("페이징된 전체 목록 조회")
     void testGetListWithPaging() {
-        // 페이징 처리된 JobPostDTO 리스트를 반환하는 Page 객체 생성
         Pageable pageable = pageRequestDTO.getPageable(Sort.by("id").descending());
         Page<JobPostDTO> jobPostDTOPage = new PageImpl<>(jobPostDTOList, pageable, jobPostDTOList.size());
 
-        // Repository에서 getList 메서드를 호출할 때 페이징된 데이터를 반환하도록 설정
         when(jobPostRepository.getList(pageable)).thenReturn(jobPostDTOPage);
 
-        // Service에서 페이징된 결과를 가져옴
         Page<JobPostDTO> resultPage = jobPostService.getList(pageRequestDTO);
 
-        // 검증: 반환된 페이지가 정상적으로 페이징되어 있는지 확인
         assertThat(resultPage.getTotalElements()).isEqualTo(2);
         assertThat(resultPage.getTotalPages()).isEqualTo(1);
         assertThat(resultPage.getContent().get(0).getTitle()).isEqualTo("Job Post 1");
         assertThat(resultPage.getContent().get(1).getTitle()).isEqualTo("Job Post 2");
 
-        // Repository 메서드 호출이 예상대로 이루어졌는지 검증
         verify(jobPostRepository, times(1)).getList(pageable);
     }
 }
