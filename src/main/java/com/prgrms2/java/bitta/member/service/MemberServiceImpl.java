@@ -9,6 +9,7 @@ import com.prgrms2.java.bitta.security.JwtToken;
 import com.prgrms2.java.bitta.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -103,6 +105,8 @@ public class MemberServiceImpl implements MemberService{
         } else if (profileImage != null && !profileImage.isEmpty()) {
             deleteProfileImage(member.getProfile());
             String imagePath = saveProfileImage(profileImage);
+
+            String thumbnailPath = createThumbnail(imagePath);
             member.setProfile(imagePath);
             isUpdated = true;
         }
@@ -130,6 +134,23 @@ public class MemberServiceImpl implements MemberService{
         return MemberDTO.toDTO(member);
     }
 
+    @Transactional
+    @Override
+    public void deleteMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
+        memberRepository.delete(member);
+    }
+
+
+
+
+
+
+    private File getProfileImageFile(String profileImg) {
+        return new File(profileImg);
+    }
+
     private String saveProfileImage(MultipartFile profileImage) throws IOException {
         String directory = fileRootPath + "/uploads/profile_images/";
         Path uploadPath = Paths.get(directory);
@@ -140,25 +161,83 @@ public class MemberServiceImpl implements MemberService{
 
         String fileName = System.currentTimeMillis() + "_" + profileImage.getOriginalFilename();
         Path filePath = uploadPath.resolve(fileName);
+
         profileImage.transferTo(filePath.toFile());
 
         return directory + fileName;
     }
 
     public void deleteProfileImage(String profileImg) {
-        if (!profileImg.equals(defaultProfileImg)) {
-            File file = new File(profileImg);
-            if (file.exists()) {
-                file.delete();
+        if (profileImg != null && !profileImg.equals(defaultProfileImg)) {
+            File profileFile = getProfileImageFile(profileImg);
+            File thumbnailFile = getThumbnailFile(profileImg);
+
+            if (profileFile.exists() && profileFile.isFile()) {
+                profileFile.delete();
+            }
+
+            if (thumbnailFile.exists() && thumbnailFile.isFile()) {
+                thumbnailFile.delete();
             }
         }
     }
 
-    @Transactional
-    @Override
-    public void deleteMember(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
-        memberRepository.delete(member);
+
+
+
+    private String createThumbnail(String imagePath) throws IOException {
+        String thumbnailDirectory = fileRootPath + "/uploads/profile_images/thumbnail/";
+        Path thumbnailPath = Paths.get(thumbnailDirectory);
+
+        if (!Files.exists(thumbnailPath)) {
+            Files.createDirectories(thumbnailPath);
+        }
+
+        String originalFileName = Paths.get(imagePath).getFileName().toString();
+        String thumbnailFileName = "thumb_" + originalFileName;
+        Path thumbnailFilePath = thumbnailPath.resolve(thumbnailFileName);
+
+        Thumbnails.of(new File(imagePath))
+                .size(200, 200)
+                .keepAspectRatio(true)
+                .toFile(thumbnailFilePath.toFile());
+
+        return thumbnailFilePath.toString();
     }
+
+
+
+//
+//    // OutputStream으로 썸네일 이미지 출력
+//    public void outputThumbnail(String imagePath, OutputStream outputStream) throws IOException {
+//        Thumbnails.of(imagePath)
+//                .size(200, 200)
+//                .keepAspectRatio(true)
+//                .outputFormat("jpg")
+//                .toOutputStream(outputStream);  // OutputStream으로 이미지 출력
+//    }
+
+
+    private File getThumbnailFile(String profileImg) {
+        String thumbnailImgPath = profileImg.replace("profile_images", "profile_images/thumbnail");
+        String thumbnailFileName = "thumb_" + Paths.get(profileImg).getFileName().toString();
+        return new File(thumbnailImgPath.replace(Paths.get(profileImg).getFileName().toString(), thumbnailFileName));
+    }
+
+    private Path getThumbnailDirectory() throws IOException {
+        String thumbnailDirectory = fileRootPath + "/uploads/profile_images/thumbnail/";
+        Path thumbnailPath = Paths.get(thumbnailDirectory);
+
+        if (!Files.exists(thumbnailPath)) {
+            try {
+                Files.createDirectories(thumbnailPath);
+            } catch (IOException e) {
+                throw new RuntimeException("썸네일 폴더를 생성할 수 없습니다.", e);
+            }
+        }
+
+        return thumbnailPath;
+    }
+
+
 }
