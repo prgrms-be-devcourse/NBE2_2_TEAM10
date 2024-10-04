@@ -80,14 +80,23 @@ public class MemberServiceImpl implements MemberService{
         return jwtTokenProvider.refreshAccessToken(refreshToken);
     }
 
+
     @Override
     public MemberDTO getMemberById(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
         String profile = member.getProfile() != null ? member.getProfile() : defaultProfileImg;
+        File thumbnailFile = getThumbnailFile(profile);
 
-        return new MemberDTO(member);
+        if (thumbnailFile.exists()) {
+            profile = thumbnailFile.getPath();
+        }
+
+        MemberDTO memberDTO = new MemberDTO(member);
+        memberDTO.setProfile(profile);
+
+        return memberDTO;
     }
 
     @Transactional
@@ -142,11 +151,6 @@ public class MemberServiceImpl implements MemberService{
         memberRepository.delete(member);
     }
 
-
-
-
-
-
     private File getProfileImageFile(String profileImg) {
         return new File(profileImg);
     }
@@ -161,7 +165,6 @@ public class MemberServiceImpl implements MemberService{
 
         String fileName = System.currentTimeMillis() + "_" + profileImage.getOriginalFilename();
         Path filePath = uploadPath.resolve(fileName);
-
         profileImage.transferTo(filePath.toFile());
 
         return directory + fileName;
@@ -181,9 +184,6 @@ public class MemberServiceImpl implements MemberService{
             }
         }
     }
-
-
-
 
     private String createThumbnail(String imagePath) throws IOException {
         String thumbnailDirectory = fileRootPath + "/uploads/profile_images/thumbnail/";
@@ -205,18 +205,18 @@ public class MemberServiceImpl implements MemberService{
         return thumbnailFilePath.toString();
     }
 
-
-
-//
-//    // OutputStream으로 썸네일 이미지 출력
-//    public void outputThumbnail(String imagePath, OutputStream outputStream) throws IOException {
-//        Thumbnails.of(imagePath)
-//                .size(200, 200)
-//                .keepAspectRatio(true)
-//                .outputFormat("jpg")
-//                .toOutputStream(outputStream);  // OutputStream으로 이미지 출력
-//    }
-
+    public void outputThumbnail(String profileImagePath, OutputStream outputStream) throws IOException {
+        File thumbnailFile = getThumbnailFile(profileImagePath);
+        if (thumbnailFile.exists() && thumbnailFile.isFile()) {
+            Thumbnails.of(thumbnailFile)
+                    .size(200, 200)
+                    .keepAspectRatio(true)
+                    .outputFormat("jpg")
+                    .toOutputStream(outputStream);
+        } else {
+            throw new IOException("썸네일 파일을 찾을 수 없습니다: " + thumbnailFile.getAbsolutePath());
+        }
+    }
 
     private File getThumbnailFile(String profileImg) {
         String thumbnailImgPath = profileImg.replace("profile_images", "profile_images/thumbnail");
@@ -229,15 +229,9 @@ public class MemberServiceImpl implements MemberService{
         Path thumbnailPath = Paths.get(thumbnailDirectory);
 
         if (!Files.exists(thumbnailPath)) {
-            try {
-                Files.createDirectories(thumbnailPath);
-            } catch (IOException e) {
-                throw new RuntimeException("썸네일 폴더를 생성할 수 없습니다.", e);
-            }
+            Files.createDirectories(thumbnailPath);
         }
 
         return thumbnailPath;
     }
-
-
 }
