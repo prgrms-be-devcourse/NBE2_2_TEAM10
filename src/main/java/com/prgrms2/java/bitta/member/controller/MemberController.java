@@ -19,8 +19,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 
@@ -184,13 +186,19 @@ public class MemberController {
             }
     )
     @PostMapping("/refresh")
-    public JwtToken refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
-        // 리프레시 토큰이 유효한지 검사
-        String refreshToken = refreshTokenRequestDTO.getRefreshToken();
-        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
-            throw new InvalidTokenException("Invalid or expired refresh token");
+    public ResponseEntity<JwtToken> reissueToken(@RequestHeader("Authorization") String bearerAccessToken,
+                                                 @RequestBody RefreshTokenRequestDTO request) {
+        try {
+            String accessToken = bearerAccessToken.substring(7);
+            JwtToken newToken = memberService.reissueToken(accessToken, request.getRefreshToken());
+
+            if (newToken == null) {
+                return ResponseEntity.ok().build(); // 현재 토큰이 유효한 경우
+            }
+
+            return ResponseEntity.ok(newToken);
+        } catch (AuthenticationException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
         }
-        // 유효한 리프레시 토큰이면 새 액세스 토큰 발급
-        return memberService.refreshToken(refreshToken);
     }
 }

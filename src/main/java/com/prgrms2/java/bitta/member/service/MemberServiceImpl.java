@@ -6,6 +6,7 @@ import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.repository.MemberRepository;
 import com.prgrms2.java.bitta.security.JwtToken;
 import com.prgrms2.java.bitta.security.JwtTokenProvider;
+import com.prgrms2.java.bitta.security.exception.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -73,9 +74,24 @@ public class MemberServiceImpl implements MemberService{
 
     @Transactional
     @Override
-    public JwtToken refreshToken(String refreshToken) {
-        return jwtTokenProvider.refreshAccessToken(refreshToken);
+    public JwtToken reissueToken(String accessToken, String refreshToken) {
+        try {
+            JwtToken newToken = jwtTokenProvider.reissueToken(accessToken, refreshToken);
+
+            if (newToken == null) {
+                // 액세스 토큰이 아직 유효한 경우
+                return null;
+            }
+
+            return newToken;
+        } catch (RuntimeException e) {
+            // 리프레시 토큰이 만료된 경우 등의 예외 처리
+            log.info("토큰 갱신 실패: {}", e.getMessage());
+            // 필요한 경우 여기서 로그아웃 처리를 할 수 있습니다.
+            throw new InvalidTokenException("토큰 갱신에 실패했습니다. 다시 로그인해주세요.");
+        }
     }
+
 
     @Override
     public MemberDTO getMemberById(Long id) {
