@@ -1,25 +1,28 @@
 package com.prgrms2.java.bitta.member.controller;
 
-
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.SignInDTO;
 import com.prgrms2.java.bitta.member.dto.SignUpDTO;
 import com.prgrms2.java.bitta.member.service.MemberService;
 import com.prgrms2.java.bitta.security.JwtToken;
+import com.prgrms2.java.bitta.security.JwtTokenProvider;
 import com.prgrms2.java.bitta.security.SecurityUtil;
+import com.prgrms2.java.bitta.security.dto.RefreshTokenRequestDTO;
+import com.prgrms2.java.bitta.security.exception.InvalidTokenException;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.Map;
+import java.io.IOException;
 
 import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 
@@ -31,10 +34,31 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 public class MemberController {
 
     private final MemberService memberService;
+    private final ObjectMapper objectMapper;
+    private final JwtTokenProvider jwtTokenProvider;
+
+    @Operation(
+            summary = "테스트",
+            description = "SecurityUtil 로부터 회원아이디를 얻는 테스트용 API입니다."
+    )
+    @PostMapping("/test")
+    public String test() {
+        return SecurityUtil.getCurrentUsername();
+    }
 
     @Operation(
             summary = "로그인",
-            description = "아이디와 비밀번호를 검증하고, 토큰을 반환합니다."
+            description = "아이디와 비밀번호를 검증하고, 토큰을 반환합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "로그인이 성공적으로 완료되었습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = JwtToken.class)
+                            )
+                    )
+            }
     )
     @PostMapping("/sign-in")
     public JwtToken signIn(@RequestBody SignInDTO signInDTO) {
@@ -47,15 +71,6 @@ public class MemberController {
     }
 
     @Operation(
-            summary = "테스트",
-            description = "SecurityUtil 로부터 회원아이디를 얻는 테스트용 API입니다."
-    )
-    @PostMapping("/test")
-    public String test() {
-        return SecurityUtil.getCurrentUsername();
-    }
-
-    @Operation(
             summary = "회원가입",
             description = "회원을 등록합니다.",
             responses = {
@@ -64,7 +79,7 @@ public class MemberController {
                             description = "회원을 성공적으로 등록했습니다.",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(example = MEMBER_SUCCESS_SIGN_UP)
+                                    schema = @Schema(implementation = MemberDTO.class, example = MEMBER_SUCCESS_SIGN_UP)
                             )
                     )
             }
@@ -76,57 +91,83 @@ public class MemberController {
     }
 
     @Operation(
-            summary = "프로필 이미지 수정",
-            description = "회원의 프로필 이미지를 수정합니다.",
+            summary = "회원 조회",
+            description = "회원 ID로 회원 정보를 조회합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "프로필 이미지를 성공적으로 수정했습니다.",
+                            description = "회원 정보를 성공적으로 조회했습니다.",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(example = MEMBER_SUCCESS_UPDATE_PROFILE_IMAGE)
+                                    schema = @Schema(implementation = MemberDTO.class)
                             )
-                    ),
+                    )
             }
     )
-    @Parameter(
-            name = "id",
-            description = "프로필 이미지를 수정할 회원의 ID",
-            required = true,
-            example = "1",
-            schema = @Schema(type = "integer")
-    )
-    @PostMapping("/{id}/profile-image")
-    public ResponseEntity<?> updateProfileImage(@PathVariable Long id,
-                                                     @RequestParam("file") MultipartFile file) {
-        memberService.updateProfileImage(id, file);
-        return ResponseEntity.ok(Map.of("message", "프로필이미지 수정이 완료되었습니다."));
+    @GetMapping("/{id}")
+    public ResponseEntity<MemberDTO> getMemberById(@PathVariable Long id) {
+        return ResponseEntity.ok(memberService.getMemberById(id));
     }
 
     @Operation(
-            summary = "프로필 이미지 삭제",
-            description = "회원의 프로필 이미지를 삭제합니다.",
+            summary = "회원 수정",
+            description = "회원 ID로 회원 정보를 수정합니다. 프로필 이미지를 업데이트할 수 있습니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "프로필 이미지를 성공적으로 수정했습니다.",
+                            description = "회원 정보를 성공적으로 수정했습니다.",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(example = MEMBER_SUCCESS_DELETE_PROFILE_IMAGE)
+                                    schema = @Schema(implementation = MemberDTO.class)
                             )
-                    ),
+                    )
             }
     )
-    @Parameter(
-            name = "id",
-            description = "프로필 이미지를 삭제할 회원의 ID",
-            required = true,
-            example = "1",
-            schema = @Schema(type = "integer")
+    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
+    public ResponseEntity<MemberDTO> updateMemberById(@PathVariable Long id,
+                                                      @RequestParam("dto") String dtoJson,
+                                                      @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
+                                                      @RequestParam(value = "removeProfileImage", required = false, defaultValue = "false") Boolean removeProfileImage) {
+        try {
+            MemberDTO memberDTO = objectMapper.readValue(dtoJson, MemberDTO.class);
+            MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
+            return ResponseEntity.ok(updatedMember);
+        } catch (IOException e) {
+            log.error("Failed to update member profile", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    @Operation(
+            summary = "회원 삭제",
+            description = "회원 ID로 회원 정보를 삭제합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "회원 정보를 성공적으로 삭제했습니다.",
+                            content = @Content(
+                                    mediaType = "text/plain",
+                                    schema = @Schema(example = "회원 삭제가 완료되었습니다.")
+                            )
+                    )
+            }
     )
-    @DeleteMapping("/{id}/profile-image")
-    public ResponseEntity<?> deleteProfileImage(@PathVariable Long id) {
-        memberService.resetProfileImageToDefault(id);
-        return ResponseEntity.ok(Map.of("message", "프로필이미지가 삭제되었습니다."));
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteMemberById(@PathVariable Long id) {
+        memberService.deleteMember(id);
+        return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
+    }
+
+
+    @PostMapping("/refresh")
+    public JwtToken refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
+        // 리프레시 토큰이 유효한지 검사
+        String refreshToken = refreshTokenRequestDTO.getRefreshToken();
+        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+            throw new InvalidTokenException("Invalid or expired refresh token");
+        }
+        // 유효한 리프레시 토큰이면 새 액세스 토큰 발급
+        return memberService.refreshToken(refreshToken);
     }
 }

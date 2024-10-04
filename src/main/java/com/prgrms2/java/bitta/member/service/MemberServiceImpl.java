@@ -7,8 +7,8 @@ import com.prgrms2.java.bitta.member.repository.MemberRepository;
 import com.prgrms2.java.bitta.security.JwtToken;
 import com.prgrms2.java.bitta.security.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -17,6 +17,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,8 +34,11 @@ public class MemberServiceImpl implements MemberService{
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final ProfileImageService profileImageService;
+    private final String defaultProfileImg = "/images/default_avatar.png";
 
+    @Value("${file.root.path}")
+    private String fileRootPath;
+    
     @Transactional
     @Override
     public JwtToken signIn(String username, String password) {
@@ -52,45 +60,82 @@ public class MemberServiceImpl implements MemberService{
         if (memberRepository.existsByUsername(signUpDTO.getUsername())) {
             throw new IllegalArgumentException("이미 사용 중인 사용자 이름입니다.");
         }
+
         // Password 암호화
         String encodedPassword = passwordEncoder.encode(signUpDTO.getPassword());
 
-        // 기본 프로필 이미지 설정
-        String defaultProfileImg = profileImageService.getDefaultProfileImage();
-
+        // USER 권한 부여
         List<String> roles = new ArrayList<>();
-        roles.add("USER");  // USER 권한 부여
+        roles.add("USER");
 
-        // 회원 가입 시 기본 프로필 이미지 추가
-        Member newMember = signUpDTO.toEntity(encodedPassword, roles);
-        newMember.setProfileImg(defaultProfileImg);
-
-        return MemberDTO.toDTO(memberRepository.save(newMember));
-        //return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
+        return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
     }
 
-    // 프로필 이미지 수정
     @Transactional
-    public void updateProfileImage(Long id, MultipartFile file) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
-
-        // 파일 저장 후 경로 설정
-        String profileImagePath = profileImageService.saveProfileImage(file);
-        member.setProfileImg(profileImagePath);
-
-        memberRepository.save(member);
+    @Override
+    public JwtToken refreshToken(String refreshToken) {
+        return jwtTokenProvider.refreshAccessToken(refreshToken);
     }
 
-    // 프로필 이미지 삭제(기본 이미지로 재설정)
+    @Override
+    public MemberDTO getMemberById(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        String profile = member.getProfile() != null ? member.getProfile() : defaultProfileImg;
+
+        return new MemberDTO(member);
+    }
+
     @Transactional
-    public void resetProfileImageToDefault(Long id) {
+    @Override
+    public MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) throws IOException {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Member not found"));
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
-        member.setProfileImg(profileImageService.getDefaultProfileImage());
+        if (removeProfileImage || profileImage == null) {
+            member.setProfile(defaultProfileImg);
+        } else {
+            String imagePath = saveProfileImage(profileImage);
+            member.setProfile(imagePath);
+        }
 
-        memberRepository.save(member);
+        member.setNickname(memberDTO.getNickname());
+        member.setAddress(memberDTO.getAddress());
+
+        return MemberDTO.toDTO(member);
     }
 
+    private String saveProfileImage(MultipartFile profileImage) throws IOException {
+        String directory = fileRootPath + "/uploads/profile_images/";
+        Path uploadPath = Paths.get(directory);
+
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + profileImage.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+        profileImage.transferTo(filePath.toFile());
+
+        return directory + fileName;
+    }
+
+
+    public void deleteProfileImage(String profileImg) {
+        if (!profileImg.equals(defaultProfileImg)) {
+            File file = new File(profileImg);
+            if (file.exists()) {
+                file.delete();
+            }
+        }
+    }
+
+    @Transactional
+    @Override
+    public void deleteMember(Long id) {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
+        memberRepository.delete(member);
+    }
 }
