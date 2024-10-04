@@ -30,7 +30,7 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members")
+@RequestMapping("api/v1/members")
 public class MemberController {
 
     private final MemberService memberService;
@@ -159,7 +159,30 @@ public class MemberController {
         return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
     }
 
-
+    @Operation(
+            summary = "토큰 재발급",
+            description = "Refresh 토큰으로 Access 토큰을 재발급 합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "토큰을 성공적으로 재발급했습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = JwtToken.class)  // JwtToken 클래스 사용
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "잘못된 요청",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "유효하지 않은 리프레시 토큰",
+                            content = @Content
+                    )
+            }
+    )
     @PostMapping("/refresh")
     public JwtToken refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
         // 리프레시 토큰이 유효한지 검사
