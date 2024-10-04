@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,9 +67,13 @@ public class ApplyController {
                     )
             }
     )
+//    @PostMapping
+//    public ResponseEntity<ApplyDTO> registerApply(@RequestBody ApplyDTO applyDTO) {
+//        return ResponseEntity.ok(applyService.register(applyDTO));
+//    }
     @PostMapping
-    public ResponseEntity<ApplyDTO> registerApply(@RequestBody ApplyDTO applyDTO) {
-        return ResponseEntity.ok(applyService.register(applyDTO));
+    public ResponseEntity<?> registerApply(@RequestBody ApplyDTO applyDTO) {
+        return applyService.register(applyDTO);
     }
 
     @Operation(
@@ -101,8 +106,9 @@ public class ApplyController {
             schema = @Schema(type = "integer")
     )
     @GetMapping("/{id}")
-    public ResponseEntity<ApplyDTO> readApply(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(applyService.read(id));
+    public ResponseEntity<ApplyDTO> readApply(@PathVariable("id") Long id, @AuthenticationPrincipal Member member) {
+        ApplyDTO applyDTO = applyService.readByIdAndMember(id, member);
+        return ResponseEntity.ok(applyDTO);
     }
 
     @Operation(

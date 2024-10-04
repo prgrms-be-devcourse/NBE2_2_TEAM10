@@ -1,6 +1,7 @@
 package com.prgrms2.java.bitta.jobpost.controller;
 
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
+import com.prgrms2.java.bitta.jobpost.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.service.JobPostService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -8,9 +9,12 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,7 +25,7 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 @Tag(name = "일거리 API 컨트롤러", description = "일거리와 관련된 REST API를 제공하는 컨틀롤러입니다.")
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/api/v1/jobpost")
+@RequestMapping("/api/v1/job-post")
 @Log4j2
 public class JobPostController {
     private final JobPostService jobPostService;
@@ -48,9 +52,14 @@ public class JobPostController {
                     )
             }
     )
+//    @GetMapping
+//    public ResponseEntity<List<JobPostDTO>> findAll() {
+//        return ResponseEntity.ok(jobPostService.getList());
+//    }
+
     @GetMapping
-    public ResponseEntity<List<JobPostDTO>> findAll() {
-        return ResponseEntity.ok(jobPostService.getList());
+    public ResponseEntity<Page<JobPostDTO>> getList(@Validated PageRequestDTO pageRequestDTO) {
+        return ResponseEntity.ok(jobPostService.getList(pageRequestDTO));
     }
 
     @Operation(
@@ -76,7 +85,7 @@ public class JobPostController {
             }
     )
     @PostMapping
-    public ResponseEntity<JobPostDTO> registerJobPost(@RequestBody JobPostDTO jobPostDTO) {
+    public ResponseEntity<JobPostDTO> registerJobPost(@Validated @RequestBody JobPostDTO jobPostDTO) {
         return ResponseEntity.ok(jobPostService.register(jobPostDTO));
     }
 
@@ -110,7 +119,7 @@ public class JobPostController {
             schema = @Schema(type = "integer")
     )
     @GetMapping("/{id}")
-    public ResponseEntity<JobPostDTO> readJobPost(@PathVariable("id") Long id) {
+    public ResponseEntity<JobPostDTO> readJobPost(@PathVariable("id") @Min(1) Long id) {
         return ResponseEntity.ok(jobPostService.read(id));
     }
 
@@ -152,7 +161,7 @@ public class JobPostController {
             schema = @Schema(type = "integer")
     )
     @PutMapping("/{id}")
-    public ResponseEntity<JobPostDTO> modifyJobPost(@RequestBody JobPostDTO jobPostDTO, @PathVariable("id") Long id) {
+    public ResponseEntity<JobPostDTO> modifyJobPost(@RequestBody JobPostDTO jobPostDTO, @Min(1) @PathVariable("id") Long id) {
         return ResponseEntity.ok(jobPostService.modify(jobPostDTO));
     }
 
@@ -194,8 +203,8 @@ public class JobPostController {
             schema = @Schema(type = "integer")
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteJobPost(@PathVariable("id") Long id) {
+    public ResponseEntity<Map<String, String>> deleteJobPost(@PathVariable("id") @Min(1) Long id) {
         jobPostService.remove(id);
-        return ResponseEntity.ok(Map.of("message", "success"));
+        return ResponseEntity.ok(Map.of("message", "delete success"));
     }
 }

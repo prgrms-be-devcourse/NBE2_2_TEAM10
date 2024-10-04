@@ -9,10 +9,10 @@ import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -33,12 +33,29 @@ public class ApplyServiceImpl implements ApplyService {
         return applies.stream().map(this::entityToDto).toList();
     }
 
+//    @Override
+//    public ApplyDTO register(ApplyDTO applyDTO) {
+//        try {
+//            Apply apply = dtoToEntity(applyDTO);
+//            apply = applyRepository.save(apply);
+//            return entityToDto(apply);
+//        } catch (Exception e) {
+//            log.error(e.getMessage());
+//            throw ApplyException.NOT_REGISTERED.get();
+//        }
+//    }
+
     @Override
-    public ApplyDTO register(ApplyDTO applyDTO) {
+    public ResponseEntity<Map<String, Object>> register(ApplyDTO applyDTO) {
         try {
             Apply apply = dtoToEntity(applyDTO);
             apply = applyRepository.save(apply);
-            return entityToDto(apply);
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", apply.getMember().getId() + "님 지원 완료");
+            response.put("data", entityToDto(apply));
+
+            return ResponseEntity.ok(response);
         } catch (Exception e) {
             log.error(e.getMessage());
             throw ApplyException.NOT_REGISTERED.get();
@@ -47,13 +64,7 @@ public class ApplyServiceImpl implements ApplyService {
 
     @Override
     public void delete(Long id) {
-        Optional<Apply> deleteApply = applyRepository.findById(id);
-        Apply apply = deleteApply.orElseThrow(ApplyException.NOT_FOUND::get);
-
-        try {
-            applyRepository.delete(apply);
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        if (applyRepository.deleteByIdAndReturnCount(id) == 0) {
             throw ApplyException.NOT_REMOVED.get();
         }
     }
@@ -63,6 +74,14 @@ public class ApplyServiceImpl implements ApplyService {
         Optional<ApplyDTO> applyDTO = applyRepository.getApplyDTO(id);
         return applyDTO.orElseThrow(ApplyException.NOT_FOUND::get);
     }
+
+    @Override
+    public ApplyDTO readByIdAndMember(Long id, Member member) {
+        Apply apply = applyRepository.findByIdAndMember(id, member)
+                .orElseThrow(ApplyException.NOT_FOUND::get);
+        return entityToDto(apply);
+    }
+
 
     private Apply dtoToEntity(ApplyDTO applyDTO) {
         return Apply.builder()
