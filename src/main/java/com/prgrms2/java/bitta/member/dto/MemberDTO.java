@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 @Getter
+@Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -16,6 +17,9 @@ public class MemberDTO {
 
     @Schema(title = "아이디", description = "로그인에 사용할 회원 아이디입니다.", example = "username")
     private String username;
+
+    @Schema(title = "비밀번호", description = "로그인에 사용할 회원 비밀번호입니다.", example = "password")
+    private String password;
 
     @Schema(title = "별명", description = "회원의 별명입니다.", example = "Nickname")
     private String nickname;

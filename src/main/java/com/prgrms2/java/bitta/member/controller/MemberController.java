@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.SignInDTO;
 import com.prgrms2.java.bitta.member.dto.SignUpDTO;
+import com.prgrms2.java.bitta.member.exception.NoChangeException;
 import com.prgrms2.java.bitta.member.service.MemberService;
 import com.prgrms2.java.bitta.security.JwtToken;
 import com.prgrms2.java.bitta.security.JwtTokenProvider;
@@ -135,8 +136,10 @@ public class MemberController {
             MemberDTO memberDTO = objectMapper.readValue(dtoJson, MemberDTO.class);
             MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
             return ResponseEntity.ok(updatedMember);
+        } catch (NoChangeException e) {
+            return ResponseEntity.ok().body(null);
         } catch (IOException e) {
-            log.error("Failed to update member profile", e);
+            log.error("파일 업데이트에 실패하였습니다.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
