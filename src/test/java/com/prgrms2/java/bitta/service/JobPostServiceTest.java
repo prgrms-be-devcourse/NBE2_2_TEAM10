@@ -1,6 +1,4 @@
-package com.prgrms2.java.bitta.jobpost.service;
-
-import static org.junit.jupiter.api.Assertions.*;
+package com.prgrms2.java.bitta.service;
 
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -8,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
 import com.prgrms2.java.bitta.jobpost.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
+import com.prgrms2.java.bitta.jobpost.service.JobPostServiceImpl;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -15,7 +14,6 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 

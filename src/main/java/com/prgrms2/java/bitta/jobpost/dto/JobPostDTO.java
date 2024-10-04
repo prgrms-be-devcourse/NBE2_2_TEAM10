@@ -62,4 +62,5 @@ public class JobPostDTO {
     @Schema(title = "종료여부", description = "일이 종료되었는지 여부입니다.", example = "true")
     @JsonProperty("isClosed")
     private boolean isClosed;
+
 }

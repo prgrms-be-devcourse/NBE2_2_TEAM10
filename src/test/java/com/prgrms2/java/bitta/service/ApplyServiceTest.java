@@ -1,4 +1,4 @@
-package com.prgrms2.java.bitta.apply.service;
+package com.prgrms2.java.bitta.service;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -7,6 +7,7 @@ import static org.assertj.core.api.Assertions.*;
 import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
 import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.apply.repository.ApplyRepository;
+import com.prgrms2.java.bitta.apply.service.ApplyServiceImpl;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;

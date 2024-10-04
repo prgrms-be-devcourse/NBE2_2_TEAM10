@@ -1,6 +1,7 @@
 package com.prgrms2.java.bitta.jobpost.exception;
 
 public enum JobPostException {
+    BAD_REQUEST("BAD_REQUEST", 404),
     NOT_FOUND("NOT_FOUND", 404),
     NOT_REGISTERED("NOT_REGISTERED", 400),
     NOT_MODIFIED("NOT_MODIFIED", 400),
