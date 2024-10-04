@@ -30,9 +30,7 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    // Member 정보를 가지고 AccessToken, RefreshToken을 생성하는 메서드
     public JwtToken generateToken(Authentication authentication) {
-        // 권한 가져오기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -43,13 +41,15 @@ public class JwtTokenProvider {
         Date accessTokenExpiresIn = new Date(now + 60000);
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim("auth", authorities)
+                .claim("auth", authorities.isEmpty() ? "ROLE_USER" : authorities)
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        // Refresh Token 생성
+        // Refresh Token 생성 - 권한 정보 포함
         String refreshToken = Jwts.builder()
+                .setSubject(authentication.getName())
+                .claim("auth", authorities.isEmpty() ? "ROLE_USER" : authorities) // 권한 정보 추가
                 .setExpiration(new Date(now + 86400000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -66,19 +66,22 @@ public class JwtTokenProvider {
         // Jwt 토큰 복호화
         Claims claims = parseClaims(accessToken);
 
-        if (claims.get("auth") == null) {
+        log.info("파싱된 claims: {}", claims);  // 로그 추가
+
+        String authorities = (String) claims.get("auth");
+        if (authorities == null || authorities.isEmpty()) {
+            log.error("권한 정보(auth)가 없습니다. claims: {}", claims);  // 권한 정보가 없을 경우 로그 추가
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
 
         // 클레임에서 권한 정보 가져오기
-        Collection<? extends GrantedAuthority> authorities = Arrays.stream(claims.get("auth").toString().split(","))
+        Collection<? extends GrantedAuthority> authoritiesCollection = Arrays.stream(authorities.split(","))
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
 
         // UserDetails 객체를 만들어서 Authentication return
-        // UserDetails: interface, User: UserDetails를 구현한 class
-        UserDetails principal = new User(claims.getSubject(), "", authorities);
-        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
+        UserDetails principal = new User(claims.getSubject(), "", authoritiesCollection);
+        return new UsernamePasswordAuthenticationToken(principal, "", authoritiesCollection);
     }
 
     // 토큰 정보를 검증하는 메서드
@@ -101,8 +104,40 @@ public class JwtTokenProvider {
         return false;
     }
 
+    public JwtToken refreshAccessToken(String refreshToken) {
+        if (!validateToken(refreshToken)) {
+            throw new RuntimeException("리프레시 토큰이 유효하지 않습니다.");
+        }
 
-    // accessToken
+        Claims claims = parseClaims(refreshToken);
+
+        String authorities = claims.get("auth", String.class);
+        if (authorities == null || authorities.isEmpty()) {
+            log.error("리프레시 토큰에 권한 정보가 없습니다.");
+            throw new RuntimeException("권한 정보가 없는 리프레시 토큰입니다.");
+        }
+
+        long now = (new Date()).getTime();
+        Date accessTokenExpiresIn = new Date(now + 60000);
+
+        String accessToken = Jwts.builder()
+                .setSubject(claims.getSubject())
+                .claim("auth", authorities)
+                .setExpiration(accessTokenExpiresIn)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+
+        log.info("새로운 Access Token 생성: {}", accessToken);
+        log.info("새로운 Access Token 권한: {}", authorities);
+
+        return JwtToken.builder()
+                .grantType("Bearer")
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
+    }
+
+    // accessToken 파싱 메서드
     private Claims parseClaims(String accessToken) {
         try {
             return Jwts.parser()
@@ -114,5 +149,4 @@ public class JwtTokenProvider {
             return e.getClaims();
         }
     }
-
 }

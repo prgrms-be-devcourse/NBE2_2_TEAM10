@@ -6,7 +6,10 @@ import com.prgrms2.java.bitta.member.dto.SignInDTO;
 import com.prgrms2.java.bitta.member.dto.SignUpDTO;
 import com.prgrms2.java.bitta.member.service.MemberService;
 import com.prgrms2.java.bitta.security.JwtToken;
+import com.prgrms2.java.bitta.security.JwtTokenProvider;
 import com.prgrms2.java.bitta.security.SecurityUtil;
+import com.prgrms2.java.bitta.security.dto.RefreshTokenRequestDTO;
+import com.prgrms2.java.bitta.security.exception.InvalidTokenException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -32,6 +35,7 @@ public class MemberController {
 
     private final MemberService memberService;
     private final ObjectMapper objectMapper;
+    private final JwtTokenProvider jwtTokenProvider;
 
     @Operation(
             summary = "테스트",
@@ -153,5 +157,17 @@ public class MemberController {
     public ResponseEntity<String> deleteMemberById(@PathVariable Long id) {
         memberService.deleteMember(id);
         return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
+    }
+
+
+    @PostMapping("/refresh")
+    public JwtToken refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
+        // 리프레시 토큰이 유효한지 검사
+        String refreshToken = refreshTokenRequestDTO.getRefreshToken();
+        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
+            throw new InvalidTokenException("Invalid or expired refresh token");
+        }
+        // 유효한 리프레시 토큰이면 새 액세스 토큰 발급
+        return memberService.refreshToken(refreshToken);
     }
 }
