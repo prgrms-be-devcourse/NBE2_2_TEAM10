@@ -1,6 +1,5 @@
 package com.prgrms2.java.bitta.video.service;
 
-import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.video.entity.Video;
 import com.prgrms2.java.bitta.video.repository.VideoRepository;
 import lombok.RequiredArgsConstructor;
@@ -49,29 +48,16 @@ public class VideoServiceImpl implements VideoService {
         }
     }
 
-    @Transactional
-    public List<Video> uploadVideos(List<MultipartFile> files, Feed feed) throws IOException {
-        for (MultipartFile file : files) {
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            String filePath = "uploads/videos/" + fileName;
+    @Override
+    public void delete(Long feedId) {
+        List<String> videoUrls = videoRepository.findVideoUrlByFeedId(feedId);
 
-            File dest = new File(filePath);
-            file.transferTo(dest);
+        videoUrls.forEach(url -> {
+            File file = new File(url);
 
-            Video video = Video.builder()
-                    .videoUrl(filePath)
-                    .fileSize(file.getSize())
-                    .feed(feed)
-                    .build();
-
-            videoRepository.save(video);
-        }
-        return videoRepository.findByFeed(feed);
-    }
-
-    @Transactional
-    public void deleteVideosByFeed(Feed feed) {
-        List<Video> videos = videoRepository.findByFeed(feed);
-        videoRepository.deleteAll(videos);
+            if (file.exists()) {
+                file.delete();
+            }
+        });
     }
 }

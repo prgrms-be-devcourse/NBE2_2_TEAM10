@@ -1,6 +1,5 @@
 package com.prgrms2.java.bitta.photo.service;
 
-import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.photo.entity.Photo;
 import com.prgrms2.java.bitta.photo.repository.PhotoRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,7 +26,7 @@ public class PhotoServiceImpl implements PhotoService{
     @Transactional
     public Photo upload(MultipartFile file) throws IOException {
         String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        String filepath = fileRootPath + "uploads/videos/" + filename;
+        String filepath = fileRootPath + "uploads/photos/" + filename;
 
         file.transferTo(new File(filepath));
 
@@ -49,29 +48,16 @@ public class PhotoServiceImpl implements PhotoService{
         }
     }
 
-    @Transactional
-    public List<Photo> uploadPhotos(List<MultipartFile> files, Feed feed) throws IOException {
-        for (MultipartFile file : files) {
-            String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-            String filePath = "uploads/photos/" + fileName;
+    @Override
+    public void delete(Long feedId) {
+        List<String> photoUrls = photoRepository.findPhotoUrlByFeedId(feedId);
 
-            File dest = new File(filePath);
-            file.transferTo(dest);
+        photoUrls.forEach(url -> {
+            File file = new File(url);
 
-            Photo photo = Photo.builder()
-                    .photoUrl(filePath)
-                    .fileSize(file.getSize())
-                    .feed(feed)
-                    .build();
-
-            photoRepository.save(photo);
-        }
-        return photoRepository.findByFeed(feed);
-    }
-
-    @Transactional
-    public void deletePhotosByFeed(Feed feed) {
-        List<Photo> photos = photoRepository.findByFeed(feed);
-        photoRepository.deleteAll(photos);
+            if (file.exists()) {
+                file.delete();
+            }
+        });
     }
 }
