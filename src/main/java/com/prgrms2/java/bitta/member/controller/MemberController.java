@@ -25,6 +25,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 
@@ -185,20 +186,25 @@ public class MemberController {
                     )
             }
     )
+
     @PostMapping("/refresh")
-    public ResponseEntity<JwtToken> reissueToken(@RequestHeader("Authorization") String bearerAccessToken,
-                                                 @RequestBody RefreshTokenRequestDTO request) {
+    public ResponseEntity<?> reissueToken(@RequestHeader("Authorization") String bearerAccessToken,
+                                          @RequestBody RefreshTokenRequestDTO request) {
         try {
             String accessToken = bearerAccessToken.substring(7);
             JwtToken newToken = memberService.reissueToken(accessToken, request.getRefreshToken());
 
+            // 현재 액세스 토큰이 유효한 경우
             if (newToken == null) {
-                return ResponseEntity.ok().build(); // 현재 토큰이 유효한 경우
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN) // 403 Forbidden 상태 코드 설정
+                        .body(Map.of("message", "액세스 토큰이 유효합니다.")); // 응답 본문에 메시지 포함
             }
 
-            return ResponseEntity.ok(newToken);
+            return ResponseEntity.ok(newToken); // 새로운 토큰을 반환
         } catch (AuthenticationException e) {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
         }
     }
+
 }
