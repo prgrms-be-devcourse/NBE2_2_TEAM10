@@ -12,11 +12,13 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -32,6 +34,7 @@ public class MediaServiceImpl implements MediaService {
     private String rootPath;
 
     @Override
+    @Transactional
     public void upload(List<MultipartFile> files, Long feedId) {
         List<MediaCategory> categories = checkFileType(files);
         List<Media> media = new ArrayList<>();
@@ -44,7 +47,7 @@ public class MediaServiceImpl implements MediaService {
             String extension = "." + StringUtils.getFilenameExtension(file.getOriginalFilename());
 
             try {
-                file.transferTo(new File(rootPath + filename + extension));
+                file.transferTo(Paths.get(rootPath + filename + extension));
             } catch (IOException e) {
                 throw MediaFileException.INTERNAL_ERROR.get();
             }
@@ -77,6 +80,7 @@ public class MediaServiceImpl implements MediaService {
     }
 
     @Override
+    @Transactional(readOnly = true)
     public void delete(Long feedId) {
         List<Media> medias = mediaRepository.findAllByFeedId(feedId);
 
