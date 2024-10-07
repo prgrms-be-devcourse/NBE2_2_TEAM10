@@ -10,7 +10,7 @@ import java.io.IOException;
 public interface MemberService {
     JwtToken signIn(String username, String password);
     MemberDTO signUp(SignUpDTO signUpDTO);
-    JwtToken refreshToken(String refreshToken);
+    JwtToken reissueToken(String accessToken, String refreshToken);
 
     MemberDTO getMemberById(Long id);
     MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) throws IOException;

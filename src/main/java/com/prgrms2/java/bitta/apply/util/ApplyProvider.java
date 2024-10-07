@@ -1,5 +1,6 @@
 package com.prgrms2.java.bitta.apply.util;
 
+import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
 import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.apply.repository.ApplyRepository;
 import lombok.RequiredArgsConstructor;

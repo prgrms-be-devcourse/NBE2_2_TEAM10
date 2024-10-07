@@ -62,7 +62,7 @@ public class JobPost {
         return LocalDate.now().isAfter(this.endDate);
     }
 
-    // 해당 게시글에 대한 신청 목록 가져야함 (임시로 application 엔티티 만듦)
+    // 해당 게시글에 대한 신청 목록 가져야함
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Apply> apply = new ArrayList<>();
 }

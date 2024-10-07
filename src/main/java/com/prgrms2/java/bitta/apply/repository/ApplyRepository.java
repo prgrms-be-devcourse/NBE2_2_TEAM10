@@ -21,4 +21,9 @@ public interface ApplyRepository extends JpaRepository<Apply, Long> {
 
     @Query("SELECT a FROM Apply a WHERE a.id = :id")
     Optional<ApplyDTO> getApplyDTO(@Param("id") Long id);
+
+    @Query("DELETE FROM Apply a WHERE a.id = :id")
+    int deleteByIdAndReturnCount(Long id);
+
+    Optional<Apply> findByIdAndMember(Long id, Member member);
 }

@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 public class JwtTokenProvider {
     private final Key key;
 
-    // application.yml에서 secret 값 가져와서 key에 저장
     public JwtTokenProvider(@Value("${jwt.secret}") String secretKey) {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         this.key = Keys.hmacShaKeyFor(keyBytes);
@@ -46,10 +45,9 @@ public class JwtTokenProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        // Refresh Token 생성 - 권한 정보 포함
+        // Refresh Token 생성 - 권한 정보 제외
         String refreshToken = Jwts.builder()
                 .setSubject(authentication.getName())
-                .claim("auth", authorities.isEmpty() ? "ROLE_USER" : authorities) // 권한 정보 추가
                 .setExpiration(new Date(now + 86400000))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
@@ -61,90 +59,85 @@ public class JwtTokenProvider {
                 .build();
     }
 
-    // Jwt 토큰을 복호화하여 토큰에 들어있는 정보를 꺼내는 메서드
+    // 토큰 갱신 처리 메서드
+    public JwtToken reissueToken(String accessToken, String refreshToken) {
+        // 1. Access Token이 아직 유효한 경우
+        if (validateToken(accessToken)) {
+            return null; // 아직 유효하므로 재발급 필요 없음
+        }
+
+        // 2. Refresh Token 검증
+        try {
+            if (!validateToken(refreshToken)) {
+                throw new RuntimeException("Refresh Token이 유효하지 않습니다. 다시 로그인해주세요.");
+            }
+
+            // Refresh Token에서 사용자 정보 추출
+            Claims refreshClaims = parseClaims(refreshToken);
+            String username = refreshClaims.getSubject();
+
+            // Access Token에서 권한 정보 추출
+            Claims accessClaims = parseClaims(accessToken);
+            String authorities = accessClaims.get("auth", String.class);
+
+            // 새로운 Access Token 생성
+            long now = (new Date()).getTime();
+            Date accessTokenExpiresIn = new Date(now + 60000);
+            String newAccessToken = Jwts.builder()
+                    .setSubject(username)
+                    .claim("auth", authorities)
+                    .setExpiration(accessTokenExpiresIn)
+                    .signWith(key, SignatureAlgorithm.HS256)
+                    .compact();
+
+            return JwtToken.builder()
+                    .grantType("Bearer")
+                    .accessToken(newAccessToken)
+                    .refreshToken(refreshToken)
+                    .build();
+
+        } catch (ExpiredJwtException e) {
+            log.info("Refresh Token이 만료되었습니다. 로그아웃 처리됩니다.");
+            throw new RuntimeException("Refresh Token이 만료되었습니다. 다시 로그인해주세요.");
+        }
+    }
+
+    // 나머지 메서드들은 그대로 유지
     public Authentication getAuthentication(String accessToken) {
-        // Jwt 토큰 복호화
         Claims claims = parseClaims(accessToken);
 
-        log.info("파싱된 claims: {}", claims);  // 로그 추가
-
-        String authorities = (String) claims.get("auth");
-        if (authorities == null || authorities.isEmpty()) {
-            log.error("권한 정보(auth)가 없습니다. claims: {}", claims);  // 권한 정보가 없을 경우 로그 추가
+        if (claims.get("auth") == null) {
             throw new RuntimeException("권한 정보가 없는 토큰입니다.");
         }
 
-        // 클레임에서 권한 정보 가져오기
-        Collection<? extends GrantedAuthority> authoritiesCollection = Arrays.stream(authorities.split(","))
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        Collection<? extends GrantedAuthority> authorities =
+                Arrays.stream(claims.get("auth").toString().split(","))
+                        .map(SimpleGrantedAuthority::new)
+                        .collect(Collectors.toList());
 
-        // UserDetails 객체를 만들어서 Authentication return
-        UserDetails principal = new User(claims.getSubject(), "", authoritiesCollection);
-        return new UsernamePasswordAuthenticationToken(principal, "", authoritiesCollection);
+        UserDetails principal = new User(claims.getSubject(), "", authorities);
+        return new UsernamePasswordAuthenticationToken(principal, "", authorities);
     }
 
-    // 토큰 정보를 검증하는 메서드
     public boolean validateToken(String token) {
         try {
-            Jwts.parser()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token);
+            Jwts.parser().setSigningKey(key).build().parseClaimsJws(token);
             return true;
         } catch (SecurityException | MalformedJwtException e) {
-            log.info("Invalid JWT Token", e);
+            log.info("잘못된 JWT 서명입니다.");
         } catch (ExpiredJwtException e) {
-            log.info("Expired JWT Token", e);
+            log.info("만료된 JWT 토큰입니다.");
         } catch (UnsupportedJwtException e) {
-            log.info("Unsupported JWT Token", e);
+            log.info("지원되지 않는 JWT 토큰입니다.");
         } catch (IllegalArgumentException e) {
-            log.info("JWT claims string is empty.", e);
+            log.info("JWT 토큰이 잘못되었습니다.");
         }
         return false;
     }
 
-    public JwtToken refreshAccessToken(String refreshToken) {
-        if (!validateToken(refreshToken)) {
-            throw new RuntimeException("리프레시 토큰이 유효하지 않습니다.");
-        }
-
-        Claims claims = parseClaims(refreshToken);
-
-        String authorities = claims.get("auth", String.class);
-        if (authorities == null || authorities.isEmpty()) {
-            log.error("리프레시 토큰에 권한 정보가 없습니다.");
-            throw new RuntimeException("권한 정보가 없는 리프레시 토큰입니다.");
-        }
-
-        long now = (new Date()).getTime();
-        Date accessTokenExpiresIn = new Date(now + 60000);
-
-        String accessToken = Jwts.builder()
-                .setSubject(claims.getSubject())
-                .claim("auth", authorities)
-                .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
-
-        log.info("새로운 Access Token 생성: {}", accessToken);
-        log.info("새로운 Access Token 권한: {}", authorities);
-
-        return JwtToken.builder()
-                .grantType("Bearer")
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
-    }
-
-    // accessToken 파싱 메서드
-    private Claims parseClaims(String accessToken) {
+    private Claims parseClaims(String token) {
         try {
-            return Jwts.parser()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(accessToken)
-                    .getBody();
+            return Jwts.parser().setSigningKey(key).build().parseClaimsJws(token).getBody();
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }

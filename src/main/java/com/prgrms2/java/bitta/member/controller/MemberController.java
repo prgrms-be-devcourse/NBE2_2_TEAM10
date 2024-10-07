@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.SignInDTO;
 import com.prgrms2.java.bitta.member.dto.SignUpDTO;
+import com.prgrms2.java.bitta.member.exception.NoChangeException;
 import com.prgrms2.java.bitta.member.service.MemberService;
 import com.prgrms2.java.bitta.security.JwtToken;
 import com.prgrms2.java.bitta.security.JwtTokenProvider;
@@ -19,10 +20,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
+import java.util.Map;
 
 import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 
@@ -30,7 +34,7 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/members")
+@RequestMapping("api/v1/members")
 public class MemberController {
 
     private final MemberService memberService;
@@ -132,8 +136,10 @@ public class MemberController {
             MemberDTO memberDTO = objectMapper.readValue(dtoJson, MemberDTO.class);
             MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
             return ResponseEntity.ok(updatedMember);
+        } catch (NoChangeException e) {
+            return ResponseEntity.ok().body(null);
         } catch (IOException e) {
-            log.error("Failed to update member profile", e);
+            log.error("파일 업데이트에 실패하였습니다.", e);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
@@ -159,15 +165,49 @@ public class MemberController {
         return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
     }
 
+    @Operation(
+            summary = "토큰 재발급",
+            description = "Refresh 토큰으로 Access 토큰을 재발급 합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "토큰을 성공적으로 재발급했습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(implementation = JwtToken.class)  // JwtToken 클래스 사용
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "잘못된 요청",
+                            content = @Content
+                    ),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "유효하지 않은 리프레시 토큰",
+                            content = @Content
+                    )
+            }
+    )
 
     @PostMapping("/refresh")
-    public JwtToken refreshToken(@RequestBody RefreshTokenRequestDTO refreshTokenRequestDTO) {
-        // 리프레시 토큰이 유효한지 검사
-        String refreshToken = refreshTokenRequestDTO.getRefreshToken();
-        if (refreshToken == null || !jwtTokenProvider.validateToken(refreshToken)) {
-            throw new InvalidTokenException("Invalid or expired refresh token");
+    public ResponseEntity<?> reissueToken(@RequestHeader("Authorization") String bearerAccessToken,
+                                          @RequestBody RefreshTokenRequestDTO request) {
+        try {
+            String accessToken = bearerAccessToken.substring(7);
+            JwtToken newToken = memberService.reissueToken(accessToken, request.getRefreshToken());
+
+            // 현재 액세스 토큰이 유효한 경우
+            if (newToken == null) {
+                return ResponseEntity
+                        .status(HttpStatus.FORBIDDEN) // 403 Forbidden 상태 코드 설정
+                        .body(Map.of("message", "액세스 토큰이 유효합니다.")); // 응답 본문에 메시지 포함
+            }
+
+            return ResponseEntity.ok(newToken); // 새로운 토큰을 반환
+        } catch (AuthenticationException e) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
         }
-        // 유효한 리프레시 토큰이면 새 액세스 토큰 발급
-        return memberService.refreshToken(refreshToken);
     }
+
 }

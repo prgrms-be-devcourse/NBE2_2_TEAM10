@@ -1,11 +1,11 @@
 package com.prgrms2.java.bitta.apply.exception;
 
 public enum ApplyException {
-    NOT_FOUND("NOT_FOUND", 404),
-    NOT_REGISTERED("NOT_REGISTERED", 400),
-    NOT_MODIFIED("NOT_MODIFIED", 400),
-    NOT_REMOVED("NOT_REMOVED", 400),
-    NOT_FETCHED("NOT_FETCHED", 400);
+    NOT_FOUND("지원서를 찾을 수 없습니다", 404),
+    NOT_REGISTERED("지원서가 등록되지 않았습니다", 400),
+    NOT_MODIFIED("지원서가 수정되지 않았습니다", 400),
+    NOT_REMOVED("지원서가 삭제되지 않았습니다", 400),
+    NOT_FETCHED("지원서 조회에 실패하였습니다", 400);
 
     private ApplyTaskException applyTaskException;
 

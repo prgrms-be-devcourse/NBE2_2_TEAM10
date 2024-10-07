@@ -1,0 +1,335 @@
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@300..700&display=swap');
+
+@font-face {
+    font-family: 'KBO-Dia-Gothic_bold';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_2304-2@1.0/KBO-Dia-Gothic_bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'KOTRA_SONGEULSSI';
+    src: url('https://fastly.jsdelivr.net/gh/projectnoonnu/noonfonts_20-10-21@1.0/KOTRA_SONGEULSSI.woff') format('woff');
+    font-weight: normal;
+    font-style: normal;
+}
+
+h2 {
+    margin-bottom: .2rem;
+}
+
+button {
+    border: none;
+}
+
+div {
+    padding:0;
+    border: 0;
+    box-sizing: border-box;
+    vertical-align: baseline;
+}
+
+a {
+    cursor: pointer;
+    outline: none;
+    text-decoration: none;
+    color: inherit;
+}
+
+img {
+    margin: 0;
+    padding: 0;
+    vertical-align: baseline;
+    box-sizing: border-box;
+}
+
+body {
+    background-color: #f7f7f9;
+}
+
+/* max-width 수정하기임 */
+.container {
+    max-width: 1200px;
+}
+
+.text-fonts {
+    font-family: "Fredoka", sans-serif;
+    font-style: normal;
+}
+
+.post-container {
+    padding: 40px 0 120px 0 ;
+}
+
+.inner {
+    position: relative;
+    display: flex;
+    width: 1192px;
+    margin: 0 auto;
+}
+
+.contents {
+    position: relative;
+    width: 720px;
+    margin-bottom: 120px;
+}
+
+.dill-box-type {
+    margin: 45px 0 0 0;
+}
+
+.dill-box-warp {
+    display: block;
+    border-radius: 12px;
+    padding: 0 20px 20px 20px;
+    background: #ececec;
+    border: none;
+    box-shadow: 0.1px 0px 9px rgba(0, 0, 0, 0.15);
+}
+
+.top-cont {
+    display: flex;
+    justify-content: space-between;
+    padding: 0 20px;
+}
+
+.main-ctext {
+    width: calc(100% - 300px);
+}
+
+.post-title {
+    display: block;
+    font-family: 'KBO-Dia-Gothic_bold';
+    font-weight: 700;
+    font-size: 40px;
+    padding-top: 10px;
+    line-height: 34px;
+}
+
+.post-explane {
+    display: block;
+    padding-top: 30px;
+    width: 265px;
+    font-weight: 400;
+    font-size: 20px;
+    line-height: 30px;
+    font-family: 'KOTRA_SONGEULSSI';
+}
+
+.img-area {
+    width: 250px;
+    height: 250px;
+    margin-top: 40px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+
+.img-area img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+
+.dill-list-box {
+    list-style: none;
+}
+
+.dill-list {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-radius: 12px;
+    width: 97%;
+    padding: 20px 30px;
+    background-color: #fff;
+    font-family: 'KOTRA_SONGEULSSI';
+}
+
+.cal-text {
+    font-family: 'KOTRA_SONGEULSSI';
+    font-size: 25px;
+
+}
+
+.list-item {
+    margin-top: 0;
+}
+
+.post-img {
+    width: 300px;
+    height: 300px;
+}
+
+.camera-category {
+    font-size: 50px;
+    padding-top: 25px;
+    padding-left: 10px;
+}
+
+
+.post-name {
+    flex: 1 auto;
+    max-width: 38%;
+}
+
+.main-name {
+    font-size:22px;
+    font-weight: 500;
+    line-height: 30px;
+}
+
+.flex-box {
+    display: flex;
+}
+
+.phistory {
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 30px;
+}
+
+.post-price {
+    font-size :22px;
+    font-weight: 500px;
+    padding-top: 20px;
+}
+
+.sidebar {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 375px;
+    height: 100%;
+    border-radius: 12px;
+    filter: drop-shadow(0px 32px 24px rgba(0,0,0,0.1));
+    z-index: 9;
+}
+
+.sinner {
+    border-radius: 12px;
+}
+
+.scroll_p {
+    position: sticky;
+    top: 121px;
+}
+
+.res_form {
+    border-radius: 12px;
+    padding:0;
+    background-color: #fff;
+}
+
+.title {
+    padding: 24px 24px 22px 24px;
+    font-size: 20px;
+    font-family: 'KOTRA_SONGEULSSI';
+    border-bottom: 1px solid #efefef;
+}
+
+.fixed-top {
+    z-index: 2;
+    background-color: white;
+}
+
+.cont {
+    border-bottom: 1px solid #efefef;
+}
+
+.ico-place {
+    display: flex;
+    align-items: center;
+    height: 54px;
+    box-sizing: border-box;
+    padding: 0 20px;
+    font-family: 'KOTRA_SONGEULSSI';
+}
+
+.btn_edit {
+    font-style: normal;
+    font-size: 14px;
+    text-decoration-line: underline;
+    color: #868e96;
+    margin-left: auto;
+    padding: 5px 0;
+    background: #fff;
+}
+
+.ico-date {
+    display: flex;
+    align-items: center;
+    height: 54px;
+    box-sizing: border-box;
+    padding: 0 20px;
+    font-family: 'KOTRA_SONGEULSSI';
+
+}
+
+.btn_group {
+    position: static;
+    width: 100%;
+    padding: 0;
+    background: transparent;
+}
+
+.type02 {
+    background: #9bb2ce;
+    border: 1px solid #e3e6ec;
+    color: #fff;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.04);
+}
+
+.btnx {
+    display: block;
+    box-sizing: border-box;
+    min-width: 160px;
+    width: 100%;
+    height: 56px;
+    font-size: 16px;
+    font-weight: 700;
+    text-align: center;
+    line-height: 56px;
+    border-radius: 0 0 12px 12px;
+}
+
+.dummy-height {
+    height: 37px;
+}
+
+.postbtn {
+    display: flex;
+    flex: 1 auto;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.btn_group1 {
+    display: flex;
+    flex: 1 auto;
+    justify-content: flex-end;
+    align-items: center;
+}
+
+.btn_res {
+    min-width: auto;
+    height: 48px;
+    line-height: 48px;
+}
+
+.type03 {
+    height: 100px;
+    width: 200px;
+    border-radius: 12px;
+    background-position: 10% center;
+    background-color: #b8c9e0;
+    border: 0;
+    z-index: 1;
+    color:#61676d;
+    font-size: 20px;
+}
+
+.type04 {
+    
+}
