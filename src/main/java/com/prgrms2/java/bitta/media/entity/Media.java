@@ -1,6 +1,8 @@
 package com.prgrms2.java.bitta.media.entity;
 
 import com.prgrms2.java.bitta.feed.entity.Feed;
+import com.prgrms2.java.bitta.jobpost.entity.JobPost;
+import com.prgrms2.java.bitta.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
@@ -40,6 +42,14 @@ public class Media {
     @JoinColumn(name = "feed_id")
     private Feed feed;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
+    private Member member;
+
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "jobpost_id")
+    private JobPost jobPost;
+    
     @CreatedDate
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;

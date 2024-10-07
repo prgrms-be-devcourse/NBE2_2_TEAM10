@@ -1,5 +1,6 @@
 package com.prgrms2.java.bitta.media.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.prgrms2.java.bitta.media.entity.MediaCategory;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Min;
@@ -17,6 +18,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Schema(title = "미디어 DTO", description = "미디어 파일의 요청 및 응답에 사용하는 DTO입니다.")
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class MediaDto {
     @Schema(title = "미디어 ID (PK)", description = "미디어 파일의 고유 ID 입니다.")
     @Min(value = 1, message = "ID는 0 또는 음수가 될 수 없습니다.")
@@ -42,6 +44,14 @@ public class MediaDto {
     @Schema(title = "피드 ID (FK)", description = "피드의 ID입니다.")
     @Min(value = 1, message = "ID는 0 또는 음수가 될 수 없습니다.")
     private Long feedId;
+
+    @Schema(title = "회원 ID (FK)", description = "회원의 ID입니다.")
+    @Min(value = 1, message = "ID는 0 또는 음수가 될 수 없습니다.")
+    private Long memberId;
+
+    @Schema(title = "일거리 ID (FK)", description = "일거리의 ID입니다.")
+    @Min(value = 1, message = "ID는 0 또는 음수가 될 수 없습니다.")
+    private Long jobPostId;
 
     @Schema(title = "파일 저장일시", description = "파일이 저장된 날짜 및 시간입니다.", example = "2023-09-24T14:45:00")
     private LocalDateTime createdAt;
