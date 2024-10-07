@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+
 @Repository
 public interface FeedRepository extends JpaRepository<Feed, Long> {
     @Query("SELECT f FROM Feed f WHERE f.member.username LIKE %:username%")
@@ -26,4 +28,8 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     @Modifying
     @Query("DELETE FROM Feed f WHERE f.id = :id")
     int deleteByIdAndReturnCount(@Param("id") Long id);
+
+    //////////////////////////
+    @Query(value = "SELECT * FROM feed ORDER BY RAND() LIMIT :limit", nativeQuery = true)
+    List<Feed> findRandomFeeds(@Param("limit") int limit);
 }
