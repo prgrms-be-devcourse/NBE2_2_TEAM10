@@ -4,10 +4,11 @@ import com.prgrms2.java.bitta.scout.dto.ScoutRequestDTO;
 import com.prgrms2.java.bitta.scout.service.ScoutRequestService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/scout")
@@ -21,21 +22,14 @@ public class ScoutRequestController {
         return ResponseEntity.ok().body(scoutRequest);
     }
 
-    @GetMapping("/sent/{senderId}")
-    public ResponseEntity<Page<ScoutRequestDTO>> getSentScoutRequests(@PathVariable Long senderId,
-                                                                      @RequestParam(defaultValue = "0") int page,
-                                                                      @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ScoutRequestDTO> sentRequests = scoutRequestService.getSentScoutRequests(senderId, pageable);
-        return ResponseEntity.ok(sentRequests);
-    }
+    @GetMapping("/all/{userId}")
+    public ResponseEntity<?> getAllScoutRequests(@PathVariable Long userId, Pageable pageable) {
+        Page<ScoutRequestDTO> sentRequests = scoutRequestService.getSentScoutRequests(userId, pageable);
+        Page<ScoutRequestDTO> receivedRequests = scoutRequestService.getReceivedScoutRequests(userId, pageable);
 
-    @GetMapping("/received/{receiverId}")
-    public ResponseEntity<Page<ScoutRequestDTO>> getReceivedScoutRequests(@PathVariable Long receiverId,
-                                                                          @RequestParam(defaultValue = "0") int page,
-                                                                          @RequestParam(defaultValue = "10") int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<ScoutRequestDTO> receivedRequests = scoutRequestService.getReceivedScoutRequests(receiverId, pageable);
-        return ResponseEntity.ok(receivedRequests);
+        return ResponseEntity.ok().body(Map.of(
+                "sentRequests", sentRequests,
+                "receivedRequests", receivedRequests
+        ));
     }
 }
