@@ -4,29 +4,26 @@ import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
-import com.prgrms2.java.bitta.member.entity.Member;
+import com.prgrms2.java.bitta.media.dto.MediaDto;
+import com.prgrms2.java.bitta.media.service.MediaService;
 import com.prgrms2.java.bitta.member.dto.MemberProvider;
-import com.prgrms2.java.bitta.photo.entity.Photo;
-import com.prgrms2.java.bitta.photo.service.PhotoService;
-import com.prgrms2.java.bitta.video.entity.Video;
-import com.prgrms2.java.bitta.video.service.VideoService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
-import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class FeedServiceImpl implements FeedService {
     private final FeedRepository feedRepository;
 
-    private final PhotoService photoService;
-
-    private final VideoService videoService;
+    private final MediaService mediaService;
 
     private final MemberProvider memberProvider;
 
@@ -41,26 +38,23 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<FeedDTO> readAll() {
-        List<Feed> feeds = feedRepository.findAll();
+    public Page<FeedDTO> readAll(Pageable pageable, String username, String title) {
+        Page<Feed> feeds = null;
 
-        if (feeds.isEmpty()) {
-            throw FeedException.CANNOT_FOUND.get();
+        if (StringUtils.hasText(username) && StringUtils.hasText(title)) {
+            feeds = feedRepository.findAllLikeUsernameAndTitleOrderByIdDesc(username, title, pageable);
+        } else if (StringUtils.hasText(username)) {
+            feeds = feedRepository.findAllLikeUsernameOrderByIdDesc(username, pageable);
+        } else if (StringUtils.hasText(title)) {
+            feeds = feedRepository.findAllLikeTitleOrderByIdDesc(title, pageable);
+        } else {
+            feeds = feedRepository.findAllByOrderByIdDesc(pageable);
         }
 
-        return feeds.stream().map(this::entityToDto).toList();
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<FeedDTO> readAll(Member member) {
-        List<Feed> feeds = feedRepository.findAllByMember(member);
-
-        if (feeds.isEmpty()) {
-            return null;
-        }
-
-        return feeds.stream().map(this::entityToDto).toList();
+        return Optional.ofNullable(feeds)
+                .filter(f -> !f.isEmpty())
+                .map(f -> f.map(this::entityToDto))
+                .orElseThrow(FeedException.CANNOT_FOUND::get);
     }
 
     @Override
@@ -72,24 +66,25 @@ public class FeedServiceImpl implements FeedService {
 
         Feed feed = dtoToEntity(feedDTO);
 
-        files.forEach(file -> uploadFile(feed, file));
+        mediaService.upload(files, feedDTO.getId());
 
         feedRepository.save(feed);
     }
 
     @Override
     @Transactional
-    public void update(FeedDTO feedDTO, List<MultipartFile> filesToUpload, List<String> filepathsToDelete) {
+    public void update(FeedDTO feedDTO, List<MultipartFile> filesToUpload, List<MediaDto> filesToDelete) {
         Feed feed = feedRepository.findById(feedDTO.getId())
                 .orElseThrow(FeedException.CANNOT_FOUND::get);
 
         feed.setTitle(feedDTO.getTitle());
         feed.setContent(feedDTO.getContent());
 
-        filepathsToDelete.forEach(this::deleteFile);
+        mediaService.delete(filesToDelete);
 
-        feed.clearFiles();
-        filesToUpload.forEach(file -> uploadFile(feed, file));
+        feed.clearMedias();
+
+        mediaService.upload(filesToUpload, feedDTO.getId());
         
         feedRepository.save(feed);
     }
@@ -97,43 +92,12 @@ public class FeedServiceImpl implements FeedService {
     @Override
     @Transactional
     public void delete(Long id) {
-        photoService.delete(id);
-        videoService.delete(id);
+        mediaService.delete(id);
 
         if (feedRepository.deleteByIdAndReturnCount(id) == 0) {
             throw FeedException.CANNOT_DELETE.get();
         }
     }
-
-    private void uploadFile(Feed feed, MultipartFile file) {
-        try {
-            if (file.getContentType().startsWith("image/")) {
-                Photo photo = photoService.upload(file);
-                feed.addPhoto(photo);
-            }
-
-            if (file.getContentType().startsWith("video/")) {
-                Video video = videoService.upload(file);
-                feed.addVideo(video);
-            }
-        } catch (IOException e) {
-            throw FeedException.INTERNAL_ERROR.get();
-        }
-    }
-
-    private void deleteFile(String filepath) {
-        try {
-            if (filepath.contains("photos")) {
-                photoService.delete(filepath);
-            } else {
-                videoService.delete(filepath);
-            }
-        } catch (NoSuchElementException e) {
-            throw FeedException.INTERNAL_ERROR.get();
-        }
-    }
-
-
 
     private Feed dtoToEntity(FeedDTO feedDto) {
         return Feed.builder()
@@ -142,6 +106,7 @@ public class FeedServiceImpl implements FeedService {
                 .content(feedDto.getContent())
                 .createdAt(feedDto.getCreatedAt())
                 .member(memberProvider.getById(feedDto.getMemberId()))
+                .medias(mediaService.convertDTOs(feedDto.getMedias()))
                 .build();
     }
 
@@ -152,10 +117,7 @@ public class FeedServiceImpl implements FeedService {
                 .content(feed.getContent())
                 .createdAt(feed.getCreatedAt())
                 .memberId(feed.getMember().getId())
-                .photoUrls(feed.getPhotos().stream()
-                        .map(Photo::getPhotoUrl).toList())
-                .videoUrls(feed.getVideos().stream()
-                        .map(Video::getVideoUrl).toList())
+                .medias(mediaService.convertEntities(feed.getMedias()))
                 .build();
     }
 }
