@@ -6,7 +6,7 @@ import com.prgrms2.java.bitta.scout.entity.ScoutRequest;
 import com.prgrms2.java.bitta.scout.repository.ScoutRequestRepository;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.service.FeedProvider;
-import com.prgrms2.java.bitta.member.service.MemberProvider;
+import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
