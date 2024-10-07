@@ -11,7 +11,6 @@ public interface MemberService {
     JwtToken signIn(String username, String password);
     MemberDTO signUp(SignUpDTO signUpDTO);
     JwtToken reissueToken(String accessToken, String refreshToken);
-
     MemberDTO getMemberById(Long id);
     MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) throws IOException;
     void deleteMember(Long id);
