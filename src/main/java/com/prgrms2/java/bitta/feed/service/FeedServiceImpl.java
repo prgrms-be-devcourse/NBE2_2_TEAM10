@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -98,6 +99,18 @@ public class FeedServiceImpl implements FeedService {
             throw FeedException.CANNOT_DELETE.get();
         }
     }
+
+    ///////////////////////////////////////
+    @Override
+    @Transactional(readOnly = true)
+    public List<FeedDTO> readRandomFeeds(int limit) {
+        List<Feed> feeds = feedRepository.findRandomFeeds(limit);
+        return feeds.stream()
+                .map(this::entityToDto)
+                .collect(Collectors.toList());
+    }
+
+    ///////////////////////////////////////
 
     private Feed dtoToEntity(FeedDTO feedDto) {
         return Feed.builder()

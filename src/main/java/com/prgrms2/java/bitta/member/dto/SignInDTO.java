@@ -12,6 +12,7 @@ import lombok.ToString;
 @NoArgsConstructor
 @Schema(title = "로그인 DTO", description = "로그인 요청에 사용하는 DTO입니다.")
 public class SignInDTO {
+
     @Schema(title = "회원 아이디", description = "로그인에 사용할 아이디입니다.", example = "username")
     private String username;
 

@@ -18,4 +18,7 @@ public interface FeedService {
     void update(FeedDTO feedDto, List<MultipartFile> filesToUpload, List<MediaDto> filesToDelete);
 
     void delete(Long id);
+
+
+    List<FeedDTO> readRandomFeeds(int limit);
 }

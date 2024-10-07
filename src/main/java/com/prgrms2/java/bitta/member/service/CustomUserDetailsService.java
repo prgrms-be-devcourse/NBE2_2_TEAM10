@@ -20,15 +20,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         Member member = memberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("해당하는 회원을 찾을 수 없습니다."));
 
-        // createUserDetails 메서드를 호출하여 UserDetails 객체 생성
         return createUserDetails(member);
     }
 
-    // 해당하는 User 의 데이터를 UserDetails 객체로 만들어서 return
     private UserDetails createUserDetails(Member member) {
         return User.builder()
                 .username(member.getUsername())
-                .password(member.getPassword())  // 암호화된 비밀번호
+                .password(member.getPassword())
                 .roles(member.getRoles().toArray(new String[0]))
                 .build();
     }
