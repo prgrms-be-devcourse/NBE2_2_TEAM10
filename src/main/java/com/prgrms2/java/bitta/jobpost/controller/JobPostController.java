@@ -29,6 +29,12 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 public class JobPostController {
     private final JobPostService jobPostService;
 
+    //LIST A
+
+    //LIST B - selectbyID
+
+    //
+
     @Operation(
             summary = "전체 일거리 조회",
             description = "전체 일거리를 조회합니다.",

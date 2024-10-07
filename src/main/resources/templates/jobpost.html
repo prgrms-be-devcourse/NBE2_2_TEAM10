@@ -51,16 +51,16 @@
       <div class="inner">
         <div class="contents">
           <div class="dummy-height"></div>
-          <div class="dill-box-type">
+          <div class="dill-box-type" th:each="i : ${jobPost}">
             <div class="dill-box-warp">
               <div class="top-cont">
                 <div class="main-ctext">
-                  <div class="camera-category">📷</div>
-                  <div class="post-title">| 숲 속 안에서</div>
-                  <span class="post-explane">숲에서 자연친화적 컨셉의 스틸 촬영하실 분 구합니다!!</span>
+                  <div class="camera-category" th:text="${i.cate}">📷</div>
+                  <div class="post-title" th:text="${i.title}">| 숲 속 안에서</div>
+                  <span class="post-explane" th:text="${i.sub_title}">숲에서 자연친화적 컨셉의 스틸 촬영하실 분 구합니다!!</span>
                 </div>
                 <div class="img-area">
-                  <img src="img/herin.png">
+                  <img src="img/herin.png" th:src="${i.img_url}">
                 </div>
               </div>
               <ul class="dill-list-box">

@@ -1,12 +1,6 @@
-<<<<<<<< HEAD:src/main/java/com/prgrms2/java/bitta/user/controller/advice/TokenControllerAdvice.java
-package com.prgrms2.java.bitta.user.controller.advice;
-
-import com.prgrms2.java.bitta.user.exception.UserTaskException;
-========
 package com.prgrms2.java.bitta.member.controller.advice;
 
 import com.prgrms2.java.bitta.member.exception.MemberTaskException;
->>>>>>>> refs/remotes/origin/main:src/main/java/com/prgrms2/java/bitta/member/controller/advice/TokenControllerAdvice.java
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authorization.AuthorizationDeniedException;

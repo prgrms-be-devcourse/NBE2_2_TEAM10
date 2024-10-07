@@ -1,6 +1,7 @@
 package com.prgrms2.java.bitta.scoutRequest.entity;
 
-import com.prgrms2.java.bitta.user.entity.User;
+import com.prgrms2.java.bitta.member.entity.Member;
+import com.prgrms2.java.bitta.member.exception.MemberException;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -23,10 +24,10 @@ public class ScoutRequest {
     private Long scoutId;
 
     @OneToMany // 아직 설정 안됨
-    private List<User> director;
+    private List<Member> director;
 
     @OneToMany // 아직 설정 안됨
-    private List<User> actor;
+    private List<Member> actor;
 
     private String message;
 
