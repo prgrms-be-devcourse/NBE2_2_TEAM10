@@ -1,11 +1,11 @@
-package com.prgrms2.java.bitta.member.dto;
+package com.prgrms2.java.bitta.member.service;
 
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.repository.MemberRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
-@Component
+@Service
 @RequiredArgsConstructor
 public class MemberProvider {
     private final MemberRepository memberRepository;
