@@ -79,17 +79,4 @@ public class ProfileImageService {
 
         return thumbnailFilePath.toString();
     }
-
-    public void outputThumbnail(String profileImagePath, OutputStream outputStream) throws IOException {
-        File thumbnailFile = getThumbnailFile(profileImagePath);
-        if (thumbnailFile.exists() && thumbnailFile.isFile()) {
-            Thumbnails.of(thumbnailFile)
-                    .size(200, 200)
-                    .keepAspectRatio(true)
-                    .outputFormat("jpg")
-                    .toOutputStream(outputStream);
-        } else {
-            throw new IOException("썸네일 파일을 찾을 수 없습니다: " + thumbnailFile.getAbsolutePath());
-        }
-    }
 }
