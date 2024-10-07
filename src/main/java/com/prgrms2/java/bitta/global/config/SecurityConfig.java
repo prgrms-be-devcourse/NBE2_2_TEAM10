@@ -1,5 +1,7 @@
-package com.prgrms2.java.bitta.security;
+package com.prgrms2.java.bitta.global.config;
 
+import com.prgrms2.java.bitta.token.filter.TokenAuthenticationFilter;
+import com.prgrms2.java.bitta.token.util.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -20,11 +22,10 @@ import java.util.List;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
-
-    private final JwtTokenProvider jwtTokenProvider;
+    private final TokenProvider tokenProvider;
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .httpBasic(basic -> basic.disable())
                 .csrf(csrf -> csrf.disable())
@@ -36,7 +37,7 @@ public class SecurityConfig {
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/webjars/**").permitAll()
                         .requestMatchers("/images/**").permitAll()
                         .anyRequest().authenticated())
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
@@ -68,7 +69,6 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // BCrypt Encoder 사용
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
