@@ -8,12 +8,12 @@ import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.service.FeedProvider;
 import com.prgrms2.java.bitta.member.service.MemberProvider;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -36,18 +36,18 @@ public class ScoutRequestService {
         return entityToDto(request);
     }
 
-    @Transactional(readOnly = true)
-    public List<ScoutRequestDTO> getSentScoutRequests(Long senderId) {
-        return scoutRequestRepository.findBySenderId(senderId).stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
-    }
 
     @Transactional(readOnly = true)
-    public List<ScoutRequestDTO> getReceivedScoutRequests(Long receiverId) {
-        return scoutRequestRepository.findByReceiverId(receiverId).stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
+    public Page<ScoutRequestDTO> getSentScoutRequests(Long senderId, Pageable pageable) {
+        return scoutRequestRepository.findBySenderId(senderId, pageable)
+                .map(this::entityToDto);
+    }
+
+
+    @Transactional(readOnly = true)
+    public Page<ScoutRequestDTO> getReceivedScoutRequests(Long receiverId, Pageable pageable) {
+        return scoutRequestRepository.findByReceiverId(receiverId, pageable)
+                .map(this::entityToDto);
     }
 
     private ScoutRequestDTO entityToDto(ScoutRequest request) {

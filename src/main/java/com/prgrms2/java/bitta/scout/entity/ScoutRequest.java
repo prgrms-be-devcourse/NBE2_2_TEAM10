@@ -19,19 +19,19 @@ public class ScoutRequest {
 
     @ManyToOne
     @JoinColumn(name = "feed_id", nullable = false)
-    private Feed feed;  // The feed for which the scout request is made.
+    private Feed feed;
 
     @ManyToOne
     @JoinColumn(name = "sender_id", nullable = false)
-    private Member sender;  // The member who is sending the scout request.
+    private Member sender;
 
     @ManyToOne
     @JoinColumn(name = "receiver_id", nullable = false)
-    private Member receiver;  // The member who owns the feed and will receive the request.
+    private Member receiver;
 
     @Lob
-    private String description;  // A description the sender can attach to the request.
+    private String description;
 
     @Column(updatable = false)
-    private LocalDateTime sentAt;  // Timestamp when the request was sent.
+    private LocalDateTime sentAt;
 }

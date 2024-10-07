@@ -13,9 +13,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 public class ScoutRequestDTO {
     private Long id;
-    private FeedDTO feed;  // The feed involved in the scout request.
-    private Long senderId;  // The ID of the user sending the request.
-    private Long receiverId;  // The ID of the user receiving the request.
-    private String description;  // Optional description attached to the scout request.
-    private LocalDateTime sentAt;  // Timestamp when the request was made.
+    private FeedDTO feed;
+    private Long senderId;
+    private Long receiverId;
+    private String description;
+    private LocalDateTime sentAt;
 }
