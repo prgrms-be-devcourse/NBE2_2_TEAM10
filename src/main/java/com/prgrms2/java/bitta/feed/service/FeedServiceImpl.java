@@ -6,7 +6,7 @@ import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
 import com.prgrms2.java.bitta.media.dto.MediaDto;
 import com.prgrms2.java.bitta.media.service.MediaService;
-import com.prgrms2.java.bitta.member.dto.MemberProvider;
+import com.prgrms2.java.bitta.member.service.MemberProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -67,7 +67,7 @@ public class FeedServiceImpl implements FeedService {
 
         Feed feed = dtoToEntity(feedDTO);
 
-        mediaService.upload(files, feedDTO.getId());
+        mediaService.uploads(files, feed.getId());
 
         feedRepository.save(feed);
     }
@@ -85,7 +85,7 @@ public class FeedServiceImpl implements FeedService {
 
         feed.clearMedias();
 
-        mediaService.upload(filesToUpload, feedDTO.getId());
+        mediaService.uploads(filesToUpload, feedDTO.getId());
         
         feedRepository.save(feed);
     }
@@ -100,7 +100,6 @@ public class FeedServiceImpl implements FeedService {
         }
     }
 
-    ///////////////////////////////////////
     @Override
     @Transactional(readOnly = true)
     public List<FeedDTO> readRandomFeeds(int limit) {
@@ -110,7 +109,10 @@ public class FeedServiceImpl implements FeedService {
                 .collect(Collectors.toList());
     }
 
-    ///////////////////////////////////////
+    @Override
+    public boolean checkAuthority(Long feedId, String username) {
+        return feedRepository.existsByIdAndMember_Username(feedId, username);
+    }
 
     private Feed dtoToEntity(FeedDTO feedDto) {
         return Feed.builder()
