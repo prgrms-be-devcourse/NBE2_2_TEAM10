@@ -28,20 +28,22 @@ public class SignUpDTO {
     @Schema(title = "주소", description = "회원의 주소입니다.", example = "경기도 고양시 일산동구 중앙로 1256")
     private String address;
 
-    @Schema(title = "프로필 이미지 URL", description = "프로필 이미지의 URL 입니다.", example = "IMAGE_URL")
-    private String profileImg;
+//    @Schema(title = "프로필 이미지 URL", description = "프로필 이미지의 URL 입니다.", example = "IMAGE_URL")
+//    private String profile;
 
+    @Builder.Default
     @Schema(title = "권한 목록", description = "회원이 가질 권한 목록입니다.", example = "[\"USER\", \"ADMIN\"]")
     private List<String> roles = new ArrayList<>();
 
     public Member toEntity(String encodedPassword, List<String> roles) {
+        String profileImage = "/images/default_avatar.png";
 
         return Member.builder()
                 .username(username)
                 .password(encodedPassword)
                 .nickname(nickname)
                 .address(address)
-                .profileImg(profileImg)
+                .profile(profileImage)
                 .roles(roles)
                 .build();
     }

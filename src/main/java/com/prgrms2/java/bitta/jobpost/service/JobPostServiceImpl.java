@@ -2,15 +2,18 @@ package com.prgrms2.java.bitta.jobpost.service;
 
 import com.prgrms2.java.bitta.apply.util.ApplyProvider;
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
+import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.exception.JobPostException;
 import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
 import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -22,22 +25,13 @@ public class JobPostServiceImpl implements JobPostService {
     private final ApplyProvider applyProvider;
 
     @Override
-    public List<JobPostDTO> getList() {
-        List<JobPost> jobPost = jobPostRepository.findAll();
+    public Page<JobPostDTO> getList(PageRequestDTO pageRequestDTO) {
+        Sort sort = Sort.by("id").descending();
+        Pageable pageable = pageRequestDTO.getPageable(sort);
 
-        if (jobPost.isEmpty()) {
-            throw JobPostException.NOT_FOUND.get();
-        }
-
-        return jobPost.stream().map(this::entityToDto).toList();
+        return jobPostRepository.getList(pageable);
     }
 
-//    @Override
-//    public JobPostDTO register(JobPostDTO jobPostDTO) {
-//        JobPost jobPost = jobPostDTO.toEntity();
-//        jobPost = jobPostRepository.save(jobPost);
-//        return new JobPostDTO(jobPost);
-//    }
     @Override
     public JobPostDTO register(JobPostDTO jobPostDTO) {
         try {
@@ -76,14 +70,10 @@ public class JobPostServiceImpl implements JobPostService {
         }
     }
 
+
     @Override
     public void remove(Long id) {
-        Optional<JobPost> deleteJobPost = jobPostRepository.findById(id);
-        JobPost jobPost = deleteJobPost.orElseThrow(JobPostException.NOT_FOUND::get);
-        try {
-            jobPostRepository.delete(jobPost);
-        } catch (Exception e) {
-            log.error(e.getMessage());
+        if (jobPostRepository.deleteByIdAndReturnCount(id) == 0) {
             throw JobPostException.NOT_REMOVED.get();
         }
     }
@@ -99,7 +89,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .startDate(jobPost.getStartDate())
                 .endDate(jobPost.getEndDate())
                 .updateAt(jobPost.getUpdatedAt())
-                .userId(jobPost.getMember().getId())
+                .memberId(jobPost.getMember().getId())
                 .build();
     }
 

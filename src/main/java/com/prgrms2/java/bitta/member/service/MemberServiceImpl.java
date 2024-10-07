@@ -3,12 +3,15 @@ package com.prgrms2.java.bitta.member.service;
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.SignUpDTO;
 import com.prgrms2.java.bitta.member.entity.Member;
+import com.prgrms2.java.bitta.member.exception.NoChangeException;
 import com.prgrms2.java.bitta.member.repository.MemberRepository;
 import com.prgrms2.java.bitta.security.JwtToken;
 import com.prgrms2.java.bitta.security.JwtTokenProvider;
+import com.prgrms2.java.bitta.security.exception.InvalidTokenException;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import lombok.extern.slf4j.Slf4j;
+import net.coobird.thumbnailator.Thumbnails;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -17,6 +20,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,7 +38,10 @@ public class MemberServiceImpl implements MemberService{
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
-    private final ProfileImageService profileImageService;
+    private final String defaultProfileImg = "/images/default_avatar.png";
+
+    @Value("${file.root.path}")
+    private String fileRootPath;
 
     @Transactional
     @Override
@@ -52,49 +64,98 @@ public class MemberServiceImpl implements MemberService{
         if (memberRepository.existsByUsername(signUpDTO.getUsername())) {
             throw new IllegalArgumentException("이미 사용 중인 사용자 이름입니다.");
         }
+
         // Password 암호화
         String encodedPassword = passwordEncoder.encode(signUpDTO.getPassword());
 
-        // 기본 프로필 이미지 설정
-        String defaultProfileImg = profileImageService.getDefaultProfileImage();
-
+        // USER 권한 부여
         List<String> roles = new ArrayList<>();
-        roles.add("USER");  // USER 권한 부여
+        roles.add("USER");
 
-        // 회원 가입 시 기본 프로필 이미지 추가
-        Member newMember = signUpDTO.toEntity(encodedPassword, roles);
-        newMember.setProfileImg(defaultProfileImg);
-
-        return MemberDTO.toDTO(memberRepository.save(newMember));
-        //return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
+        return MemberDTO.toDTO(memberRepository.save(signUpDTO.toEntity(encodedPassword, roles)));
     }
+
+    @Transactional
+    @Override
+    public JwtToken reissueToken(String accessToken, String refreshToken) {
+        try {
+            JwtToken newToken = jwtTokenProvider.reissueToken(accessToken, refreshToken);
+
+            if (newToken == null) {
+                // 액세스 토큰이 아직 유효한 경우
+                return null;
+            }
+
+            return newToken;
+        } catch (RuntimeException e) {
+            // 리프레시 토큰이 만료된 경우 등의 예외 처리
+            log.info("토큰 갱신 실패: {}", e.getMessage());
+            // 필요한 경우 여기서 로그아웃 처리를 할 수 있습니다.
+            throw new InvalidTokenException("토큰 갱신에 실패했습니다. 다시 로그인해주세요.");
+        }
+    }
+
 
     @Override
     public MemberDTO getMemberById(Long id) {
         Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
-        return MemberDTO.toDTO(member);  // MemberDTO의 toDTO 메서드 사용
-    }
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
 
-    @Override
-    public MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("ID가 " + id + "인 회원을 찾을 수 없습니다."));
+        String profile = member.getProfile() != null ? member.getProfile() : defaultProfileImg;
+        File thumbnailFile = getThumbnailFile(profile);
 
-        // 회원 정보 업데이트
-        member.setUsername(memberDTO.getUsername());
-        member.setNickname(memberDTO.getNickname());
-        member.setAddress(memberDTO.getAddress());
-
-        // 프로필 이미지 수정/삭제
-        if (removeProfileImage) {
-            member.setProfileImg(profileImageService.getDefaultProfileImage());
-        } else if (profileImage != null && !profileImage.isEmpty()) {
-            String profileImageUrl = profileImageService.saveProfileImage(profileImage);
-            member.setProfileImg(profileImageUrl);
+        if (thumbnailFile.exists()) {
+            profile = thumbnailFile.getPath();
         }
 
-        return MemberDTO.toDTO(memberRepository.save(member));
+        MemberDTO memberDTO = new MemberDTO(member);
+        memberDTO.setProfile(profile);
+
+        return memberDTO;
+    }
+
+    @Transactional
+    @Override
+    public MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) throws IOException {
+        Member member = memberRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("회원 정보를 찾을 수 없습니다."));
+
+        boolean isUpdated = false;
+
+        if (removeProfileImage) {
+            deleteProfileImage(member.getProfile());
+            member.setProfile(defaultProfileImg);
+            isUpdated = true;
+        } else if (profileImage != null && !profileImage.isEmpty()) {
+            deleteProfileImage(member.getProfile());
+            String imagePath = saveProfileImage(profileImage);
+
+            String thumbnailPath = createThumbnail(imagePath);
+            member.setProfile(imagePath);
+            isUpdated = true;
+        }
+
+        if (memberDTO.getNickname() != null && !memberDTO.getNickname().isBlank()) {
+            member.setNickname(memberDTO.getNickname());
+            isUpdated = true;
+        }
+
+        if (memberDTO.getAddress() != null && !memberDTO.getAddress().isBlank()) {
+            member.setAddress(memberDTO.getAddress());
+            isUpdated = true;
+        }
+
+        if (memberDTO.getPassword() != null && !memberDTO.getPassword().isBlank()) {
+            member.setPassword(passwordEncoder.encode(memberDTO.getPassword()));
+            isUpdated = true;
+        }
+
+        if (!isUpdated) {
+            throw new NoChangeException("변경된 내용이 없습니다.");
+        }
+
+        memberRepository.save(member);
+        return MemberDTO.toDTO(member);
     }
 
     @Transactional
@@ -105,15 +166,87 @@ public class MemberServiceImpl implements MemberService{
         memberRepository.delete(member);
     }
 
-    // 프로필 이미지 삭제(기본 이미지로 재설정)
-    @Transactional
-    @Override
-    public void resetProfileImageToDefault(Long id) {
-        Member member = memberRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다."));
+    private File getProfileImageFile(String profileImg) {
+        return new File(profileImg);
+    }
 
-        member.setProfileImg(profileImageService.getDefaultProfileImage());
+    private String saveProfileImage(MultipartFile profileImage) throws IOException {
+        String directory = fileRootPath + "/uploads/profile_images/";
+        Path uploadPath = Paths.get(directory);
 
-        memberRepository.save(member);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+
+        String fileName = System.currentTimeMillis() + "_" + profileImage.getOriginalFilename();
+        Path filePath = uploadPath.resolve(fileName);
+        profileImage.transferTo(filePath.toFile());
+
+        return directory + fileName;
+    }
+
+    public void deleteProfileImage(String profileImg) {
+        if (profileImg != null && !profileImg.equals(defaultProfileImg)) {
+            File profileFile = getProfileImageFile(profileImg);
+            File thumbnailFile = getThumbnailFile(profileImg);
+
+            if (profileFile.exists() && profileFile.isFile()) {
+                profileFile.delete();
+            }
+
+            if (thumbnailFile.exists() && thumbnailFile.isFile()) {
+                thumbnailFile.delete();
+            }
+        }
+    }
+
+    private String createThumbnail(String imagePath) throws IOException {
+        String thumbnailDirectory = fileRootPath + "/uploads/profile_images/thumbnail/";
+        Path thumbnailPath = Paths.get(thumbnailDirectory);
+
+        if (!Files.exists(thumbnailPath)) {
+            Files.createDirectories(thumbnailPath);
+        }
+
+        String originalFileName = Paths.get(imagePath).getFileName().toString();
+        String thumbnailFileName = "thumb_" + originalFileName;
+        Path thumbnailFilePath = thumbnailPath.resolve(thumbnailFileName);
+
+        Thumbnails.of(new File(imagePath))
+                .size(200, 200)
+                .keepAspectRatio(true)
+                .toFile(thumbnailFilePath.toFile());
+
+        return thumbnailFilePath.toString();
+    }
+
+    public void outputThumbnail(String profileImagePath, OutputStream outputStream) throws IOException {
+        File thumbnailFile = getThumbnailFile(profileImagePath);
+        if (thumbnailFile.exists() && thumbnailFile.isFile()) {
+            Thumbnails.of(thumbnailFile)
+                    .size(200, 200)
+                    .keepAspectRatio(true)
+                    .outputFormat("jpg")
+                    .toOutputStream(outputStream);
+        } else {
+            throw new IOException("썸네일 파일을 찾을 수 없습니다: " + thumbnailFile.getAbsolutePath());
+        }
+    }
+
+    private File getThumbnailFile(String profileImg) {
+        String thumbnailImgPath = profileImg.replace("profile_images", "profile_images/thumbnail");
+        String thumbnailFileName = "thumb_" + Paths.get(profileImg).getFileName().toString();
+        return new File(thumbnailImgPath.replace(Paths.get(profileImg).getFileName().toString(), thumbnailFileName));
+    }
+
+    private Path getThumbnailDirectory() throws IOException {
+        String thumbnailDirectory = fileRootPath + "/uploads/profile_images/thumbnail/";
+        Path thumbnailPath = Paths.get(thumbnailDirectory);
+
+        if (!Files.exists(thumbnailPath)) {
+            Files.createDirectories(thumbnailPath);
+        }
+
+        return thumbnailPath;
     }
 }

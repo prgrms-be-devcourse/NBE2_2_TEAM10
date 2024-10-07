@@ -1,19 +1,11 @@
 package com.prgrms2.java.bitta.member.dto;
 
-import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
-import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.member.entity.Member;
-import com.prgrms2.java.bitta.member.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
 @Getter
+@Setter
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,6 +18,9 @@ public class MemberDTO {
     @Schema(title = "아이디", description = "로그인에 사용할 회원 아이디입니다.", example = "username")
     private String username;
 
+    @Schema(title = "비밀번호", description = "로그인에 사용할 회원 비밀번호입니다.", example = "password")
+    private String password;
+
     @Schema(title = "별명", description = "회원의 별명입니다.", example = "Nickname")
     private String nickname;
 
@@ -33,7 +28,15 @@ public class MemberDTO {
     private String address;
 
     @Schema(title = "프로필 이미지 URL", description = "프로필 이미지의 URL 입니다.", example = "IMAGE_URL")
-    private String profileImg;
+    private String profile;
+
+    public MemberDTO(Member member) {
+        this.id = member.getId();
+        this.username = member.getUsername();
+        this.nickname = member.getNickname();
+        this.address = member.getAddress();
+        this.profile = member.getProfile();
+    }
 
     static public MemberDTO toDTO(Member member) {
         return MemberDTO.builder()
@@ -41,7 +44,7 @@ public class MemberDTO {
                 .username(member.getUsername())
                 .nickname(member.getNickname())
                 .address(member.getAddress())
-                .profileImg(member.getProfileImg()).build();
+                .profile(member.getProfile()).build();
     }
 
     public Member toEntity() {
@@ -50,6 +53,6 @@ public class MemberDTO {
                 .username(username)
                 .nickname(nickname)
                 .address(address)
-                .profileImg(profileImg).build();
+                .profile(profile).build();
     }
 }

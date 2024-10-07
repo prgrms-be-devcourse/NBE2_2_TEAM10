@@ -2,8 +2,10 @@ package com.prgrms2.java.bitta.feed.controller;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.service.FeedService;
+import com.prgrms2.java.bitta.media.dto.MediaDto;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -11,6 +13,8 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -31,8 +35,8 @@ public class FeedController {
     private final FeedService feedService;
 
     @Operation(
-            summary = "전체 피드 조회",
-            description = "전체 피드를 조회합니다.",
+            summary = "피드 목록 조회",
+            description = "페이지와 사이즈를 조건으로 피드 목록을 조회합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
@@ -52,11 +56,32 @@ public class FeedController {
                     )
             }
     )
+    @Parameters({
+            @Parameter(
+                    name = "page",
+                    description = "피드 페이지 번호",
+                    required = true,
+                    example = "0",
+                    schema = @Schema(type = "integer", defaultValue = "0", minimum = "0")
+            ),
+            @Parameter(
+                    name = "size",
+                    description = "피드 페이지 크기",
+                    required = true,
+                    example = "10",
+                    schema = @Schema(type = "integer", defaultValue = "10", minimum = "1")
+            )
+    })
     @GetMapping
-    public ResponseEntity<?> getFeed() {
+    public ResponseEntity<?> getFeeds(@RequestParam(required = false, defaultValue = "0", value = "page") int page
+            , @RequestParam(required = false, defaultValue = "10", value = "size") int size
+            , @RequestParam(required = false, value = "username") String username
+            , @RequestParam(required = false, value = "title") String title) {
+        Pageable pageable = PageRequest.of(page, size);
+
         return ResponseEntity.ok(
-                Map.of("message", "피드를 성공적으로 조회했습니다.", "result", feedService.readAll())
-        );
+                Map.of("message", "피드를 성공적으로 조회했습니다."
+                        , "result", feedService.readAll(pageable, username, title)));
     }
 
     @Operation(
@@ -204,10 +229,10 @@ public class FeedController {
     )
     @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> modifyFeed(@PathVariable("id") @Min(1) Long id, @RequestPart("feed") @Valid FeedDTO feedDTO
-            , @RequestPart("filesToUpload") List<MultipartFile> filesToUpload, @RequestPart("filepathsToDelete") List<String> filepathsToDelete) {
+            , @RequestPart("filesToUpload") List<MultipartFile> filesToUpload, @RequestPart("filesToDelete") List<MediaDto> filesToDelete) {
         feedDTO.setId(id);
 
-        feedService.update(feedDTO, filesToUpload, filepathsToDelete);
+        feedService.update(feedDTO, filesToUpload, filesToDelete);
 
         return ResponseEntity.ok().body(Map.of("message", "피드가 수정되었습니다."));
     }

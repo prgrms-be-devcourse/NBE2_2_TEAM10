@@ -9,8 +9,10 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -66,8 +68,9 @@ public class ApplyController {
                     )
             }
     )
+
     @PostMapping
-    public ResponseEntity<ApplyDTO> registerApply(@RequestBody ApplyDTO applyDTO) {
+    public ResponseEntity<Map<String, Object>> registerApply(@Valid @RequestBody ApplyDTO applyDTO) {
         return ResponseEntity.ok(applyService.register(applyDTO));
     }
 
@@ -101,8 +104,9 @@ public class ApplyController {
             schema = @Schema(type = "integer")
     )
     @GetMapping("/{id}")
-    public ResponseEntity<ApplyDTO> readApply(@PathVariable("id") Long id) {
-        return ResponseEntity.ok(applyService.read(id));
+    public ResponseEntity<ApplyDTO> readApply(@PathVariable("id") Long id, @AuthenticationPrincipal Member member) {
+        ApplyDTO applyDTO = applyService.readByIdAndMember(id, member);
+        return ResponseEntity.ok(applyDTO);
     }
 
     @Operation(
@@ -143,8 +147,8 @@ public class ApplyController {
             schema = @Schema(type = "integer")
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<Map<String, String>> deleteApply(@PathVariable("id") Long id) {
+    public ResponseEntity<Map<String, String>> deleteApply(@Valid @PathVariable("id") Long id) {
         applyService.delete(id);
-        return ResponseEntity.ok(Map.of("message", "delete complete"));
+        return ResponseEntity.ok(Map.of("message", "삭제가 완료되었습니다"));
     }
 }
