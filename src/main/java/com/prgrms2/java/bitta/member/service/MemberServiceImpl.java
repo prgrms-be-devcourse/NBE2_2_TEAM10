@@ -1,9 +1,11 @@
 package com.prgrms2.java.bitta.member.service;
 
+import com.prgrms2.java.bitta.media.entity.Media;
 import com.prgrms2.java.bitta.media.exception.MediaTaskException;
 import com.prgrms2.java.bitta.media.service.MediaService;
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
+import com.prgrms2.java.bitta.member.dto.MemberResponseDto;
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.exception.MemberException;
 import com.prgrms2.java.bitta.member.repository.MemberRepository;
@@ -79,11 +81,18 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public MemberDTO getDtoById(Long id) {
-        return memberRepository.findById(id)
-                .map(this::entityToDto)
+    public MemberResponseDto.Information read(Long id) {
+        Member member = memberRepository.findById(id)
                 .orElseThrow(MemberException.NOT_FOUND::get);
+
+        MemberResponseDto.Information memberDto = memberMapper
+                .entityToDto(member);
+
+        if (member.getMedia() != null) {
+            memberDto.setProfileUrl(mediaService.getMediaUrl(member.getMedia()));
+        }
+
+        return memberDto;
     }
 
     @Override
@@ -156,13 +165,15 @@ public class MemberServiceImpl implements MemberService {
     }
 
     private MemberDTO entityToDto(Member member) {
+        Media media = member.getMedia();
+
         return MemberDTO.builder()
                 .id(member.getId())
                 .username(member.getUsername())
                 .password(member.getPassword())
                 .nickname(member.getNickname())
                 .address(member.getAddress())
-                .profileUrl(mediaService.getMediaUrl(member.getMedia()))
+                .profileUrl(media != null ? mediaService.getMediaUrl(media) : null)
                 .build();
     }
 
