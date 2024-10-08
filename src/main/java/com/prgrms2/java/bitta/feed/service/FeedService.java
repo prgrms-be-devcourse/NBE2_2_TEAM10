@@ -19,6 +19,7 @@ public interface FeedService {
 
     void delete(Long id);
 
-
     List<FeedDTO> readRandomFeeds(int limit);
+
+    boolean checkAuthority(Long feedId, String memberId);
 }

@@ -2,7 +2,11 @@ package com.prgrms2.java.bitta.feed.controller;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.service.FeedService;
+import com.prgrms2.java.bitta.global.exception.AuthenticationException;
+import com.prgrms2.java.bitta.global.util.AuthenticationProvider;
 import com.prgrms2.java.bitta.media.dto.MediaDto;
+import com.prgrms2.java.bitta.member.entity.Role;
+import com.prgrms2.java.bitta.member.service.MemberProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -230,6 +234,10 @@ public class FeedController {
     @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> modifyFeed(@PathVariable("id") @Min(1) Long id, @RequestPart("feed") @Valid FeedDTO feedDTO
             , @RequestPart("filesToUpload") List<MultipartFile> filesToUpload, @RequestPart("filesToDelete") List<MediaDto> filesToDelete) {
+        if (!checkPermission(id)) {
+            throw AuthenticationException.CANNOT_ACCESS.get();
+        }
+
         feedDTO.setId(id);
 
         feedService.update(feedDTO, filesToUpload, filesToDelete);
@@ -276,9 +284,21 @@ public class FeedController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteFeed(@PathVariable("id") @Min(1) Long id) {
+        if (!checkPermission(id)) {
+            throw AuthenticationException.CANNOT_ACCESS.get();
+        }
+
         feedService.delete(id);
 
         return ResponseEntity.ok().body(Map.of("message", "피드가 삭제되었습니다."));
+    }
+
+    private boolean checkPermission(Long id) {
+        if (AuthenticationProvider.getRoles() == Role.ADMIN) {
+            return true;
+        }
+
+        return feedService.checkAuthority(id, AuthenticationProvider.getUsername());
     }
 }
 

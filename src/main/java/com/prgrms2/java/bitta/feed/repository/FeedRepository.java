@@ -32,4 +32,6 @@ public interface FeedRepository extends JpaRepository<Feed, Long> {
     //////////////////////////
     @Query(value = "SELECT * FROM feed ORDER BY RAND() LIMIT :limit", nativeQuery = true)
     List<Feed> findRandomFeeds(@Param("limit") int limit);
+
+    boolean existsByIdAndMember_Username(Long feedId, String username);
 }

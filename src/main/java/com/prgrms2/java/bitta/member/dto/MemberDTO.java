@@ -1,19 +1,15 @@
 package com.prgrms2.java.bitta.member.dto;
 
-import com.prgrms2.java.bitta.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-@Getter
-@Setter
-@ToString
-@AllArgsConstructor
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Schema(title = "회원 DTO", description = "회원 요청 및 응답에 사용하는 DTO입니다.")
 public class MemberDTO {
-
     @Schema(title = "회원 ID (PK)", description = "회원의 고유 ID 입니다.", example = "1", minimum = "1")
     @Min(value = 1, message = "회원 ID는 0 또는 음수가 될 수 없습니다.")
     private Long id;
@@ -37,14 +33,5 @@ public class MemberDTO {
     private String address;
 
     @Schema(title = "프로필 이미지 URL", description = "프로필 이미지의 URL 입니다.", example = "IMAGE_URL")
-    private String profile;
-
-    static public MemberDTO toDTO(Member member) {
-        return MemberDTO.builder()
-                .id(member.getId())
-                .username(member.getUsername())
-                .nickname(member.getNickname())
-                .address(member.getAddress())
-                .profile(member.getProfile()).build();
-    }
+    private String profileUrl;
 }

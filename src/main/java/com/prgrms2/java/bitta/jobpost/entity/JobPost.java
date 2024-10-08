@@ -1,6 +1,7 @@
 package com.prgrms2.java.bitta.jobpost.entity;
 
 import com.prgrms2.java.bitta.apply.entity.Apply;
+import com.prgrms2.java.bitta.media.entity.Media;
 import com.prgrms2.java.bitta.member.entity.Member;
 import jakarta.persistence.*;
 import lombok.*;
@@ -61,6 +62,9 @@ public class JobPost {
     public boolean isClosed() {
         return LocalDate.now().isAfter(this.endDate);
     }
+
+    @OneToOne(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Media media;
 
     // 해당 게시글에 대한 신청 목록 가져야함
     @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)

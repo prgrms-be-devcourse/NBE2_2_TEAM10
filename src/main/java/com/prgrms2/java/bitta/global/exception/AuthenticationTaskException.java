@@ -1,12 +1,11 @@
-package com.prgrms2.java.bitta.member.exception;
-
+package com.prgrms2.java.bitta.global.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 @Getter
 @AllArgsConstructor
-public class MemberTaskException extends RuntimeException {
+public class AuthenticationTaskException extends RuntimeException {
     private int code;
     private String message;
 }

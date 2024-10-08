@@ -6,7 +6,7 @@ import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.exception.JobPostException;
 import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
-import com.prgrms2.java.bitta.member.dto.MemberProvider;
+import com.prgrms2.java.bitta.member.service.MemberProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
