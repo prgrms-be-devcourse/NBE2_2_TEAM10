@@ -47,7 +47,7 @@ public class ScoutServiceTest {
     public void setup() {
         MockitoAnnotations.openMocks(this);
 
-        // Setting up mock member and feed data
+
         sender = Member.builder().id(1L).username("sender").build();
         receiver = Member.builder().id(2L).username("receiver").build();
         feed = Feed.builder().id(1L).title("Sample Feed").member(receiver).build();
@@ -64,7 +64,7 @@ public class ScoutServiceTest {
 
     @Test
     public void sendScoutRequest_shouldReturnScoutRequestDTO() {
-        // Mock FeedProvider and MemberProvider responses
+
         when(feedProvider.getById(1L)).thenReturn(feed);
         when(memberProvider.getById(1L)).thenReturn(sender);
 

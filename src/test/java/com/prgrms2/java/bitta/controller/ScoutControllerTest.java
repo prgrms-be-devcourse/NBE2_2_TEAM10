@@ -41,17 +41,17 @@ public class ScoutControllerTest {
 
     @BeforeEach
     public void setUp() {
-        // Setting up FeedDTO
+
         feedDTO = FeedDTO.builder()
                 .id(1L)
                 .title("Test Feed")
                 .content("Sample Content")
                 .memberId(1L)
                 .createdAt(LocalDateTime.now())
-                .medias(List.of()) // Assuming no media files for this test
+                .medias(List.of())
                 .build();
 
-        // Setting up ScoutRequestDTO
+
         scoutRequestDTO = ScoutRequestDTO.builder()
                 .id(1L)
                 .feed(feedDTO)
@@ -64,7 +64,7 @@ public class ScoutControllerTest {
 
     @Test
     public void sendScoutRequest_ShouldReturn200() throws Exception {
-        // Mocking the service call
+
         when(scoutRequestService.sendScoutRequest(anyLong(), anyLong(), any(String.class)))
                 .thenReturn(scoutRequestDTO);
 
@@ -82,7 +82,7 @@ public class ScoutControllerTest {
 
     @Test
     public void getAllScoutRequests_ShouldReturn200() throws Exception {
-        // Mocking the paginated result for sent and received requests
+
         Page<ScoutRequestDTO> scoutRequestPage = new PageImpl<>(List.of(scoutRequestDTO));
         when(scoutRequestService.getSentScoutRequests(anyLong(), any(Pageable.class)))
                 .thenReturn(scoutRequestPage);
