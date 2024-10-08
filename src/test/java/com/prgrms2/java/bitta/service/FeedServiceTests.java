@@ -6,10 +6,10 @@ import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.exception.FeedTaskException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
 import com.prgrms2.java.bitta.feed.service.FeedServiceImpl;
+import com.prgrms2.java.bitta.media.service.MediaService;
 import com.prgrms2.java.bitta.member.entity.Member;
-import com.prgrms2.java.bitta.photo.entity.Photo;
-import com.prgrms2.java.bitta.photo.service.PhotoService;
-import com.prgrms2.java.bitta.video.service.VideoService;
+
+import com.prgrms2.java.bitta.member.service.MemberProvider;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -45,18 +45,13 @@ public class FeedServiceTests {
     private MemberProvider memberProvider;
 
     @Mock
-    private PhotoService photoService;
-
-    @Mock
-    private VideoService videoService;
+    private MediaService mediaService;
 
     private Member member;
 
     private Feed feed;
 
     private FeedDTO feedDTO;
-
-    private Photo photo;
 
     private List<Feed> feeds;
 
@@ -84,13 +79,6 @@ public class FeedServiceTests {
                 .title("Title")
                 .content("Content")
                 .memberId(1L)
-                .build();
-
-        photo = Photo.builder()
-                .photoId(1L)
-                .photoUrl("uploads/photos/fake")
-                .fileSize(100000L)
-                .feed(feed)
                 .build();
 
         feeds = new ArrayList<>();

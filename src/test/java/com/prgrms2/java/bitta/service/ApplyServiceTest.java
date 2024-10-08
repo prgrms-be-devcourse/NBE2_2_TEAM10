@@ -13,6 +13,7 @@ import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
 import com.prgrms2.java.bitta.jobpost.util.JobPostProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
+import com.prgrms2.java.bitta.member.service.MemberProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -124,4 +125,3 @@ import java.util.Map;
 //        verify(applyRepository, times(1)).deleteByIdAndReturnCount(1L);
 //    }
 //}
-

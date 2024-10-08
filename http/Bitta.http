@@ -1,0 +1,12 @@
+### 1. 게시물 작성
+GET https://examples.http-client.intellij.net/get
+    ?generated-in=IntelliJ IDEA
+
+### 2. 게시물 전체 조회
+
+
+
+### 3. 단일 게시물 조회
+
+
+### 4. 게시물 삭제
