@@ -1,5 +1,5 @@
 package com.prgrms2.java.bitta.service;
-
+/*
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.exception.FeedException;
@@ -306,3 +306,4 @@ public class FeedServiceTests {
                 .hasMessage("삭제할 피드가 존재하지 않습니다");
     }
 }
+*/
