@@ -151,4 +151,5 @@ public class ApplyController {
         applyService.delete(id);
         return ResponseEntity.ok(Map.of("message", "삭제가 완료되었습니다"));
     }
+
 }

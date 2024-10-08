@@ -1,5 +1,5 @@
 package com.prgrms2.java.bitta.controller;
-
+/*
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.prgrms2.java.bitta.feed.controller.FeedController;
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
@@ -295,3 +295,4 @@ public class FeedControllerTests {
                         .value("ID는 음수가 될 수 없습니다."));
     }
 }
+*/

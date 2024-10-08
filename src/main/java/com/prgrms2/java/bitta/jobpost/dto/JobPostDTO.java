@@ -1,16 +1,14 @@
 package com.prgrms2.java.bitta.jobpost.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
-import com.prgrms2.java.bitta.member.entity.Member;
+import com.prgrms2.java.bitta.jobpost.entity.ShootMethod;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -47,6 +45,13 @@ public class JobPostDTO {
 
     @Schema(title = "일거리 수정일시", description = "일거리가 수정된 날짜 및 시간입니다.", example = "2023-09-24T14:45:00")
     private LocalDateTime updateAt;
+
+    @Schema(title = "촬영 방법", description = "일거리의 진행 방식입니다.", example = "FILM")
+    @NotNull(message = "촬영 방법은 필수적으로 입력해야 합니다")
+    private ShootMethod shootMethod;
+
+    @Schema(title = "오디션일", description = "오디션을 진행하는 날짜입니다.", example = "2023-09-24")
+    private LocalDate auditionDate;
 
     @Schema(title = "시작일", description = "일이 시작하는 날짜입니다.", example = "2023-09-24")
     private LocalDate startDate;
