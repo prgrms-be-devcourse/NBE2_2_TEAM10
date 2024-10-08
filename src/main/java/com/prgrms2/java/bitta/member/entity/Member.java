@@ -53,7 +53,7 @@ public class Member implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Builder.Default
-    private Role role = Role.USER;
+    private Role role = Role.ROLE_USER;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
