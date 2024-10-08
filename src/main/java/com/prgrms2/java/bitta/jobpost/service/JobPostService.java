@@ -14,5 +14,10 @@ public interface JobPostService {
     JobPostDTO modify(JobPostDTO jobPostDTO);
 
     Page<JobPostDTO> getList(PageRequestDTO pageRequestDTO);
+
+    Page<JobPostDTO> getJobPostByMember(Long memberId, PageRequestDTO pageRequestDTO);
+
+    Page<JobPostDTO> searchJobPosts(String keyword, PageRequestDTO pageRequestDTO);
+
 }
 

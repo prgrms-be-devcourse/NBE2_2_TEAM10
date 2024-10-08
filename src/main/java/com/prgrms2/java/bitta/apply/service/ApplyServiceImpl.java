@@ -4,6 +4,8 @@ import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
 import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.apply.exception.ApplyException;
 import com.prgrms2.java.bitta.apply.repository.ApplyRepository;
+import com.prgrms2.java.bitta.jobpost.entity.JobPost;
+import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
 import com.prgrms2.java.bitta.jobpost.util.JobPostProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.service.MemberProvider;
@@ -18,6 +20,7 @@ import java.util.*;
 @RequiredArgsConstructor
 public class ApplyServiceImpl implements ApplyService {
     private final ApplyRepository applyRepository;
+    private final JobPostRepository jobPostRepository;
     private final MemberProvider memberProvider;
     private final JobPostProvider jobPostProvider;
 
@@ -62,13 +65,21 @@ public class ApplyServiceImpl implements ApplyService {
         return applyDTO.orElseThrow(ApplyException.NOT_FOUND::get);
     }
 
+    // 게시글 작성자의 ID 값 가져오는 메서드
     @Override
     public ApplyDTO readByIdAndMember(Long id, Member member) {
-        Apply apply = applyRepository.findByIdAndMember(id, member)
-                .orElseThrow(ApplyException.NOT_FOUND::get);
-        return entityToDto(apply);
+        Optional<ApplyDTO> applyDTO = applyRepository.findByIdAndMember(id, member);
+        return applyDTO.orElseThrow(ApplyException.NOT_FOUND::get);
     }
 
+    @Override
+    public List<ApplyDTO> getApplyForJobPost(Long jobPostId) {
+        JobPost jobPost = jobPostRepository.findById(jobPostId).orElseThrow();
+
+        List<ApplyDTO> apply = applyRepository.findAllByJobPost(jobPost);
+
+        return apply;
+    }
 
     private Apply dtoToEntity(ApplyDTO applyDTO) {
         return Apply.builder()

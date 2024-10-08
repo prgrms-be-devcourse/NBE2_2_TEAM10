@@ -2,6 +2,7 @@ package com.prgrms2.java.bitta.apply.repository;
 
 import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
 import com.prgrms2.java.bitta.apply.entity.Apply;
+import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.member.entity.Member;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -25,5 +26,9 @@ public interface ApplyRepository extends JpaRepository<Apply, Long> {
     @Query("DELETE FROM Apply a WHERE a.id = :id")
     int deleteByIdAndReturnCount(Long id);
 
-    Optional<Apply> findByIdAndMember(Long id, Member member);
+    @Query("SELECT a FROM Apply a WHERE a.id = :id AND a.member = :member")
+    Optional<ApplyDTO> findByIdAndMember(Long id, Member member);
+
+    @Query("SELECT a FROM Apply a WHERE a.jobPost = :jobPost")
+    List<ApplyDTO> findAllByJobPost(@Param("jobPost") JobPost jobPost);
 }

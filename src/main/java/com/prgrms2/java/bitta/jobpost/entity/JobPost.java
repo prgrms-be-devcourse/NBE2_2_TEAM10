@@ -52,8 +52,13 @@ public class JobPost {
     @LastModifiedDate
     private LocalDateTime updatedAt;   // 게시글 수정일자
 
-    private LocalDate startDate;   // 이벤트의 시작일
-    private LocalDate endDate;     // 이벤트의 종료일
+    @Enumerated(EnumType.STRING)
+    private ShootMethod shootMethod;   // 촬영 방법
+
+    private LocalDate auditionDate;     // 오디션 일자
+
+    private LocalDate startDate;   // 촬영 기간 시작일
+    private LocalDate endDate;     // 촬영 기간 종료일
 
     @Transient
     private boolean isClosed;   // 게시글의 마감 여부
@@ -67,6 +72,6 @@ public class JobPost {
     private Media media;
 
     // 해당 게시글에 대한 신청 목록 가져야함
-    @OneToMany(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "jobPost", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Apply> apply = new ArrayList<>();
 }
