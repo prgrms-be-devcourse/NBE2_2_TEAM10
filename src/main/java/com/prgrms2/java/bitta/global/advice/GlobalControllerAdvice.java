@@ -1,5 +1,6 @@
 package com.prgrms2.java.bitta.global.advice;
 
+import com.prgrms2.java.bitta.global.exception.AuthenticationTaskException;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
@@ -38,4 +39,9 @@ public class GlobalControllerAdvice {
                 .body(Map.of("error", "Payload Too Large", "reason", "파일의 크기가 허용된 한도를 초과했습니다."));
     }
 
+    @ExceptionHandler(AuthenticationTaskException.class)
+    public ResponseEntity<?> handleArgsException(AuthenticationTaskException e) {
+        return ResponseEntity.status(e.getCode())
+                .body(Map.of("error", e.getMessage()));
+    }
 }

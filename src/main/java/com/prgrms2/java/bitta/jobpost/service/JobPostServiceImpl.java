@@ -1,17 +1,12 @@
 package com.prgrms2.java.bitta.jobpost.service;
 
-import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
-import com.prgrms2.java.bitta.apply.entity.Apply;
-import com.prgrms2.java.bitta.apply.repository.ApplyRepository;
-import com.prgrms2.java.bitta.apply.service.ApplyServiceImpl;
 import com.prgrms2.java.bitta.apply.util.ApplyProvider;
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
 import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.exception.JobPostException;
 import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
-import com.prgrms2.java.bitta.member.dto.MemberProvider;
-import com.prgrms2.java.bitta.member.repository.MemberRepository;
+import com.prgrms2.java.bitta.member.service.MemberProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -20,9 +15,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -31,9 +24,6 @@ public class JobPostServiceImpl implements JobPostService {
     private final JobPostRepository jobPostRepository;
     private final MemberProvider memberProvider;
     private final ApplyProvider applyProvider;
-    private final MemberRepository memberRepository;
-    private final ApplyRepository applyRepository;
-    private final ApplyServiceImpl applyServiceImpl;
 
     @Override
     public Page<JobPostDTO> getList(PageRequestDTO pageRequestDTO) {

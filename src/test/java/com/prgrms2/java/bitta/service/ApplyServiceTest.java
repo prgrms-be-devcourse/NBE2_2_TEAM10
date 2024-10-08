@@ -12,7 +12,6 @@ import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
 import com.prgrms2.java.bitta.jobpost.util.JobPostProvider;
-import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;

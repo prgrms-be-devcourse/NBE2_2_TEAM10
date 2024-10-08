@@ -1,17 +1,14 @@
 package com.prgrms2.java.bitta.jobpost.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.entity.Location;
 import com.prgrms2.java.bitta.jobpost.entity.PayStatus;
 import com.prgrms2.java.bitta.jobpost.entity.ShootMethod;
-import com.prgrms2.java.bitta.member.entity.Member;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

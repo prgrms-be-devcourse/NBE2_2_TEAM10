@@ -1,18 +1,26 @@
 package com.prgrms2.java.bitta.member.service;
 
 import com.prgrms2.java.bitta.member.dto.MemberDTO;
-import com.prgrms2.java.bitta.member.dto.SignUpDTO;
-import com.prgrms2.java.bitta.security.JwtToken;
+import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
+import com.prgrms2.java.bitta.token.dto.TokenResponseDto;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
-
 public interface MemberService {
-    JwtToken signIn(String username, String password);
-    MemberDTO signUp(SignUpDTO signUpDTO);
-    JwtToken reissueToken(String accessToken, String refreshToken);
+    TokenResponseDto validate(MemberRequestDto.Login loginDto);
 
-    MemberDTO getMemberById(Long id);
-    MemberDTO updateMember(Long id, MemberDTO memberDTO, MultipartFile profileImage, boolean removeProfileImage) throws IOException;
-    void deleteMember(Long id);
+    void insert(MemberRequestDto.Register registerDto);
+
+    void insert(MemberRequestDto.Register registerDto, MultipartFile multipartFile);
+
+    MemberDTO getDtoById(Long id);
+
+    void changePassword(MemberRequestDto.ChangePassword memberDto);
+
+    void update(MemberRequestDto.Modify memberDto);
+
+    void update(MemberRequestDto.Modify memberDto, MultipartFile profileImage);
+
+    void delete(Long id);
+
+    boolean checkAuthority(Long id, String username);
 }

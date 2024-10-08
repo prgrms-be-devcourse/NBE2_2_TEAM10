@@ -1,5 +1,6 @@
 package com.prgrms2.java.bitta.feed.exception;
 
+
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 

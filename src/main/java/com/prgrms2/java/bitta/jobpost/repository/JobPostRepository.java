@@ -1,6 +1,5 @@
 package com.prgrms2.java.bitta.jobpost.repository;
 
-import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import org.springframework.data.domain.Page;

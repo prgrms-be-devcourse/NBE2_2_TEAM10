@@ -6,7 +6,6 @@ import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.exception.FeedTaskException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
 import com.prgrms2.java.bitta.feed.service.FeedServiceImpl;
-import com.prgrms2.java.bitta.member.dto.MemberProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.photo.entity.Photo;
 import com.prgrms2.java.bitta.photo.service.PhotoService;

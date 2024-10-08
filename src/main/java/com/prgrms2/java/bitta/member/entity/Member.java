@@ -2,6 +2,7 @@ package com.prgrms2.java.bitta.member.entity;
 
 import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.feed.entity.Feed;
+import com.prgrms2.java.bitta.media.entity.Media;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
@@ -11,38 +12,36 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Entity
-@Getter
-@Setter
-@NoArgsConstructor(access = AccessLevel.PROTECTED)
-@AllArgsConstructor
+@Data
 @Builder
-@Table(name = "member")
-@EqualsAndHashCode(of = "id")
+@NoArgsConstructor
+@AllArgsConstructor
+@Entity
 @EntityListeners(AuditingEntityListener.class)
 public class Member implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "member_id")
+    @Setter(AccessLevel.NONE)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String nickname;
 
     @Column(nullable = false)
     private String address;
 
-    @Builder.Default
-    private String profile = "/images/default_avatar.png";
+    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Media media;
 
     @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @Builder.Default
@@ -52,20 +51,18 @@ public class Member implements UserDetails {
     @Builder.Default
     private List<Apply> applies = new ArrayList<>();
 
-    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
     @Builder.Default
-    private List<String> roles = new ArrayList<>();
+    private Role role = Role.USER;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return this.roles.stream()
-                .map(SimpleGrantedAuthority::new)
-                .collect(Collectors.toList());
+        return Collections.singletonList(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override
     public String getUsername() {
-        return this.username;
+        return username;
     }
 
     @Override
@@ -86,35 +83,5 @@ public class Member implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public void addFeed(Feed feed) {
-        this.feeds.add(feed);
-        feed.setMember(this);  // 양방향 연관관계 설정
-    }
-
-    public void removeFeed(Feed feed) {
-        this.feeds.remove(feed);
-        feed.setMember(null);  // 연관관계 해제
-    }
-
-    public void addPostApplication(Apply apply) {
-        this.applies.add(apply);
-        apply.setMember(this);  // 양방향 연관관계 설정
-    }
-
-    public void removePostApplication(Apply apply) {
-        this.applies.remove(apply);
-        apply.setMember(null);  // 연관관계 해제
-    }
-
-    @Builder
-    public Member(String username, String password, String nickname, String address, String profile, List<String> roles) {
-        this.username = username;
-        this.password = password;
-        this.nickname = nickname;
-        this.address = address;
-        this.profile = profile != null ? profile : "/images/default_avatar.png";
-        this.roles = roles;
     }
 }

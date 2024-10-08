@@ -32,6 +32,12 @@ public class JobPostController {
     private final JobPostService jobPostService;
     private final ApplyService applyService;
 
+    //LIST A
+
+    //LIST B - selectbyID
+
+    //
+
     @Operation(
             summary = "전체 일거리 조회",
             description = "전체 일거리를 조회합니다.",

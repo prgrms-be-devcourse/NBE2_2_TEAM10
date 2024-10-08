@@ -1,31 +1,26 @@
 package com.prgrms2.java.bitta.member.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prgrms2.java.bitta.member.dto.MemberDTO;
-import com.prgrms2.java.bitta.member.dto.SignInDTO;
-import com.prgrms2.java.bitta.member.dto.SignUpDTO;
-import com.prgrms2.java.bitta.member.exception.NoChangeException;
+import com.prgrms2.java.bitta.global.exception.AuthenticationException;
+import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
+import com.prgrms2.java.bitta.member.entity.Role;
+import com.prgrms2.java.bitta.member.service.MemberProvider;
 import com.prgrms2.java.bitta.member.service.MemberService;
-import com.prgrms2.java.bitta.security.JwtToken;
-import com.prgrms2.java.bitta.security.JwtTokenProvider;
-import com.prgrms2.java.bitta.security.SecurityUtil;
-import com.prgrms2.java.bitta.security.dto.RefreshTokenRequestDTO;
-import com.prgrms2.java.bitta.security.exception.InvalidTokenException;
+import com.prgrms2.java.bitta.token.dto.TokenResponseDto;
+import com.prgrms2.java.bitta.global.util.AuthenticationProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.IOException;
 import java.util.Map;
 
 import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
@@ -34,12 +29,11 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/members")
+@RequestMapping("api/v1/member")
 public class MemberController {
-
     private final MemberService memberService;
-    private final ObjectMapper objectMapper;
-    private final JwtTokenProvider jwtTokenProvider;
+
+    private final MemberProvider memberProvider;
 
     @Operation(
             summary = "테스트",
@@ -47,167 +41,158 @@ public class MemberController {
     )
     @PostMapping("/test")
     public String test() {
-        return SecurityUtil.getCurrentUsername();
+        return AuthenticationProvider.getUsername();
     }
 
     @Operation(
             summary = "로그인",
-            description = "아이디와 비밀번호를 검증하고, 토큰을 반환합니다.",
+            description = "로그인 후 JWT 토큰을 발급합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "로그인이 성공적으로 완료되었습니다.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = JwtToken.class)
-                            )
-                    )
+                            description = "로그인 성공",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(
+                            responseCode = "401",
+                            description = "로그인 실패",
+                            content = @Content)
             }
     )
-    @PostMapping("/sign-in")
-    public JwtToken signIn(@RequestBody SignInDTO signInDTO) {
-        String username = signInDTO.getUsername();
-        String password = signInDTO.getPassword();
-        JwtToken jwtToken = memberService.signIn(username, password);
-        log.info("request username = {}, password = {}", username, password);
-        log.info("jwtToken accessToken = {}, refreshToken = {}", jwtToken.getAccessToken(), jwtToken.getRefreshToken());
-        return jwtToken;
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody MemberRequestDto.Login loginDto) {
+        TokenResponseDto tokenResponseDto = memberService.validate(loginDto);
+
+        return ResponseEntity.ok(Map.of("message", "로그인에 성공했습니다."
+                , "result", tokenResponseDto));
     }
 
     @Operation(
             summary = "회원가입",
-            description = "회원을 등록합니다.",
+            description = "회원가입을 진행합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "회원을 성공적으로 등록했습니다.",
+                            description = "회원가입 성공",
                             content = @Content(
                                     mediaType = "application/json",
-                                    schema = @Schema(implementation = MemberDTO.class, example = MEMBER_SUCCESS_SIGN_UP)
-                            )
-                    )
+                                    schema = @Schema(example = MEMBER_SUCCESS_SIGN_UP))),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "회원가입 실패",
+                            content = @Content)
             }
     )
-    @PostMapping("/sign-up")
-    public ResponseEntity<MemberDTO> signUp(@RequestBody SignUpDTO signUpDTO) {
-        MemberDTO savedMember = memberService.signUp(signUpDTO);
-        return ResponseEntity.ok(savedMember);
+    @PostMapping
+    public ResponseEntity<?> register(@RequestBody MemberRequestDto.Register registerDto) {
+        memberService.insert(registerDto);
+
+        return ResponseEntity.ok(Map.of("message", "회원가입에 성공했습니다."));
     }
 
     @Operation(
-            summary = "회원 조회",
-            description = "회원 ID로 회원 정보를 조회합니다.",
+            summary = "회원 정보 조회",
+            description = "회원의 ID를 사용해 회원 정보를 조회합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "회원 정보를 성공적으로 조회했습니다.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = MemberDTO.class)
-                            )
-                    )
+                            description = "회원 정보 조회 성공",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "회원 정보 조회 실패",
+                            content = @Content)
             }
     )
     @GetMapping("/{id}")
-    public ResponseEntity<MemberDTO> getMemberById(@PathVariable Long id) {
-        return ResponseEntity.ok(memberService.getMemberById(id));
-    }
-
-    @Operation(
-            summary = "회원 수정",
-            description = "회원 ID로 회원 정보를 수정합니다. 프로필 이미지를 업데이트할 수 있습니다.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "회원 정보를 성공적으로 수정했습니다.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = MemberDTO.class)
-                            )
-                    )
-            }
-    )
-    @PutMapping(value = "/{id}", consumes = "multipart/form-data")
-    public ResponseEntity<MemberDTO> updateMemberById(@PathVariable Long id,
-                                                      @RequestParam("dto") String dtoJson,
-                                                      @RequestParam(value = "profileImage", required = false) MultipartFile profileImage,
-                                                      @RequestParam(value = "removeProfileImage", required = false, defaultValue = "false") Boolean removeProfileImage) {
-        try {
-            MemberDTO memberDTO = objectMapper.readValue(dtoJson, MemberDTO.class);
-            MemberDTO updatedMember = memberService.updateMember(id, memberDTO, profileImage, removeProfileImage);
-            return ResponseEntity.ok(updatedMember);
-        } catch (NoChangeException e) {
-            return ResponseEntity.ok().body(null);
-        } catch (IOException e) {
-            log.error("파일 업데이트에 실패하였습니다.", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+    public ResponseEntity<?> read(@PathVariable("id") @Min(1) Long id) {
+        if (!checkPermission(id)) {
+            throw AuthenticationException.CANNOT_ACCESS.get();
         }
+
+        return ResponseEntity.ok(Map.of("message", "회원을 성공적으로 조회했습니다."
+                , "result", memberService.getDtoById(id)));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> changePassword(@PathVariable("id") @Min(1) Long id
+            , @RequestBody @Valid MemberRequestDto.ChangePassword changePasswordDto) {
+        if (!checkPermission(id)) {
+            throw AuthenticationException.CANNOT_ACCESS.get();
+        }
+
+        changePasswordDto.setId(id);
+
+        memberService.changePassword(changePasswordDto);
+
+        return ResponseEntity.ok().body(Map.of("message", "비밀번호가 수정되었습니다."));
     }
 
     @Operation(
-            summary = "회원 삭제",
-            description = "회원 ID로 회원 정보를 삭제합니다.",
+            summary = "회원 정보 수정",
+            description = "회원의 정보를 수정합니다.",
             responses = {
                     @ApiResponse(
                             responseCode = "200",
-                            description = "회원 정보를 성공적으로 삭제했습니다.",
-                            content = @Content(
-                                    mediaType = "text/plain",
-                                    schema = @Schema(example = "회원 삭제가 완료되었습니다.")
-                            )
-                    )
+                            description = "회원 정보 수정 성공",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(
+                            responseCode = "304",
+                            description = "변경된 내용 없음",
+                            content = @Content),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "프로필 이미지 처리 오류",
+                            content = @Content)
             }
     )
+    @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<?> modify(@PathVariable("id") @Min(1) Long id, @RequestPart(value = "member") @Valid MemberRequestDto.Modify modifyDto
+            , @RequestPart(value = "file", required = false) MultipartFile file) {
+        if (!checkPermission(id)) {
+            throw AuthenticationException.CANNOT_ACCESS.get();
+        }
 
+        modifyDto.setId(id);
+
+        if (file.isEmpty()) {
+            memberService.update(modifyDto, file);
+        } else {
+            memberService.update(modifyDto);
+        }
+
+        return ResponseEntity.ok().body(Map.of("message", "회원이 수정되었습니다."));
+    }
+
+    @Operation(
+            summary = "회원 탈퇴",
+            description = "회원 탈퇴를 진행합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "회원 탈퇴 성공",
+                            content = @Content(mediaType = "application/json")),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "회원 탈퇴 실패",
+                            content = @Content)
+            }
+    )
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteMemberById(@PathVariable Long id) {
-        memberService.deleteMember(id);
-        return ResponseEntity.ok("회원 삭제가 완료되었습니다.");
-    }
-
-    @Operation(
-            summary = "토큰 재발급",
-            description = "Refresh 토큰으로 Access 토큰을 재발급 합니다.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "토큰을 성공적으로 재발급했습니다.",
-                            content = @Content(
-                                    mediaType = "application/json",
-                                    schema = @Schema(implementation = JwtToken.class)  // JwtToken 클래스 사용
-                            )
-                    ),
-                    @ApiResponse(
-                            responseCode = "400",
-                            description = "잘못된 요청",
-                            content = @Content
-                    ),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "유효하지 않은 리프레시 토큰",
-                            content = @Content
-                    )
-            }
-    )
-
-    @PostMapping("/refresh")
-    public ResponseEntity<?> reissueToken(@RequestHeader("Authorization") String bearerAccessToken,
-                                          @RequestBody RefreshTokenRequestDTO request) {
-        try {
-            String accessToken = bearerAccessToken.substring(7);
-            JwtToken newToken = memberService.reissueToken(accessToken, request.getRefreshToken());
-
-            // 현재 액세스 토큰이 유효한 경우
-            if (newToken == null) {
-                return ResponseEntity
-                        .status(HttpStatus.FORBIDDEN) // 403 Forbidden 상태 코드 설정
-                        .body(Map.of("message", "액세스 토큰이 유효합니다.")); // 응답 본문에 메시지 포함
-            }
-
-            return ResponseEntity.ok(newToken); // 새로운 토큰을 반환
-        } catch (AuthenticationException e) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, e.getMessage());
+    public ResponseEntity<String> delete(@PathVariable Long id) {
+        if (!checkPermission(id)) {
+            throw AuthenticationException.CANNOT_ACCESS.get();
         }
+
+        memberService.delete(id);
+        log.info("회원 삭제 완료 - 사용자 ID: {}", id);
+        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
     }
 
+    private boolean checkPermission(Long id) {
+        if (AuthenticationProvider.getRoles() == Role.ADMIN) {
+            return true;
+        }
+
+        return memberService.checkAuthority(id, AuthenticationProvider.getUsername());
+    }
 }
