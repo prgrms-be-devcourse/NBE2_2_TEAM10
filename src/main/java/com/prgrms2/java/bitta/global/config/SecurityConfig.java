@@ -31,11 +31,19 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/members/sign-in").permitAll()
-                        .requestMatchers("/members/sign-up").permitAll()
-                        .requestMatchers("/members/test").hasRole("USER")
+                        .requestMatchers(
+                                "api/v1/members/sign-up",
+                                "api/v1/members/sign-in",
+                                "api/v1/members/refresh").permitAll()
+                        .requestMatchers(
+                                "api/v1/members/test",
+                                "api/v1/members/{id}",
+                                "api/v1/feed/**",
+                                "api/v1/apply/**",
+                                "api/v1/job-post/**",
+                                "api/v1/scout/**").hasRole("USER")
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/webjars/**").permitAll()
-                        .requestMatchers("/images/**").permitAll()
+                        // .requestMatchers("/images/**").permitAll() /  S3 연결 필요
                         .anyRequest().authenticated())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
