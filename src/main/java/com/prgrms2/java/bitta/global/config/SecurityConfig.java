@@ -44,6 +44,10 @@ public class SecurityConfig {
                                 "api/v1/scout/**").hasRole("USER")
                         .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**", "/webjars/**").permitAll()
                         // .requestMatchers("/images/**").permitAll() /  S3 연결 필요
+                        //jobpost get요청 받기.
+                        .requestMatchers("/jobpost/**").permitAll()
+                        //정적 메서드 css등등
+                        .requestMatchers("/css/**", "/js/**", "/images/**").permitAll()
                         .anyRequest().authenticated())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
