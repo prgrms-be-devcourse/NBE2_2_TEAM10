@@ -1,5 +1,7 @@
 package com.prgrms2.java.bitta.global.config;
 
+import com.prgrms2.java.bitta.global.util.AccessDeniedHandlerImpl;
+import com.prgrms2.java.bitta.global.util.AuthenticationEntryPointImpl;
 import com.prgrms2.java.bitta.token.filter.TokenAuthenticationFilter;
 import com.prgrms2.java.bitta.token.util.TokenProvider;
 import lombok.RequiredArgsConstructor;
@@ -39,7 +41,10 @@ public class SecurityConfig {
                                 "api/v1/member/{id}", "api/v1/member/test", "api/v1/apply/**",
                                 "api/v1/feed/**", "api/v1/job-post/**", "api/v1/scout/**",
                                 "member/profile", "apply/**", "feed/**", "job-post/**", "scout/**" ).hasRole("USER")
-                        .anyRequest().permitAll())
+                        .anyRequest().authenticated())
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new AuthenticationEntryPointImpl())
+                        .accessDeniedHandler(new AccessDeniedHandlerImpl()))
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -74,5 +79,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
-
 }

@@ -1,6 +1,5 @@
 package com.prgrms2.java.bitta.token.filter;
 
-import com.prgrms2.java.bitta.token.exception.TokenException;
 import com.prgrms2.java.bitta.token.util.TokenProvider;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -8,7 +7,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
@@ -23,21 +21,18 @@ import java.io.IOException;
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private final TokenProvider tokenProvider;
 
-    @Value("${token.grant.type}")
-    private String grantType;
-
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        try {
-            String accessToken = parseToken(request);
+        String accessToken = parseToken(request);
 
-            if (tokenProvider.validate(accessToken)) {
-                Authentication authentication = tokenProvider.getAuthentication(accessToken);
-                SecurityContextHolder.getContext().setAuthentication(authentication);
-                log.info("Setting authentication for user: {}", authentication.getName());
-            }
-        } catch (RuntimeException ignored) {}
+        if (accessToken != null && tokenProvider.validate(accessToken)) {
+            Authentication authentication = tokenProvider.getAuthentication(accessToken);
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            log.info("Setting authentication for user: {}", authentication.getName());
+        } else {
+            log.warn("Invalid token, proceeding without setting authentication.");
+        }
 
         filterChain.doFilter(request, response);
     }
@@ -45,14 +40,11 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     private String parseToken(HttpServletRequest httpServletRequest) {
         String accessToken = httpServletRequest.getHeader("Authorization");
 
-        if (!StringUtils.hasText(accessToken)) {
-            throw TokenException.EMPTY_HEADER.get();
+        if (!StringUtils.hasText(accessToken) || !accessToken.startsWith("Bearer")) {
+            log.warn("인증 헤더가 비어있거나 일치하지 않습니다.");
+            return null;
         }
 
-        if (!accessToken.startsWith(grantType)) {
-            throw TokenException.WRONG_GRANT_TYPE.get();
-        }
-
-        return accessToken.substring(grantType.length() + 1);
+        return accessToken.substring("Bearer".length() + 1);
     }
 }
