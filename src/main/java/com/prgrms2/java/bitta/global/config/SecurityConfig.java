@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "api/v1/member",
+                                "api/v1/member/login",
                                 "api/v1/members/sign-up",
                                 "api/v1/members/sign-in",
                                 "api/v1/members/refresh").permitAll()
