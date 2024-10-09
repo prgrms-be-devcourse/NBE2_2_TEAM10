@@ -19,7 +19,7 @@ public interface MediaService {
 
     void delete(Long feedId);
 
-    String getMediaUrl(Media media);
+    String getUrl(Media media);
 
     Media getMedia(String mediaUrl);
 
