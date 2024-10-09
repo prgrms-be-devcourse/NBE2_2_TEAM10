@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빛다</title>
+
+    <link rel="stylesheet" th:href="@{../css/style.css}" />
+</head>
+<body>
+<div th:replace="~{common/header :: header}"></div>
+
+
+<div class="wrap">
+    <h1>메인페이지</h1>
+    <!--<section id="banner">
+        <div class="box"><img src="/images/main-banner.jpg" alt="Main Banner"></div>
+    </section>
+
+    <section id="recent-casting">
+        <h2>최근 캐스팅 공고</h2>
+        <div class="image-board">
+            <!- 공고 이미지 게시판 ->
+            <div><img src="/images/casting1.jpg" alt="Casting 1"></div>
+            <div><img src="/images/casting2.jpg" alt="Casting 2"></div>
+        </div>
+    </section>
+
+    <section id="random-portfolio">
+        <h2>배우 포트폴리오 랜덤</h2>
+        <div class="image-board">
+            <!- 포트폴리오 이미지 게시판 ->
+            <div><img src="/images/portfolio1.jpg" alt="Portfolio 1"></div>
+            <div><img src="/images/portfolio2.jpg" alt="Portfolio 2"></div>
+        </div>
+    </section>-->
+</div>
+
+<div th:replace="~{common/footer:: footer}"></div>
+
+<script>
+    const getCookie = (name) => {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    };
+
+    const token = getCookie("token");
+    if (token) {
+        document.querySelector('.head-my').style.display = 'none';
+        document.querySelector('.head-my-on').style.display = 'block';
+        console.log("로그인 상태입니다.");
+    } else {
+        console.log("로그인하지 않았습니다.");
+    }
+</script>
+</body>
+</html>

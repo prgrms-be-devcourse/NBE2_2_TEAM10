@@ -1,54 +1,40 @@
-@import url('reset.css');
+@import url('style.css');
 
 
-/* title */
-.title {
-    font-size: 40px;
-    font-weight: normal;
-    color: #000;
-    margin-bottom: 20px;
-}
-
-/* form */
-.form-wrap {
-    width: 1000px;
-    height: 1200px;
-}
-.form-line {
-    display: flex;
-    margin-bottom: 10px;
-}
-.form-label {
-    width: 100px;
-    font-size:20px;
-    font-weight: normal;
-    color: #000;
-}
-.form-input {}
-
-.form-btn {
-    font-size: 30px;
-    font-width: normal;
-    color: #000;
-    margin-top: 40px;
-}
 
 /* join */
-.join {
-    width: 1000px;
-    margin: 100px auto 0;
+#join {
+    padding-top: 50px;
 }
 
-.join-tit {}
-.join-cont {}
-.join-cont .form-wrap {}
+#join .form-wrap form .form-ctr {
+    flex-direction: column;
+}
+
+
+#join .form-wrap form .form-ctr + .form-ctr {
+    margin-top: 25px;
+}
+
+/* join-complete */
+#joinComplete {
+    padding-top: 50px;
+}
+
+#joinComplete .form-wrap {
+    min-width: 350px;
+}
+
+#joinComplete .form-wrap form .form-cont img {
+    width: 50%;
+    max-width: 350px;
+}
 
 /* login */
-.login {
-    width: 800px;
-    margin: 100px auto 0;
+#login {
+    padding-top: 50px;
 }
 
-.login-tit {}
-.login-cont {}
-.login-cont .form-wrap {}
+#login .form-wrap {
+    min-width: 350px;
+}

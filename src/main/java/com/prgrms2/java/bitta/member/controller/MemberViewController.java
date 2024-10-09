@@ -7,27 +7,39 @@ import org.springframework.web.bind.annotation.RequestMapping;
 @Controller
 @RequestMapping("/member")
 public class MemberViewController {
-    // 로그인 페이지로 이동
+    // 로그인
     @GetMapping("/login")
     public String showLoginPage() {
-        return "member/login"; // member 폴더 안에 있는 login.html
+        return "member/login";
     }
 
-    // 회원가입 페이지로 이동
+    // 회원가입
     @GetMapping("/join")
     public String showJoinPage() {
-        return "member/join"; // member 폴더 안에 있는 join.html
+        return "member/join";
     }
 
-    // 마이페이지로 이동
+    // 회원가입완료
+    @GetMapping("/join-complete")
+    public String JoinCompletePage() {
+        return "member/join-complete";
+    }
+
+    // 회원정보수정
+    @GetMapping("/myinfo")
+    public String modifyMyPage() {
+        return "member/myinfo";
+    }
+
+    // 회원정보조회
     @GetMapping("/mypage")
     public String showMyPage() {
-        return "member/mypage"; // member 폴더 안에 있는 mypage.html
+        return "member/mypage";
     }
 
-    // 마이페이지로 이동
+    // 비밀번호찾기
     @GetMapping("/find")
     public String findMyPW() {
-        return "member/find"; // member 폴더 안에 있는 mypage.html
+        return "member/find";
     }
 }
