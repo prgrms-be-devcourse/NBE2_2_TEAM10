@@ -1,6 +1,7 @@
 package com.prgrms2.java.bitta.feed.service;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
+import com.prgrms2.java.bitta.feed.dto.FeedRequestDto;
 import com.prgrms2.java.bitta.media.dto.MediaDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,7 +16,7 @@ public interface FeedService {
 
     void insert(FeedDTO feedDto, List<MultipartFile> files);
 
-    void update(FeedDTO feedDto, List<MultipartFile> filesToUpload, List<MediaDto> filesToDelete);
+    void update(FeedRequestDto.Modify feedDto, List<MultipartFile> filesToUpload, List<String> filesToDeletes);
 
     void delete(Long id);
 

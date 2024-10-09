@@ -40,5 +40,5 @@ public class FeedDTO {
     private LocalDateTime createdAt;
 
     @Schema(title = "미디어 파일 목록", description = "피드에 포함된 사진 및 영상 목록입니다.")
-    private List<MediaDto> medias;
+    private List<String> medias;
 }

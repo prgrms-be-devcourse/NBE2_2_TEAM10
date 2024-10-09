@@ -1,6 +1,7 @@
 package com.prgrms2.java.bitta.feed.controller;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
+import com.prgrms2.java.bitta.feed.dto.FeedRequestDto;
 import com.prgrms2.java.bitta.feed.service.FeedService;
 import com.prgrms2.java.bitta.global.exception.AuthenticationException;
 import com.prgrms2.java.bitta.global.util.AuthenticationProvider;
@@ -233,8 +234,8 @@ public class FeedController {
             schema = @Schema(type = "integer", minimum = "1")
     )
     @PutMapping(value = "/{id}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<?> modifyFeed(@PathVariable("id") @Min(1) Long id, @RequestPart("feed") @Valid FeedDTO feedDTO
-            , @RequestPart("filesToUpload") List<MultipartFile> filesToUpload, @RequestPart("filesToDelete") List<MediaDto> filesToDelete) {
+    public ResponseEntity<?> modifyFeed(@PathVariable("id") @Min(1) Long id, @RequestPart("feed") @Valid FeedRequestDto.Modify feedDTO
+            , @RequestPart("filesToUpload") List<MultipartFile> filesToUpload, @RequestPart("filesToDelete") List<String> filesToDelete) {
         if (!checkPermission(id)) {
             throw AuthenticationException.CANNOT_ACCESS.get();
         }
