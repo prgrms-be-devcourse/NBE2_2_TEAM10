@@ -1,10 +1,13 @@
 package com.prgrms2.java.bitta.global.config;
 
+import com.prgrms2.java.bitta.global.util.AccessDeniedHandlerImpl;
+import com.prgrms2.java.bitta.global.util.AuthenticationEntryPointImpl;
 import com.prgrms2.java.bitta.token.filter.TokenAuthenticationFilter;
 import com.prgrms2.java.bitta.token.util.TokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -32,7 +35,16 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .anyRequest().permitAll())
+                        .requestMatchers(
+                                "api/v1/member", "api/v1/member/login", "api/v1/token"
+                                , "member/login").permitAll()
+                        .requestMatchers(HttpMethod.POST, "api/v1/member").anonymous()
+                        .requestMatchers(HttpMethod.PUT, "api/v1/member/{id}").hasRole("USER")
+                        .requestMatchers(
+                                "api/v1/member/test", "api/v1/apply/**",
+                                "api/v1/feed/**", "api/v1/job-post/**", "api/v1/scout/**",
+                                "member/profile", "apply/**", "feed/**", "job-post/**", "scout/**" ).hasRole("USER")
+                        .anyRequest().authenticated())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
@@ -67,5 +79,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
-
 }

@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빛다::회원가입</title>
+
+    <link rel="stylesheet" th:href="@{../css/member.css}" />
+</head>
+<body>
+<div th:replace="~{common/header :: header}"></div>
+
+<div id="join" class="wrap">
+    <div class="form-wrap">
+        <h2 class="title">회원가입</h2>
+
+        <form id="joinForm">
+            <div class="form-ctr">
+                <label for="username">아이디 <span class="font-red">*</span></label>
+                <input type="text" id="username" name="username" placeholder="아이디를 입력해주세요." required>
+            </div>
+
+            <div class="form-ctr">
+                <label for="password">비밀번호 <span class="font-red">*</span></label>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력해주세요." required>
+            </div>
+
+            <div class="form-ctr">
+                <label for="nickname">닉네임 <span class="font-red">*</span></label>
+                <input type="text" id="nickname" name="nickname" placeholder="닉네임을 입력해주세요." required>
+            </div>
+
+            <div class="form-ctr">
+                <label for="address">주소 <span class="font-red">*</span></label>
+                <input type="text" id="address" name="address" placeholder="주소를 입력해주세요." required>
+            </div>
+
+            <div class="form-btn">
+                <button type="submit">회원가입</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{common/footer:: footer}"></div>
+
+<script>
+    document.getElementById("joinForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const response = await fetch("/api/v1/member", {
+            method: "POST",
+            body: JSON.stringify(Object.fromEntries(formData)),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.ok) {
+            window.location.href = "/member/join-complete";
+        } else {
+            //alert("회원가입 실패: " + (await response.text()));
+            alert("회원가입 실패하였습니다. 다시 시도해주세요.");
+        }
+    });
+</script>
+</body>
+</html>

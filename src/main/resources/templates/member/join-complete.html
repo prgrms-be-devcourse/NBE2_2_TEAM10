@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빛다::회원가입</title>
+
+    <link rel="stylesheet" th:href="@{../css/member.css}" />
+</head>
+<body>
+    <div th:replace="~{common/header :: header}"></div>
+
+    <div id="joinComplete" class="wrap">
+        <div class="form-wrap">
+            <h2 class="title">회원가입 완료</h2>
+            <form>
+                <div class="form-cont">
+                    <img src="/images/complete.png" alt="축하">
+                    <!--<p><span class="text-bold" th:text="${username} + '님 회원가입이 완료되었습니다.'"></span></p>-->
+                    <p>회원가입이 완료되었습니다.</p>
+                </div>
+                <div class="form-btn">
+                    <a href="login">로그인 페이지로 이동</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div th:replace="~{common/footer:: footer}"></div>
+
+</body>
+</html>

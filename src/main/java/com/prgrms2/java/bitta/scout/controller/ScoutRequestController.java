@@ -16,13 +16,13 @@ import java.util.Map;
 public class ScoutRequestController {
     private final ScoutRequestService scoutRequestService;
 
-    @PostMapping("/send")
+    @PostMapping
     public ResponseEntity<?> sendScoutRequest(@RequestParam Long feedId, @RequestParam Long senderId, @RequestParam String description) {
         ScoutRequestDTO scoutRequest = scoutRequestService.sendScoutRequest(feedId, senderId, description);
         return ResponseEntity.ok().body(scoutRequest);
     }
 
-    @GetMapping("/all/{userId}")
+    @GetMapping("/{userId}")
     public ResponseEntity<?> getAllScoutRequests(@PathVariable Long userId, Pageable pageable) {
         Page<ScoutRequestDTO> sentRequests = scoutRequestService.getSentScoutRequests(userId, pageable);
         Page<ScoutRequestDTO> receivedRequests = scoutRequestService.getReceivedScoutRequests(userId, pageable);

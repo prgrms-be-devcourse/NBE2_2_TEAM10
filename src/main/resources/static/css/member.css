@@ -1,0 +1,40 @@
+@import url('style.css');
+
+
+
+/* join */
+#join {
+    padding-top: 50px;
+}
+
+#join .form-wrap form .form-ctr {
+    flex-direction: column;
+}
+
+
+#join .form-wrap form .form-ctr + .form-ctr {
+    margin-top: 25px;
+}
+
+/* join-complete */
+#joinComplete {
+    padding-top: 50px;
+}
+
+#joinComplete .form-wrap {
+    min-width: 350px;
+}
+
+#joinComplete .form-wrap form .form-cont img {
+    width: 50%;
+    max-width: 350px;
+}
+
+/* login */
+#login {
+    padding-top: 50px;
+}
+
+#login .form-wrap {
+    min-width: 350px;
+}

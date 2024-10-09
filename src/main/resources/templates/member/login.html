@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>빛다::로그인</title>
+
+    <link rel="stylesheet" th:href="@{../css/member.css}" />
+</head>
+<body>
+<div th:replace="~{common/header :: header}"></div>
+
+<div id="login" class="wrap">
+    <div class="form-wrap">
+        <h2 class="title">로그인</h2>
+
+        <form id="loginForm">
+            <div class="form-ctr">
+                <!--<label for="username">아이디</label>-->
+                <input type="text" id="username" name="username" placeholder="아이디" required>
+            </div>
+
+            <div class="form-ctr">
+                <!--<label for="password">비밀번호</label>-->
+                <input type="password" id="password" name="password" placeholder="비밀번호" required>
+            </div>
+
+            <div class="form-btn">
+                <button type="submit">로그인</button>
+            </div>
+
+            <div class="form-act">
+                <a href="/member/join">회원가입</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{common/footer:: footer}"></div>
+
+<script>
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const formData = new FormData(event.target);
+        const response = await fetch("/api/v1/member/login", {
+            method: "POST",
+            body: JSON.stringify(Object.fromEntries(formData)),
+            headers: {
+                "Content-Type": "application/json"
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            document.cookie = "token=" + data.result.token + "; path=/";
+            window.location.href = "/";
+        } else {
+            // alert("로그인 실패: " + (await response.text()));
+            alert("아이디 또는 비밀번호가 잘못되었습니다.");
+        }
+    });
+</script>
+</body>
+</html>

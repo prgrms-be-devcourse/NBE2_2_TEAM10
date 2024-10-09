@@ -18,6 +18,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -32,7 +33,6 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 @RequestMapping("api/v1/member")
 public class MemberController {
     private final MemberService memberService;
-
     private final MemberProvider memberProvider;
 
     @Operation(
@@ -83,10 +83,16 @@ public class MemberController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> register(@RequestBody MemberRequestDto.Register registerDto) {
+    public String register(@RequestBody MemberRequestDto.Register registerDto, Model model) {
         memberService.insert(registerDto);
 
-        return ResponseEntity.ok(Map.of("message", "회원가입에 성공했습니다."));
+        // 회원가입 후 username 추가
+        model.addAttribute("username", registerDto.getUsername());
+        model.addAttribute("successMessage", "회원가입에 성공했습니다.");
+
+        return "redirect:/member/join-complete";
+
+        //return ResponseEntity.ok(Map.of("message", "회원가입에 성공했습니다."));
     }
 
     @Operation(
@@ -154,9 +160,11 @@ public class MemberController {
 
         modifyDto.setId(id);
 
-        if (file.isEmpty()) {
+        if (!file.isEmpty()) {
+            System.out.println("파일이 있습니다.");
             memberService.update(modifyDto, file);
         } else {
+            System.out.println("파일이 비어있습니다.");
             memberService.update(modifyDto);
         }
 

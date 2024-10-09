@@ -8,22 +8,19 @@ import com.prgrms2.java.bitta.media.dto.MediaDto;
 import com.prgrms2.java.bitta.media.entity.MediaCategory;
 import com.prgrms2.java.bitta.media.entity.Media;
 import com.prgrms2.java.bitta.media.exception.MediaException;
+import com.prgrms2.java.bitta.media.exception.MediaTaskException;
 import com.prgrms2.java.bitta.media.repository.MediaRepository;
 
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.service.MemberProvider;
 import lombok.RequiredArgsConstructor;
 
-import net.coobird.thumbnailator.Thumbnails;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Paths;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -39,8 +36,7 @@ public class MediaServiceImpl implements MediaService {
 
     private final JobPostProvider jobPostProvider;
 
-    @Value("${file.root.path}")
-    private String rootPath;
+    private final S3Service s3Service;
 
     @Override
     @Transactional
@@ -54,18 +50,19 @@ public class MediaServiceImpl implements MediaService {
 
             String filename = UUID.randomUUID().toString();
             String extension = "." + StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
-
+            MediaCategory category = categories.get(i);
             try {
-                multipartFile.transferTo(Paths.get(rootPath, filename + extension));
-            } catch (IOException e) {
-                throw MediaException.INTERNAL_ERROR.get();
+                String filepath = category + filename;
+                s3Service.upload(multipartFile, filepath);
+            } catch (MediaTaskException ignored) {
+
             }
 
             medias.add(Media.builder()
                     .filename(filename)
                     .extension(extension)
                     .size(multipartFile.getSize())
-                    .type(categories.get(i))
+                    .type(category)
                     .feed(feed)
                     .build());
         }
@@ -75,15 +72,15 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public void upload(MultipartFile multipartFile, Long memberId, Long jobPostId) {
-        String filename = UUID.randomUUID().toString();
-        String extension = "." + StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
-        String filepath = rootPath + filename + extension;
         MediaCategory category = checkFileType(multipartFile);
 
-        File file = new File(filepath);
+        String filename = UUID.randomUUID().toString();
+        String extension = "." + StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
+        String filepath = category.name() + "/" + filename;
+
         Member member = null;
         JobPost jobPost = null;
-
+        Media media = null;
         try {
             if (memberId != null && jobPostId != null) {
                 throw MediaException.BAD_REQUEST.get();
@@ -91,37 +88,70 @@ public class MediaServiceImpl implements MediaService {
 
             if (memberId != null) {
                 member = memberProvider.getById(memberId);
-                multipartFile.transferTo(file);
+
+                if (!mediaRepository.existsById(member.getMedia().getId())) {
+                    media = Media.builder()
+                            .filename(filename)
+                            .extension(extension)
+                            .size(multipartFile.getSize())
+                            .type(category)
+                            .member(member)
+                            .build();
+                } else {
+                    media = mediaRepository.findById(member.getMedia().getId()).get();
+                    media.setFilename(filename);
+                    media.setExtension(extension);
+                    media.setSize(multipartFile.getSize());
+                    media.setType(category);
+                }
+
+                mediaRepository.save(media);
+
+                s3Service.uploadThumbnail(multipartFile, filepath);
+
+                return;
             }
 
             if (jobPostId != null) {
                 jobPost = jobPostProvider.getById(jobPostId);
-                Thumbnails.of(multipartFile.getInputStream())
-                        .size(200, 200)
-                        .keepAspectRatio(true)
-                        .toFile(file);
+
+                if (!mediaRepository.existsById(jobPost.getMedia().getId())) {
+                    media = Media.builder()
+                            .filename(filename)
+                            .extension(extension)
+                            .size(multipartFile.getSize())
+                            .type(category)
+                            .jobPost(jobPost)
+                            .build();
+                } else {
+                    media = mediaRepository.findById(member.getMedia().getId()).get();
+                    media.setFilename(filename);
+                    media.setExtension(extension);
+                    media.setSize(multipartFile.getSize());
+                    media.setType(category);
+                }
+
+                mediaRepository.save(media);
+
+                s3Service.upload(multipartFile, filepath);
             }
-        } catch (IOException e) {
-            throw MediaException.INTERNAL_ERROR.get();
+        } catch (MediaTaskException e) {
+            System.out.println(e.getMessage());
         }
-
-        Media media = Media.builder()
-                .filename(filename)
-                .extension(extension)
-                .size(multipartFile.getSize())
-                .type(category)
-                .member(member)
-                .jobPost(jobPost)
-                .build();
-
-        mediaRepository.save(media);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public void delete(Media media) {
-        delete(entityToDto(media));
+    @Transactional
+    public void deleteExistFile(Media media) {
+        String filepath = checkFileType(media.getExtension()) + media.getFilename() + media.getExtension();
+
+        try {
+            s3Service.delete(filepath);
+        } catch (MediaTaskException ignored) {
+
+        }
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -129,14 +159,12 @@ public class MediaServiceImpl implements MediaService {
         List<Media> medias = mediaRepository.findAllByFeedId(feedId);
 
         medias.forEach(media -> {
-            String filepath = rootPath + media.getFilename() + media.getExtension();
+            String filepath = checkFileType(media.getExtension()) + media.getFilename() + media.getExtension();
 
-            File file = new File(filepath);
+            try {
+                s3Service.delete(filepath);
+            } catch (MediaTaskException ignored) {
 
-            if (file.exists()) {
-                file.delete();
-            } else {
-                throw MediaException.NOT_FOUND.get();
             }
         });
     }
@@ -148,26 +176,31 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public void delete(MediaDto mediaDto) {
-        String filepath = rootPath + mediaDto.getFilename() + mediaDto.getExtension();
+        String filepath = checkFileType(mediaDto.getExtension()) + mediaDto.getFilename() + mediaDto.getExtension();
 
-        File file = new File(filepath);
+        try {
+            s3Service.delete(filepath);
+        } catch (MediaTaskException ignored) {
 
-        if (file.exists()) {
-            file.delete();
-        } else {
-            throw MediaException.NOT_FOUND.get();
         }
     }
 
     @Override
-    public String getMediaUrl(Media media) {
-        return rootPath + media.getFilename() + media.getExtension();
+    public String getUrl(Media media) {
+        String filepath = checkFileType(media.getExtension()) + media.getFilename() + media.getExtension();
+
+        try {
+            return s3Service.generatePreSignedUrl(filepath);
+        } catch (MediaTaskException ignored) {
+
+        }
+
+        return null;
     }
 
     @Override
-    public Media getMedia(String mediaUrl) {
-        String filename = mediaUrl.substring(rootPath.length())
-                .substring(0, mediaUrl.indexOf("."));
+    public Media getMedia(String preSignedUrl) {
+        String filename = extractFilename(preSignedUrl);
 
         return mediaRepository.findByFilename(filename).orElse(null);
     }
@@ -192,8 +225,8 @@ public class MediaServiceImpl implements MediaService {
     }
 
     private MediaCategory checkFileType(MultipartFile multipartFile) {
-        String contentType = multipartFile.getContentType();
-
+        String contentType = multipartFile.getContentType().toLowerCase();
+        System.out.println(contentType);
         if (contentType.matches("image/(jpeg|png|gif|bmp|webp|svg\\+xml)")) {
             return MediaCategory.IMAGE;
         }
@@ -203,6 +236,23 @@ public class MediaServiceImpl implements MediaService {
         }
 
         throw MediaException.INVALID_FORMAT.get();
+    }
+
+    private MediaCategory checkFileType(String filepath) {
+        return filepath.matches("\\.(jpg|png|gif|bmp|webp|svg)$")
+                ? MediaCategory.IMAGE : MediaCategory.VIDEO;
+    }
+
+    private String extractFilename(String preSignedUrl) {
+        String uriPath = URI.create(preSignedUrl).getPath();
+
+        return uriPath.substring(uriPath.lastIndexOf("/") + 1);
+    }
+
+    private String extractFilepath(String preSignedUrl) {
+        String uriPath = URI.create(preSignedUrl).getPath();
+
+        return uriPath.substring(uriPath.indexOf("/", 1) + 1);
     }
 
     private Media dtoToEntity(MediaDto mediaDto) {

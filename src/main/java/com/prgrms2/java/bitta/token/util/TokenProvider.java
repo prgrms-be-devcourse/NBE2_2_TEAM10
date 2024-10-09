@@ -1,6 +1,5 @@
 package com.prgrms2.java.bitta.token.util;
 
-import com.prgrms2.java.bitta.member.service.MemberProvider;
 import com.prgrms2.java.bitta.token.dto.TokenResponseDto;
 import com.prgrms2.java.bitta.token.exception.TokenException;
 import io.jsonwebtoken.*;
@@ -31,7 +30,7 @@ public class TokenProvider {
     @Value("${token.secret.key}")
     private String secretKey;
 
-    private final long TEN_MINUTES = 600000L;
+    private final long ONE_HOURS = 3600000L;
     private final long ONE_WEEKS = 604800000L;
 
     public TokenResponseDto generate(Authentication authentication) {
@@ -46,7 +45,7 @@ public class TokenProvider {
 
         // Access Token 생성
         Date bothIssuedAt = new Date(currentMilliseconds);
-        Date accessExpiredAt = new Date(currentMilliseconds + TEN_MINUTES);
+        Date accessExpiredAt = new Date(currentMilliseconds + ONE_HOURS);
         Date refreshExpiredAt = new Date(currentMilliseconds + ONE_WEEKS);
 
         String accessToken = Jwts.builder()
@@ -90,7 +89,7 @@ public class TokenProvider {
         accessToken = Jwts.builder()
                 .claims(Map.of("username", username, "authority", authority))
                 .issuedAt(new Date(currentMillSeconds))
-                .expiration(new Date(currentMillSeconds + TEN_MINUTES))
+                .expiration(new Date(currentMillSeconds + ONE_HOURS))
                 .signWith(getSignedKey(), HS256)
                 .compact();
 
@@ -133,7 +132,9 @@ public class TokenProvider {
         Collection<? extends GrantedAuthority> authorities
                 = Collections.singletonList(new SimpleGrantedAuthority(authority.toString()));
 
-        return new UsernamePasswordAuthenticationToken(username.toString(), null, authorities);
+        authorities.forEach(System.out::println);
+
+        return new UsernamePasswordAuthenticationToken(username.toString(), "", authorities);
     }
 
     private String stripGrantType(String token) {
@@ -159,10 +160,20 @@ public class TokenProvider {
     }
 
     private Claims parseClaims(String accessToken) {
-        return Jwts.parser()
-                .verifyWith(getSignedKey())
-                .build()
-                .parseSignedClaims(accessToken)
-                .getPayload();
+        try {
+            return Jwts.parser()
+                    .verifyWith(getSignedKey())
+                    .build()
+                    .parseSignedClaims(accessToken)
+                    .getPayload();
+        } catch (SecurityException | MalformedJwtException e) {
+            throw TokenException.BAD_SIGNATURE.get();
+        } catch (ExpiredJwtException e) {
+            throw TokenException.TOKEN_EXPIRED.get();
+        } catch (UnsupportedJwtException e) {
+            throw TokenException.UNSUPPORTED.get();
+        } catch (IllegalArgumentException e) {
+            throw TokenException.WRONG_TOKEN.get();
+        }
     }
 }

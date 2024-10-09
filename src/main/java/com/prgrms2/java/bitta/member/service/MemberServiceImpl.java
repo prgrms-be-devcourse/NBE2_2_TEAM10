@@ -1,9 +1,7 @@
 package com.prgrms2.java.bitta.member.service;
 
-import com.prgrms2.java.bitta.media.entity.Media;
 import com.prgrms2.java.bitta.media.exception.MediaTaskException;
 import com.prgrms2.java.bitta.media.service.MediaService;
-import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
 import com.prgrms2.java.bitta.member.dto.MemberResponseDto;
 import com.prgrms2.java.bitta.member.entity.Member;
@@ -23,8 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -89,7 +85,7 @@ public class MemberServiceImpl implements MemberService {
                 .entityToDto(member);
 
         if (member.getMedia() != null) {
-            memberDto.setProfileUrl(mediaService.getMediaUrl(member.getMedia()));
+            memberDto.setProfileUrl(mediaService.getUrl(member.getMedia()));
         }
 
         return memberDto;
@@ -110,12 +106,15 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void update(MemberRequestDto.Modify memberDto) {
-        if (!memberRepository.existsById(memberDto.getId())) {
-            throw MemberException.NOT_FOUND.get();
-        }
+        Member member = memberRepository.findById(memberDto.getId())
+                .orElseThrow(MemberException.NOT_FOUND::get);
+
+        member.setUsername(memberDto.getUsername());
+        member.setNickname(memberDto.getNickname());
+        member.setAddress(memberDto.getAddress());
 
         try {
-            memberRepository.save(memberMapper.dtoToEntity(memberDto));
+            memberRepository.save(member);
         } catch (DataIntegrityViolationException | ConstraintViolationException | MediaTaskException e) {
             throw MemberException.NOT_MODIFIED.get();
         }
@@ -127,18 +126,18 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(memberDto.getId())
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
-        try {
-            mediaService.delete(member.getMedia());
-        } catch (MediaTaskException ignored) {}
-
-        try {
-            mediaService.upload(profileImage, member.getId(), null);
-        } catch (MediaTaskException ignored) {
-            throw MemberException.NOT_MODIFIED.get();
+        if (member.getMedia() != null) {
+            mediaService.deleteExistFile(member.getMedia());
         }
 
+        mediaService.upload(profileImage, member.getId(), null);
+
+        member.setUsername(memberDto.getUsername());
+        member.setNickname(memberDto.getNickname());
+        member.setAddress(memberDto.getAddress());
+
         try {
-            memberRepository.save(memberMapper.dtoToEntity(memberDto));
+            memberRepository.save(member);
         } catch (DataIntegrityViolationException | ConstraintViolationException | MediaTaskException e) {
             throw MemberException.NOT_MODIFIED.get();
         }
@@ -151,7 +150,7 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
         try {
-            mediaService.delete(member.getMedia());
+            mediaService.deleteExistFile(member.getMedia());
             log.info("회원 삭제 완료 - ID: {}", id);
         } catch (Exception e) {
             log.error("회원 삭제 실패 - ID: {}", id, e);
@@ -162,28 +161,5 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean checkAuthority(Long id, String username) {
         return memberRepository.existsByIdAndUsername(id, username);
-    }
-
-    private MemberDTO entityToDto(Member member) {
-        Media media = member.getMedia();
-
-        return MemberDTO.builder()
-                .id(member.getId())
-                .username(member.getUsername())
-                .password(member.getPassword())
-                .nickname(member.getNickname())
-                .address(member.getAddress())
-                .profileUrl(media != null ? mediaService.getMediaUrl(media) : null)
-                .build();
-    }
-
-    private Member dtoToEntity(MemberDTO memberDTO) {
-        return Member.builder()
-                .id(memberDTO.getId())
-                .username(memberDTO.getUsername())
-                .password(memberDTO.getPassword())
-                .nickname(memberDTO.getNickname())
-                .address(memberDTO.getAddress())
-                .build();
     }
 }
