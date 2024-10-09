@@ -170,6 +170,7 @@ public class FeedController {
                     )
             }
     )
+
     @PostMapping(consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<?> createFeed(@RequestPart(value = "feed") @Valid FeedDTO feedDto
             , @RequestPart(value = "files", required = false) List<MultipartFile> files) {
@@ -294,7 +295,7 @@ public class FeedController {
     }
 
     private boolean checkPermission(Long id) {
-        if (AuthenticationProvider.getRoles() == Role.ADMIN) {
+        if (AuthenticationProvider.getRoles() == Role.ROLE_ADMIN) {
             return true;
         }
 

@@ -38,9 +38,8 @@ public class TokenController {
             }
     )
     @PostMapping
-    public ResponseEntity<?> reissue(@RequestHeader("Authorization") String accessToken
-            , @RequestBody TokenRequestDto requestDto) {
-        TokenResponseDto tokenResponseDto = tokenProvider.reissue(accessToken, requestDto.getRefreshToken());
+    public ResponseEntity<?> reissue(@RequestBody TokenRequestDto requestDto) {
+        TokenResponseDto tokenResponseDto = tokenProvider.reissue(requestDto.getAccessToken(), requestDto.getRefreshToken());
 
         return ResponseEntity.ok(Map.of("message", "토큰을 재발행했습니다."
                 , "accessToken", tokenResponseDto.getAccessToken()

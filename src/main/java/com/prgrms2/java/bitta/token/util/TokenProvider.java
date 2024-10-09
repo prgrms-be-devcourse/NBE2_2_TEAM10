@@ -25,8 +25,6 @@ import static io.jsonwebtoken.Jwts.SIG.HS256;
 @Component
 @RequiredArgsConstructor
 public class TokenProvider {
-    private final MemberProvider memberProvider;
-
     @Value("${token.grant.type}")
     private String grantType;
 
@@ -38,11 +36,11 @@ public class TokenProvider {
 
     public TokenResponseDto generate(Authentication authentication) {
         String username = authentication.getName();
-        String authority = String.format("ROLE_%s", authentication
+        String authority = authentication
                 .getAuthorities()
                 .iterator()
                 .next()
-                .getAuthority());
+                .getAuthority();
 
         long currentMilliseconds = System.currentTimeMillis();
 

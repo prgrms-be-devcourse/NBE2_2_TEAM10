@@ -39,7 +39,7 @@ public class MemberRequestDto {
 
         @Builder.Default
         @Schema(title = "회원 권한", description = "회원이 갖는 액세스 권한입니다.", example = "USER")
-        private Role role = Role.USER;
+        private Role role = Role.ROLE_USER;
     }
 
     @Data

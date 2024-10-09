@@ -110,7 +110,7 @@ public class MemberController {
         }
 
         return ResponseEntity.ok(Map.of("message", "회원을 성공적으로 조회했습니다."
-                , "result", memberService.getDtoById(id)));
+                , "result", memberService.read(id)));
     }
 
     @PutMapping("/{id}")
@@ -189,7 +189,7 @@ public class MemberController {
     }
 
     private boolean checkPermission(Long id) {
-        if (AuthenticationProvider.getRoles() == Role.ADMIN) {
+        if (AuthenticationProvider.getRoles() == Role.ROLE_ADMIN) {
             return true;
         }
 

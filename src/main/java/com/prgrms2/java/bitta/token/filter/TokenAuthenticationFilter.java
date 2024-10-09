@@ -35,6 +35,7 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             if (tokenProvider.validate(accessToken)) {
                 Authentication authentication = tokenProvider.getAuthentication(accessToken);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
+                log.info("Setting authentication for user: {}", authentication.getName());
             }
         } catch (RuntimeException ignored) {}
 
