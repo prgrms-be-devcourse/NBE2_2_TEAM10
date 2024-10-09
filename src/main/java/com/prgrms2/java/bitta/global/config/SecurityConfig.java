@@ -34,12 +34,11 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "api/v1/member", "api/v1/member/login", "api/v1/token",
-                                "member", "/member/login").permitAll()
+                                "member/register", "member/login").permitAll()
                         .requestMatchers(
                                 "api/v1/member/{id}", "api/v1/member/test", "api/v1/apply/**",
                                 "api/v1/feed/**", "api/v1/job-post/**", "api/v1/scout/**",
-                                "member/{id}", "apply/**", "feed/**", "job-post/**", "scout/**" ).hasRole("USER")
-
+                                "member/profile", "apply/**", "feed/**", "job-post/**", "scout/**" ).hasRole("USER")
                         .anyRequest().permitAll())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
