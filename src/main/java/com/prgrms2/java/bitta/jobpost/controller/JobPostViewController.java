@@ -29,6 +29,6 @@ public class JobPostViewController {
         List<JobPost> result = jobPostRepository.findAll();
         model.addAttribute("jobPosts", result);
 
-        return "jobpost.html";
+        return "jobpost/jobpost.html";
     }
 }
