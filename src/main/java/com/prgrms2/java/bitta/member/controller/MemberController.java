@@ -186,14 +186,14 @@ public class MemberController {
             }
     )
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> delete(@PathVariable Long id) {
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         if (!checkPermission(id)) {
             throw AuthenticationException.CANNOT_ACCESS.get();
         }
 
         memberService.delete(id);
         log.info("회원 삭제 완료 - 사용자 ID: {}", id);
-        return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+        return ResponseEntity.ok(Map.of("message", "회원 탈퇴가 완료되었습니다."));
     }
 
     private boolean checkPermission(Long id) {
