@@ -41,6 +41,7 @@ public class SecurityConfig {
                                 , "/swagger-ui/**", "/api-docs", "/api-docs/**"
                                 , "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/v1/member").anonymous()
+                        .requestMatchers(HttpMethod.PUT, "api/v1/member/{id}").hasRole("USER")
                         .requestMatchers(
                                 "api/v1/member/{id}", "api/v1/member/test", "api/v1/apply/**",
                                 "api/v1/feed/**", "api/v1/job-post/**", "api/v1/scout/**",

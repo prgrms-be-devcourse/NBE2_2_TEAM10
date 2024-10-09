@@ -4,6 +4,7 @@ import com.prgrms2.java.bitta.member.exception.MemberTaskException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -24,6 +25,12 @@ public class MemberControllerAdvice {
     public ResponseEntity<?> handleArgsException(MemberTaskException e) {
         return ResponseEntity.status(e.getCode())
                 .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<?> handleArgsException(BadCredentialsException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "로그인에 실패했습니다."));
     }
 }
 

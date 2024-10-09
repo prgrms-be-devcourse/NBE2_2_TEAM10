@@ -88,8 +88,9 @@ public class MediaServiceImpl implements MediaService {
 
             if (memberId != null) {
                 member = memberProvider.getById(memberId);
+                media = member.getMedia();
 
-                if (!mediaRepository.existsById(member.getMedia().getId())) {
+                if (media == null) {
                     media = Media.builder()
                             .filename(filename)
                             .extension(extension)
@@ -98,7 +99,6 @@ public class MediaServiceImpl implements MediaService {
                             .member(member)
                             .build();
                 } else {
-                    media = mediaRepository.findById(member.getMedia().getId()).get();
                     media.setFilename(filename);
                     media.setExtension(extension);
                     media.setSize(multipartFile.getSize());
@@ -114,8 +114,9 @@ public class MediaServiceImpl implements MediaService {
 
             if (jobPostId != null) {
                 jobPost = jobPostProvider.getById(jobPostId);
+                media = jobPost.getMedia();
 
-                if (!mediaRepository.existsById(jobPost.getMedia().getId())) {
+                if (media == null) {
                     media = Media.builder()
                             .filename(filename)
                             .extension(extension)
@@ -124,7 +125,6 @@ public class MediaServiceImpl implements MediaService {
                             .jobPost(jobPost)
                             .build();
                 } else {
-                    media = mediaRepository.findById(member.getMedia().getId()).get();
                     media.setFilename(filename);
                     media.setExtension(extension);
                     media.setSize(multipartFile.getSize());
