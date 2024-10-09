@@ -11,7 +11,7 @@ public interface MediaService {
 
     void upload(MultipartFile file, Long memberId, Long jobPostId);
 
-    void delete(Media media);
+    void deleteExistFile(Media media);
 
     void delete(List<MediaDto> mediaDtos);
 

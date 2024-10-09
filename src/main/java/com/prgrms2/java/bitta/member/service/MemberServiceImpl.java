@@ -106,12 +106,15 @@ public class MemberServiceImpl implements MemberService {
     @Override
     @Transactional
     public void update(MemberRequestDto.Modify memberDto) {
-        if (!memberRepository.existsById(memberDto.getId())) {
-            throw MemberException.NOT_FOUND.get();
-        }
+        Member member = memberRepository.findById(memberDto.getId())
+                .orElseThrow(MemberException.NOT_FOUND::get);
+
+        member.setUsername(memberDto.getUsername());
+        member.setNickname(memberDto.getNickname());
+        member.setAddress(memberDto.getAddress());
 
         try {
-            memberRepository.save(memberMapper.dtoToEntity(memberDto));
+            memberRepository.save(member);
         } catch (DataIntegrityViolationException | ConstraintViolationException | MediaTaskException e) {
             throw MemberException.NOT_MODIFIED.get();
         }
@@ -123,18 +126,18 @@ public class MemberServiceImpl implements MemberService {
         Member member = memberRepository.findById(memberDto.getId())
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
-        try {
-            mediaService.delete(member.getMedia());
-        } catch (MediaTaskException ignored) {}
-
-        try {
-            mediaService.upload(profileImage, member.getId(), null);
-        } catch (MediaTaskException ignored) {
-            throw MemberException.NOT_MODIFIED.get();
+        if (member.getMedia() != null) {
+            mediaService.deleteExistFile(member.getMedia());
         }
 
+        mediaService.upload(profileImage, member.getId(), null);
+
+        member.setUsername(memberDto.getUsername());
+        member.setNickname(memberDto.getNickname());
+        member.setAddress(memberDto.getAddress());
+
         try {
-            memberRepository.save(memberMapper.dtoToEntity(memberDto));
+            memberRepository.save(member);
         } catch (DataIntegrityViolationException | ConstraintViolationException | MediaTaskException e) {
             throw MemberException.NOT_MODIFIED.get();
         }
@@ -147,7 +150,7 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
         try {
-            mediaService.delete(member.getMedia());
+            mediaService.deleteExistFile(member.getMedia());
             log.info("회원 삭제 완료 - ID: {}", id);
         } catch (Exception e) {
             log.error("회원 삭제 실패 - ID: {}", id, e);

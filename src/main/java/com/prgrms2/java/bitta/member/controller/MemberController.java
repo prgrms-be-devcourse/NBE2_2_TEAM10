@@ -160,9 +160,11 @@ public class MemberController {
 
         modifyDto.setId(id);
 
-        if (file.isEmpty()) {
+        if (!file.isEmpty()) {
+            System.out.println("파일이 있습니다.");
             memberService.update(modifyDto, file);
         } else {
+            System.out.println("파일이 비어있습니다.");
             memberService.update(modifyDto);
         }
 

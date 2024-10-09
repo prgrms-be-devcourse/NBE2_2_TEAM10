@@ -76,11 +76,11 @@ public class MediaServiceImpl implements MediaService {
 
         String filename = UUID.randomUUID().toString();
         String extension = "." + StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
-        String filepath = category.name() + filename;
+        String filepath = category.name() + "/" + filename;
 
         Member member = null;
         JobPost jobPost = null;
-
+        Media media = null;
         try {
             if (memberId != null && jobPostId != null) {
                 throw MediaException.BAD_REQUEST.get();
@@ -89,39 +89,69 @@ public class MediaServiceImpl implements MediaService {
             if (memberId != null) {
                 member = memberProvider.getById(memberId);
 
-                if (category == MediaCategory.VIDEO) {
-                    MediaException.CANNOT_UPLOAD_VIDEO.get();
+                if (!mediaRepository.existsById(member.getMedia().getId())) {
+                    media = Media.builder()
+                            .filename(filename)
+                            .extension(extension)
+                            .size(multipartFile.getSize())
+                            .type(category)
+                            .member(member)
+                            .build();
+                } else {
+                    media = mediaRepository.findById(member.getMedia().getId()).get();
+                    media.setFilename(filename);
+                    media.setExtension(extension);
+                    media.setSize(multipartFile.getSize());
+                    media.setType(category);
                 }
 
+                mediaRepository.save(media);
+
                 s3Service.uploadThumbnail(multipartFile, filepath);
+
+                return;
             }
 
             if (jobPostId != null) {
                 jobPost = jobPostProvider.getById(jobPostId);
 
+                if (!mediaRepository.existsById(jobPost.getMedia().getId())) {
+                    media = Media.builder()
+                            .filename(filename)
+                            .extension(extension)
+                            .size(multipartFile.getSize())
+                            .type(category)
+                            .jobPost(jobPost)
+                            .build();
+                } else {
+                    media = mediaRepository.findById(member.getMedia().getId()).get();
+                    media.setFilename(filename);
+                    media.setExtension(extension);
+                    media.setSize(multipartFile.getSize());
+                    media.setType(category);
+                }
+
+                mediaRepository.save(media);
+
                 s3Service.upload(multipartFile, filepath);
             }
-        } catch (MediaTaskException ignored) {
-
+        } catch (MediaTaskException e) {
+            System.out.println(e.getMessage());
         }
-
-        Media media = Media.builder()
-                .filename(filename)
-                .extension(extension)
-                .size(multipartFile.getSize())
-                .type(category)
-                .member(member)
-                .jobPost(jobPost)
-                .build();
-
-        mediaRepository.save(media);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public void delete(Media media) {
-        delete(entityToDto(media));
+    @Transactional
+    public void deleteExistFile(Media media) {
+        String filepath = checkFileType(media.getExtension()) + media.getFilename() + media.getExtension();
+
+        try {
+            s3Service.delete(filepath);
+        } catch (MediaTaskException ignored) {
+
+        }
     }
+
 
     @Override
     @Transactional(readOnly = true)
@@ -195,8 +225,8 @@ public class MediaServiceImpl implements MediaService {
     }
 
     private MediaCategory checkFileType(MultipartFile multipartFile) {
-        String contentType = multipartFile.getContentType();
-
+        String contentType = multipartFile.getContentType().toLowerCase();
+        System.out.println(contentType);
         if (contentType.matches("image/(jpeg|png|gif|bmp|webp|svg\\+xml)")) {
             return MediaCategory.IMAGE;
         }

@@ -13,6 +13,6 @@ import java.io.IOException;
 public class AccessDeniedHandlerImpl implements AccessDeniedHandler {
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response, AccessDeniedException accessDeniedException) throws IOException, ServletException {
-        response.sendRedirect("/api/v1/token?code=401");
+        response.sendRedirect("/api/v1/token?code=403");
     }
 }

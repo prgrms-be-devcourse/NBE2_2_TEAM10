@@ -14,6 +14,6 @@ public class AuthenticationEntryPointImpl implements AuthenticationEntryPoint {
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response, AuthenticationException authException)
             throws IOException, ServletException {
-        response.sendRedirect("/api/v1/token?code=403");
+        response.sendRedirect("/api/v1/token?code=401");
     }
 }

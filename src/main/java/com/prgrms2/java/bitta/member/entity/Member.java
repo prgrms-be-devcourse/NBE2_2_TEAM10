@@ -40,14 +40,14 @@ public class Member implements UserDetails {
     @Column(nullable = false)
     private String address;
 
-    @OneToOne(mappedBy = "member", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
     private Media media;
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Feed> feeds = new ArrayList<>();
 
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)
     @Builder.Default
     private List<Apply> applies = new ArrayList<>();
 

@@ -30,7 +30,7 @@ public class TokenProvider {
     @Value("${token.secret.key}")
     private String secretKey;
 
-    private final long TEN_MINUTES = 600000L;
+    private final long ONE_HOURS = 3600000L;
     private final long ONE_WEEKS = 604800000L;
 
     public TokenResponseDto generate(Authentication authentication) {
@@ -45,7 +45,7 @@ public class TokenProvider {
 
         // Access Token 생성
         Date bothIssuedAt = new Date(currentMilliseconds);
-        Date accessExpiredAt = new Date(currentMilliseconds + TEN_MINUTES);
+        Date accessExpiredAt = new Date(currentMilliseconds + ONE_HOURS);
         Date refreshExpiredAt = new Date(currentMilliseconds + ONE_WEEKS);
 
         String accessToken = Jwts.builder()
@@ -89,7 +89,7 @@ public class TokenProvider {
         accessToken = Jwts.builder()
                 .claims(Map.of("username", username, "authority", authority))
                 .issuedAt(new Date(currentMillSeconds))
-                .expiration(new Date(currentMillSeconds + TEN_MINUTES))
+                .expiration(new Date(currentMillSeconds + ONE_HOURS))
                 .signWith(getSignedKey(), HS256)
                 .compact();
 
