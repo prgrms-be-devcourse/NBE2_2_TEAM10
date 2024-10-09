@@ -206,17 +206,107 @@ public class JobPostController {
         return ResponseEntity.ok(Map.of("message", "삭제가 완료되었습니다"));
     }
 
+    @Operation(
+            summary = "작성자의 다른 게시물 조회",
+            description = "작성자의 ID와 동일한 게시물을 조회합니다",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "작성자의 게시물 조회에 성공했습니다",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(example = JOB_POST_SUCCESS_READ)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "작성자의 게시물을 찾을 수 없습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(example = JOB_POST_FAILURE_NOT_FOUND)
+                            )
+                    )
+            }
+    )
+    @Parameter(
+            name = "memberId",
+            description = "작성자의 ID",
+            required = true,
+            example = "1",
+            schema = @Schema(type = "integer")
+    )
+
     @GetMapping("/member/{memberId}")
     public ResponseEntity<Page<JobPostDTO>> getJobPostByMember(@PathVariable Long memberId, @ModelAttribute PageRequestDTO pageRequestDTO) {
         Page<JobPostDTO> result = jobPostService.getJobPostByMember(memberId, pageRequestDTO);
         return ResponseEntity.ok(result);
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<Page<JobPostDTO>> searchJobPost(@RequestParam("keyword") String keyword, @ModelAttribute PageRequestDTO pageRequestDTO) {
+    @Operation(
+            summary = "키워드 검색",
+            description = "키워드가 포함된 게시물을 검색합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "검색 결과를 성공적으로 조회했습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(example = JOB_POST_SUCCESS_READ)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "검색 결과가 존재하지 않습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(example = JOB_POST_FAILURE_NOT_FOUND)
+                            )
+                    )
+            }
+    )
+    @Parameter(
+            name = "keyword",
+            description = "검색할 키워드",
+            required = true,
+            example = "1",
+            schema = @Schema(type = "string")
+    )
+
+    @GetMapping("/search/{keyword}")
+    public ResponseEntity<Page<JobPostDTO>> searchJobPost(@PathVariable("keyword") String keyword, @ModelAttribute PageRequestDTO pageRequestDTO) {
         Page<JobPostDTO> result = jobPostService.searchJobPosts(keyword, pageRequestDTO);
         return ResponseEntity.ok(result);
     }
+
+    @Operation(
+            summary = "게시물의 지원서 조회",
+            description = "게시물에 해당하는 지원서를 조회합니다.",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "지원서를 성공적으로 조회했습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(example = JOB_POST_SUCCESS_READ)
+                            )
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "지원서가 존재하지 않습니다.",
+                            content = @Content(
+                                    mediaType = "application/json",
+                                    schema = @Schema(example = JOB_POST_FAILURE_NOT_FOUND)
+                            )
+                    )
+            }
+    )
+    @Parameter(
+            name = "id",
+            description = "지원서의 해당 일거리 ID",
+            required = true,
+            example = "1",
+            schema = @Schema(type = "integer")
+    )
 
     @GetMapping("/{id}/showApply")
     public ResponseEntity<List<ApplyDTO>> showApplyForJobPost(@PathVariable("id") Long id) {
