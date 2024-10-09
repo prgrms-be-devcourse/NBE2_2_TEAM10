@@ -37,7 +37,7 @@ public class S3ServiceImpl implements S3Service {
                     .build();
 
             PresignedGetObjectRequest presignedGetObjectRequest = s3Presigner.presignGetObject(request -> request
-                    .signatureDuration(Duration.ofMinutes(1))
+                    .signatureDuration(Duration.ofMinutes(60))
                     .getObjectRequest(getObjectRequest));
 
             return presignedGetObjectRequest.url().toString();

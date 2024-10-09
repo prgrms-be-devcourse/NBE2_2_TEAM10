@@ -150,6 +150,7 @@ public class MemberServiceImpl implements MemberService {
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
         try {
+            memberRepository.deleteById(id);
             mediaService.deleteExistFile(member.getMedia());
             log.info("회원 삭제 완료 - ID: {}", id);
         } catch (Exception e) {

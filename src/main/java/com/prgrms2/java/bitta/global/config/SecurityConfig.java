@@ -37,7 +37,9 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "api/v1/member", "api/v1/member/login", "api/v1/token"
-                                , "member/login").permitAll()
+                                , "member/login","/swagger", "/swagger-ui.html"
+                                , "/swagger-ui/**", "/api-docs", "/api-docs/**"
+                                , "/v3/api-docs/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/v1/member").anonymous()
                         .requestMatchers(HttpMethod.PUT, "api/v1/member/{id}").hasRole("USER")
                         .requestMatchers(

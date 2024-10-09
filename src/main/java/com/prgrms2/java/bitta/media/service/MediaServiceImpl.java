@@ -187,7 +187,9 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public String getUrl(Media media) {
-        String filepath = checkFileType(media.getExtension()) + media.getFilename() + media.getExtension();
+        String filepath = checkFileType(media.getExtension()) + "/" + media.getFilename();
+
+        System.out.println("URLURLURL : " + filepath);
 
         try {
             return s3Service.generatePreSignedUrl(filepath);
@@ -238,8 +240,8 @@ public class MediaServiceImpl implements MediaService {
         throw MediaException.INVALID_FORMAT.get();
     }
 
-    private MediaCategory checkFileType(String filepath) {
-        return filepath.matches("\\.(jpg|png|gif|bmp|webp|svg)$")
+    private MediaCategory checkFileType(String extension) {
+        return extension.toLowerCase().matches("\\.(jpg|png|gif|bmp|webp|svg)$")
                 ? MediaCategory.IMAGE : MediaCategory.VIDEO;
     }
 

@@ -30,9 +30,11 @@ public class S3Config {
 
     @Bean
     public S3Presigner s3Presigner() {
+        AwsBasicCredentials awsBasicCredentials = AwsBasicCredentials.create(accessId, secretKey);
+
         return S3Presigner.builder()
                 .region(Region.AP_NORTHEAST_2)
-                .credentialsProvider(DefaultCredentialsProvider.create())
+                .credentialsProvider(StaticCredentialsProvider.create(awsBasicCredentials))
                 .build();
     }
 }
