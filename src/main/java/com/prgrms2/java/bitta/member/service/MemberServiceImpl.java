@@ -1,9 +1,7 @@
 package com.prgrms2.java.bitta.member.service;
 
-import com.prgrms2.java.bitta.media.entity.Media;
 import com.prgrms2.java.bitta.media.exception.MediaTaskException;
 import com.prgrms2.java.bitta.media.service.MediaService;
-import com.prgrms2.java.bitta.member.dto.MemberDTO;
 import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
 import com.prgrms2.java.bitta.member.dto.MemberResponseDto;
 import com.prgrms2.java.bitta.member.entity.Member;
@@ -23,8 +21,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -89,7 +85,7 @@ public class MemberServiceImpl implements MemberService {
                 .entityToDto(member);
 
         if (member.getMedia() != null) {
-            memberDto.setProfileUrl(mediaService.getMediaUrl(member.getMedia()));
+            memberDto.setProfileUrl(mediaService.getUrl(member.getMedia()));
         }
 
         return memberDto;
@@ -162,28 +158,5 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public boolean checkAuthority(Long id, String username) {
         return memberRepository.existsByIdAndUsername(id, username);
-    }
-
-    private MemberDTO entityToDto(Member member) {
-        Media media = member.getMedia();
-
-        return MemberDTO.builder()
-                .id(member.getId())
-                .username(member.getUsername())
-                .password(member.getPassword())
-                .nickname(member.getNickname())
-                .address(member.getAddress())
-                .profileUrl(media != null ? mediaService.getMediaUrl(media) : null)
-                .build();
-    }
-
-    private Member dtoToEntity(MemberDTO memberDTO) {
-        return Member.builder()
-                .id(memberDTO.getId())
-                .username(memberDTO.getUsername())
-                .password(memberDTO.getPassword())
-                .nickname(memberDTO.getNickname())
-                .address(memberDTO.getAddress())
-                .build();
     }
 }
