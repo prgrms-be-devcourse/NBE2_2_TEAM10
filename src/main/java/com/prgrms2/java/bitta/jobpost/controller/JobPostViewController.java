@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @Controller
-@RequestMapping("/jobpost")
+@RequestMapping("/job-post")
 public class JobPostViewController {
 
     @GetMapping
