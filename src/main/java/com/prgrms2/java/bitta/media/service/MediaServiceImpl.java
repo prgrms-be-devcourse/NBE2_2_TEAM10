@@ -183,6 +183,15 @@ public class MediaServiceImpl implements MediaService {
         });
     }
 
+    @Transactional
+    @Override
+    public void delete(Media media) {
+        media.setJobPost(null);
+        media.setMember(null);
+        media.setFeed(null);
+        mediaRepository.delete(media);
+    }
+
     @Override
     public void delete(List<MediaDto> mediaDTOs) {
         mediaDTOs.forEach(this::delete);

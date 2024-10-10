@@ -1,6 +1,7 @@
 package com.prgrms2.java.bitta.apply.service;
 
 import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
+import com.prgrms2.java.bitta.apply.entity.Apply;
 import com.prgrms2.java.bitta.member.entity.Member;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +13,11 @@ public interface ApplyService {
 
     void delete(Long id);
 
+    void delete(List<Apply> apply);
+
     ApplyDTO read(Long id);
 
-    ApplyDTO readByIdAndMember(Long id, Member member);
-
     List<ApplyDTO> getApplyForJobPost(Long jobPostId);
+
+    ApplyDTO findById(Long id);
 }

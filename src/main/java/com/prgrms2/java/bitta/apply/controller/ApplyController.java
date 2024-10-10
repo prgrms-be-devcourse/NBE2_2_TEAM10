@@ -12,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -104,8 +103,8 @@ public class ApplyController {
             schema = @Schema(type = "integer")
     )
     @GetMapping("/{id}")
-    public ResponseEntity<ApplyDTO> readApply(@PathVariable("id") Long id, @AuthenticationPrincipal Member member) {
-        ApplyDTO applyDTO = applyService.readByIdAndMember(id, member);
+    public ResponseEntity<ApplyDTO> readApply(@PathVariable("id") Long id) {
+        ApplyDTO applyDTO = applyService.findById(id);
         return ResponseEntity.ok(applyDTO);
     }
 
@@ -151,5 +150,4 @@ public class ApplyController {
         applyService.delete(id);
         return ResponseEntity.ok(Map.of("message", "삭제가 완료되었습니다"));
     }
-
 }

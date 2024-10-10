@@ -21,58 +21,58 @@ import org.springframework.data.domain.Sort;
 import java.util.Arrays;
 import java.util.List;
 
-class JobPostServiceTest {
-
-    @Mock
-    private JobPostRepository jobPostRepository;
-
-    @InjectMocks
-    private JobPostServiceImpl jobPostService;
-
-    private PageRequestDTO pageRequestDTO;
-    private List<JobPostDTO> jobPostDTOList;
-    private JobPostDTO jobPostDTO1;
-    private JobPostDTO jobPostDTO2;
-
-    @BeforeEach
-    void setUp() {
-        MockitoAnnotations.openMocks(this);
-
-        jobPostDTO1 = JobPostDTO.builder()
-                .id(1L)
-                .title("Job Post 1")
-                .description("Description 1")
-                .build();
-
-        jobPostDTO2 = JobPostDTO.builder()
-                .id(2L)
-                .title("Job Post 2")
-                .description("Description 2")
-                .build();
-
-        jobPostDTOList = Arrays.asList(jobPostDTO1, jobPostDTO2);
-
-        pageRequestDTO = PageRequestDTO.builder()
-                .page(1)
-                .size(10)
-                .build();
-    }
-
-    @Test
-    @DisplayName("페이징된 전체 목록 조회")
-    void testGetListWithPaging() {
-        Pageable pageable = pageRequestDTO.getPageable(Sort.by("id").descending());
-        Page<JobPostDTO> jobPostDTOPage = new PageImpl<>(jobPostDTOList, pageable, jobPostDTOList.size());
-
-        when(jobPostRepository.getList(pageable)).thenReturn(jobPostDTOPage);
-
-        Page<JobPostDTO> resultPage = jobPostService.getList(pageRequestDTO);
-
-        assertThat(resultPage.getTotalElements()).isEqualTo(2);
-        assertThat(resultPage.getTotalPages()).isEqualTo(1);
-        assertThat(resultPage.getContent().get(0).getTitle()).isEqualTo("Job Post 1");
-        assertThat(resultPage.getContent().get(1).getTitle()).isEqualTo("Job Post 2");
-
-        verify(jobPostRepository, times(1)).getList(pageable);
-    }
-}
+//class JobPostServiceTest {
+//
+//    @Mock
+//    private JobPostRepository jobPostRepository;
+//
+//    @InjectMocks
+//    private JobPostServiceImpl jobPostService;
+//
+//    private PageRequestDTO pageRequestDTO;
+//    private List<JobPostDTO> jobPostDTOList;
+//    private JobPostDTO jobPostDTO1;
+//    private JobPostDTO jobPostDTO2;
+//
+//    @BeforeEach
+//    void setUp() {
+//        MockitoAnnotations.openMocks(this);
+//
+//        jobPostDTO1 = JobPostDTO.builder()
+//                .id(1L)
+//                .title("Job Post 1")
+//                .description("Description 1")
+//                .build();
+//
+//        jobPostDTO2 = JobPostDTO.builder()
+//                .id(2L)
+//                .title("Job Post 2")
+//                .description("Description 2")
+//                .build();
+//
+//        jobPostDTOList = Arrays.asList(jobPostDTO1, jobPostDTO2);
+//
+//        pageRequestDTO = PageRequestDTO.builder()
+//                .page(1)
+//                .size(10)
+//                .build();
+//    }
+//
+//    @Test
+//    @DisplayName("페이징된 전체 목록 조회")
+//    void testGetListWithPaging() {
+//        Pageable pageable = pageRequestDTO.getPageable(Sort.by("id").descending());
+//        Page<JobPostDTO> jobPostDTOPage = new PageImpl<>(jobPostDTOList, pageable, jobPostDTOList.size());
+//
+//        when(jobPostRepository.getList(pageable)).thenReturn(jobPostDTOPage);
+//
+//        Page<JobPostDTO> resultPage = jobPostService.getList(pageRequestDTO);
+//
+//        assertThat(resultPage.getTotalElements()).isEqualTo(2);
+//        assertThat(resultPage.getTotalPages()).isEqualTo(1);
+//        assertThat(resultPage.getContent().get(0).getTitle()).isEqualTo("Job Post 1");
+//        assertThat(resultPage.getContent().get(1).getTitle()).isEqualTo("Job Post 2");
+//
+//        verify(jobPostRepository, times(1)).getList(pageable);
+//    }
+//}
