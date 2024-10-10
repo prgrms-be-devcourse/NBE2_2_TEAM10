@@ -8,10 +8,7 @@
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-
-    <link rel="stylesheet" th:href="@{../css/jobpost.css}" />
-
-
+    <link href="/css/jobpost.css" rel="stylesheet">
   </head>
   <body>
     <!-- navbar -->
@@ -19,14 +16,14 @@
       <div class="container">
         <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
           <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 link-body-emphasis text-decoration-none">
-            <img src="img/BI.png" alt="Logo" width="40" height="32" class="me-2">
+            <img src="images/infologobitta.png" alt="Logo" width="40" height="32" class="me-2">
           </a>
   
           <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0 text-fonts">
-            <li><a href="#" class="nav-link px-2 link-secondary">구인공지</a></li>
-            <li><a href="#" class="nav-link px-2 link-body-emphasis">Inventory</a></li>
-            <li><a href="#" class="nav-link px-2 link-body-emphasis">Customers</a></li>
-            <li><a href="#" class="nav-link px-2 link-body-emphasis">Products</a></li>
+            <li><a href="#" class="nav-link px-2 link-secondary">JobPost</a></li>
+            <li><a href="#" class="nav-link px-2 link-body-emphasis">Feed</a></li>
+            <li><a href="http://localhost:8080/swagger-ui/index.html#/" class="nav-link px-2 link-body-emphasis">Swagger</a></li>
+            <li><a href="#" class="nav-link px-2 link-body-emphasis">info</a></li>
           </ul>
   
           <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
@@ -54,16 +51,17 @@
       <div class="inner">
         <div class="contents">
           <div class="dummy-height"></div>
-          <div class="dill-box-type" th:each="i : ${jobPost}">
+          <div class="dill-box-type" th:each="i : ${jobPosts}">
             <div class="dill-box-warp">
               <div class="top-cont">
                 <div class="main-ctext">
-                  <div class="camera-category" th:text="${i.cate}">📷</div>
-                  <div class="post-title" th:text="${i.title}">| 숲 속 안에서</div>
-                  <span class="post-explane" th:text="${i.sub_title}">숲에서 자연친화적 컨셉의 스틸 촬영하실 분 구합니다!!</span>
+                  <div class="camera-category">📷</div>
+                  <div class="post-title" th:text="'| ' + ${i.title}">| 숲 속 안에서</div>
+                  <span class="post-explane" th:text="${i.description}">숲에서 자연친화적 컨셉의 스틸 촬영하실 분 구합니다!!</span>
                 </div>
                 <div class="img-area">
-                  <img src="img/herin.png" th:src="${i.img_url}">
+                  <img src="/images/herin.png">
+<!--                  th:src="${i.media.filename}-->
                 </div>
               </div>
               <ul class="dill-list-box">
@@ -71,61 +69,29 @@
                   <div class="cal-text">📆10월 20일</div>
                   <a class="dill-list">
                     <div class="post-name">
-                      <div class="main-name">이수호 촬영감독</div>
+                      <div class="main-name" th:text="${i.member?.nickname} + ' 감독님'">이수호 촬영감독</div>
                       <div class="phistory">경력 2년</div>
-                      <div class="post-price">💸상호 무페이</div>
+                      <div class="post-price" th:if="${i.payStatus.name() == 'PAID'}">💸 협상 문의</div>
+                      <div class="post-price" th:if="${i.payStatus.name() != 'PAID'}">💸 상호 무페이</div>
                     </div>
                     <div class="postbtn">
                       <div class="btn_group1">
                         <button class="btn_res type03">
                           지원하기
-                          D-321
                         </button>
                       </div>
                     </div>
                   </a>
                 </li>
               </ul>
-
             </div>
-            
           </div>
-          <div class="dill-box-type">
-            <div class="dill-box-warp">
-              <div class="top-cont">
-                <div class="main-ctext">
-                  <div class="camera-category">📷</div>
-                  <div class="post-title">| 숲 속 안에서</div>
-                  <span class="post-explane">숲에서 자연친화적 컨셉의 스틸 촬영하실 분 구합니다!!</span>
-                </div>
-                <div class="img-area">
-                  <img src="img/herin.png">
-                </div>
-              </div>
-              <ul class="dill-list-box">
-                <li class="list-item">
-                  <div class="cal-text">📆10월 20일</div>
-                  <a class="dill-list">
-                    <div class="post-name">
-                      <div class="main-name">이수호 촬영감독</div>
-                      <div class="phistory">경력 2년</div>
-                      <div class="post-price">💸상호 무페이</div>
-                        
-                    </div>
-                  </a>
-                </li>
-              </ul>
-
-            </div>
-            
-          </div>
-          
         </div>
         <div class="sidebar">
           <div class="sinner scroll_p">
             <div class="res_form">
               <h2 class="title">카테고리 설정</h2>
-              
+
               <div class="cont">
                 <a class="ico-place" style="cursor: pointer;">
                   사진촬영
@@ -138,7 +104,7 @@
                   <button class="btn_edit">수정</button>
                 </a>
               </div>
-              
+
               <div class="btn_group">
                 <button class="btnx type02">재검색</button>
               </div>

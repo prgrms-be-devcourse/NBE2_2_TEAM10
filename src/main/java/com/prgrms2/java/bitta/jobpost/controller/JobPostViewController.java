@@ -1,68 +1,34 @@
 package com.prgrms2.java.bitta.jobpost.controller;
 
+import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
+import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
+import com.prgrms2.java.bitta.jobpost.entity.JobPost;
+import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
+import com.prgrms2.java.bitta.jobpost.service.JobPostService;
+import com.prgrms2.java.bitta.member.repository.MemberRepository;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
 @Controller
-@RequestMapping("/jobpost")
+@RequiredArgsConstructor
 public class JobPostViewController {
 
-    @GetMapping
-    public String showJobpostPage(Model model) {
-        return "jobpost/jobpost";
+    private final JobPostService jobPostService;
+    private final JobPostRepository jobPostRepository;
+    private final MemberRepository memberRepository;
+
+    @GetMapping("jobpost")
+    public String getjobpost(Model model) {
+        List<JobPost> result = jobPostRepository.findAll();
+        model.addAttribute("jobPosts", result);
+
+        return "jobpost/jobpost.html";
     }
 }
-
-
-
-
-
-//import edu.example.training.entity.Training;
-//import edu.example.training.service.TrainingService;
-//import org.springframework.stereotype.Controller;
-//import org.springframework.stereotype.Repository;
-//import org.springframework.ui.Model;
-//import org.springframework.web.bind.annotation.GetMapping;
-//import org.springframework.web.bind.annotation.RequestMapping;
-//import org.springframework.web.bind.annotation.RequestParam;
-//
-//import java.util.List;
-//
-//@Controller
-//@RequestMapping("/training")
-//public class TrainingController {
-//    private final TrainingService trainingService;
-//
-//    public TrainingController(TrainingService trainingService) {
-//        this.trainingService = trainingService;
-//    }
-//
-//    @GetMapping("/display-list")
-//    public String displayList(Model model){
-//        System.out.println("/training/display-list");
-//
-//        List<Training> trainings = trainingService.findAll();
-//        model.addAttribute("trainingList", trainings);
-//
-//        return "training/trainingList";
-//    }
-//
-//    @GetMapping("/display-details")
-//    public String displayDetails(@RequestParam String trainingId, Model model){
-//        System.out.println("/training/display-details id : " + trainingId);
-//
-//        Training training = trainingService.findById(trainingId);
-//        model.addAttribute("training", training);
-//
-//        return "training/trainingDetails";
-//    }
-//}
-
-
-
-
