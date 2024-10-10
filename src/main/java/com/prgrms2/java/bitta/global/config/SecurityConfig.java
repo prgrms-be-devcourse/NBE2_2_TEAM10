@@ -39,14 +39,14 @@ public class SecurityConfig {
                                 "api/v1/member", "api/v1/member/login", "api/v1/token"
                                 , "member/login","/swagger", "/swagger-ui.html"
                                 , "/swagger-ui/**", "/api-docs", "/api-docs/**"
-                                , "/v3/api-docs/**").permitAll()
+                                , "/v3/api-docs/**", "job-post/**", "/css/**", "/images/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "api/v1/member").anonymous()
                         .requestMatchers(HttpMethod.PUT, "api/v1/member/{id}").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "api/v1/feed/{id}").hasRole("USER")
                         .requestMatchers(
                                 "api/v1/member/{id}", "api/v1/member/test", "api/v1/apply/**",
                                 "api/v1/feed**", "api/v1/job-post/**", "api/v1/scout**",
-                                "member/profile", "apply/**", "feed/**", "job-post/**", "scout/**" ).hasRole("USER")
+                                "member/profile", "apply/**", "feed/**", "scout/**" ).hasRole("USER")
                         .anyRequest().authenticated())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();
