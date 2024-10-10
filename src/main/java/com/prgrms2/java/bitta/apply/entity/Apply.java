@@ -24,12 +24,10 @@ public class Apply {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Application은 특정 JobPost에 속함 (N:1 관계)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "job_post_id", nullable = false)
     private JobPost jobPost;
 
-    // Application은 특정 User의 신청 정보 (N:1 관계)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;

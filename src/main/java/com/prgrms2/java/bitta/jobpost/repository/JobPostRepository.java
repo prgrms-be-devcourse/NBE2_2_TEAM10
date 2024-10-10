@@ -14,13 +14,10 @@ import java.util.Optional;
 public interface JobPostRepository extends JpaRepository<JobPost, Long> {
 
     @Query("SELECT j FROM JobPost j WHERE j.id = :id")
-    Optional<JobPostDTO> getJobPostDTO(@Param("id") Long id);
-
-    @Query("DELETE FROM JobPost j WHERE j.id = :id")
-    Long deleteByIdAndReturnCount(Long id);
+    Optional<JobPost> getJobPost(@Param("id") Long id);
 
     @Query("SELECT j FROM JobPost j ORDER BY 'id' DESC ")
-    Page<JobPostDTO> getList(Pageable pageable);
+    Page<JobPost> getList(Pageable pageable);
 
     @Query("SELECT j FROM JobPost j WHERE j.member.id = :memberId")
     Page<JobPostDTO> findJobPostByMember(@Param("memberId") Long memberId, Pageable pageable);

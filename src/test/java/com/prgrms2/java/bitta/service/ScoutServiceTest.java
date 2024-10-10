@@ -4,7 +4,7 @@ import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.service.FeedProvider;
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.dto.MemberProvider;
-import com.prgrms2.java.bitta.scout.dto.ScoutRequestDTO;
+import com.prgrms2.java.bitta.scout.dto.ScoutDTO;
 import com.prgrms2.java.bitta.scout.entity.ScoutRequest;
 import com.prgrms2.java.bitta.scout.repository.ScoutRequestRepository;
 import com.prgrms2.java.bitta.scout.service.ScoutRequestService;
@@ -70,7 +70,7 @@ public class ScoutServiceTest {
 
         when(scoutRequestRepository.save(any(ScoutRequest.class))).thenReturn(scoutRequest);
 
-        ScoutRequestDTO result = scoutRequestService.sendScoutRequest(1L, 1L, "Scout Request Description");
+        ScoutDTO result = scoutRequestService.sendScoutRequest(1L, 1L, "Scout Request Description");
 
         assertEquals(1L, result.getFeed().getId());
         assertEquals(1L, result.getSenderId());
@@ -82,7 +82,7 @@ public class ScoutServiceTest {
         Page<ScoutRequest> scoutRequestPage = new PageImpl<>(List.of(scoutRequest));
         when(scoutRequestRepository.findBySenderId(any(Long.class), any(PageRequest.class))).thenReturn(scoutRequestPage);
 
-        Page<ScoutRequestDTO> result = scoutRequestService.getSentScoutRequests(1L, PageRequest.of(0, 10));
+        Page<ScoutDTO> result = scoutRequestService.getSentScoutRequests(1L, PageRequest.of(0, 10));
 
         assertEquals(1, result.getTotalElements());
         assertEquals(1L, result.getContent().get(0).getSenderId());
@@ -93,7 +93,7 @@ public class ScoutServiceTest {
         Page<ScoutRequest> scoutRequestPage = new PageImpl<>(List.of(scoutRequest));
         when(scoutRequestRepository.findByReceiverId(any(Long.class), any(PageRequest.class))).thenReturn(scoutRequestPage);
 
-        Page<ScoutRequestDTO> result = scoutRequestService.getReceivedScoutRequests(2L, PageRequest.of(0, 10));
+        Page<ScoutDTO> result = scoutRequestService.getReceivedScoutRequests(2L, PageRequest.of(0, 10));
 
         assertEquals(1, result.getTotalElements());
         assertEquals(2L, result.getContent().get(0).getReceiverId());

@@ -1,10 +1,12 @@
 package com.prgrms2.java.bitta.feed.service;
 
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
+import com.prgrms2.java.bitta.feed.dto.FeedRequestDto;
 import com.prgrms2.java.bitta.feed.entity.Feed;
 import com.prgrms2.java.bitta.feed.exception.FeedException;
 import com.prgrms2.java.bitta.feed.repository.FeedRepository;
 import com.prgrms2.java.bitta.media.dto.MediaDto;
+import com.prgrms2.java.bitta.media.entity.Media;
 import com.prgrms2.java.bitta.media.service.MediaService;
 import com.prgrms2.java.bitta.member.service.MemberProvider;
 import lombok.RequiredArgsConstructor;
@@ -67,25 +69,29 @@ public class FeedServiceImpl implements FeedService {
 
         Feed feed = dtoToEntity(feedDTO);
 
-        mediaService.uploads(files, feed.getId());
+        feed = feedRepository.save(feed);
 
-        feedRepository.save(feed);
+        mediaService.uploads(files, feed.getId());
     }
 
     @Override
     @Transactional
-    public void update(FeedDTO feedDTO, List<MultipartFile> filesToUpload, List<MediaDto> filesToDelete) {
-        Feed feed = feedRepository.findById(feedDTO.getId())
+    public void update(FeedRequestDto.Modify feedDto, List<MultipartFile> filesToUpload, List<String> filesToDeletes) {
+        Feed feed = feedRepository.findById(feedDto.getId())
                 .orElseThrow(FeedException.CANNOT_FOUND::get);
 
-        feed.setTitle(feedDTO.getTitle());
-        feed.setContent(feedDTO.getContent());
+        feed.setTitle(feedDto.getTitle());
+        feed.setContent(feedDto.getContent());
 
-        mediaService.delete(filesToDelete);
+        if (filesToDeletes != null) {
+            List<Media> deleteMedias = mediaService.getMedias(filesToDeletes);
+
+            mediaService.deleteExistFiles(deleteMedias);
+        }
 
         feed.clearMedias();
 
-        mediaService.uploads(filesToUpload, feedDTO.getId());
+        mediaService.uploads(filesToUpload, feedDto.getId());
         
         feedRepository.save(feed);
     }
@@ -93,11 +99,15 @@ public class FeedServiceImpl implements FeedService {
     @Override
     @Transactional
     public void delete(Long id) {
-        mediaService.delete(id);
+        Feed feed = feedRepository.findById(id)
+                .orElseThrow(FeedException.CANNOT_FOUND::get);
 
-        if (feedRepository.deleteByIdAndReturnCount(id) == 0) {
-            throw FeedException.CANNOT_DELETE.get();
+        if (feed.getMedias() != null) {
+            mediaService.deleteAll(feed.getMedias());
         }
+
+        feed.setMember(null);
+        feedRepository.delete(feed);
     }
 
     @Override
@@ -121,7 +131,7 @@ public class FeedServiceImpl implements FeedService {
                 .content(feedDto.getContent())
                 .createdAt(feedDto.getCreatedAt())
                 .member(memberProvider.getById(feedDto.getMemberId()))
-                .medias(mediaService.convertDTOs(feedDto.getMedias()))
+                .medias(mediaService.getMedias(feedDto.getMedias()))
                 .build();
     }
 
@@ -132,7 +142,7 @@ public class FeedServiceImpl implements FeedService {
                 .content(feed.getContent())
                 .createdAt(feed.getCreatedAt())
                 .memberId(feed.getMember().getId())
-                .medias(mediaService.convertEntities(feed.getMedias()))
+                .medias(mediaService.getUrls(feed.getMedias()))
                 .build();
     }
 }

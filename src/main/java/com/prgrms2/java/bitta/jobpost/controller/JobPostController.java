@@ -1,7 +1,5 @@
 package com.prgrms2.java.bitta.jobpost.controller;
 
-import com.prgrms2.java.bitta.apply.dto.ApplyDTO;
-import com.prgrms2.java.bitta.apply.service.ApplyService;
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
 import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.service.JobPostService;
@@ -18,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
@@ -30,13 +27,6 @@ import static com.prgrms2.java.bitta.global.constants.ApiResponses.*;
 @Log4j2
 public class JobPostController {
     private final JobPostService jobPostService;
-    private final ApplyService applyService;
-
-    //LIST A
-
-    //LIST B - selectbyID
-
-    //
 
     @Operation(
             summary = "전체 일거리 조회",
@@ -89,7 +79,7 @@ public class JobPostController {
             }
     )
     @PostMapping
-    public ResponseEntity<JobPostDTO> registerJobPost(@Valid @RequestBody JobPostDTO jobPostDTO) {
+    public ResponseEntity<JobPostDTO> registerJobPost(@RequestBody JobPostDTO jobPostDTO) {
         return ResponseEntity.ok(jobPostService.register(jobPostDTO));
     }
 
@@ -208,25 +198,7 @@ public class JobPostController {
     )
     @DeleteMapping("/{id}")
     public ResponseEntity<Map<String, String>> deleteJobPost(@Valid @PathVariable("id") Long id) {
-        jobPostService.remove(id);
+        jobPostService.removeJobPost(id);
         return ResponseEntity.ok(Map.of("message", "삭제가 완료되었습니다"));
-    }
-
-    @GetMapping("/member/{memberId}")
-    public ResponseEntity<Page<JobPostDTO>> getJobPostByMember(@PathVariable Long memberId, @ModelAttribute PageRequestDTO pageRequestDTO) {
-        Page<JobPostDTO> result = jobPostService.getJobPostByMember(memberId, pageRequestDTO);
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/search")
-    public ResponseEntity<Page<JobPostDTO>> searchJobPost(@RequestParam("keyword") String keyword, @ModelAttribute PageRequestDTO pageRequestDTO) {
-        Page<JobPostDTO> result = jobPostService.searchJobPosts(keyword, pageRequestDTO);
-        return ResponseEntity.ok(result);
-    }
-
-    @GetMapping("/{id}/showApply")
-    public ResponseEntity<List<ApplyDTO>> showApplyForJobPost(@PathVariable("id") Long id) {
-        List<ApplyDTO> applyList = applyService.getApplyForJobPost(id);
-        return ResponseEntity.ok(applyList);
     }
 }

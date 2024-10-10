@@ -40,7 +40,7 @@ public class Member implements UserDetails {
     @Column(nullable = false)
     private String address;
 
-    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "member", fetch = FetchType.LAZY, cascade = CascadeType.REMOVE)
     private Media media;
 
     @OneToMany(mappedBy = "member", fetch = FetchType.LAZY)

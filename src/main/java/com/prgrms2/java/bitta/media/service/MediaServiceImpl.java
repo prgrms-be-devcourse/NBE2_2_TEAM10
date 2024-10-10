@@ -20,7 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -41,6 +43,10 @@ public class MediaServiceImpl implements MediaService {
     @Override
     @Transactional
     public void uploads(List<MultipartFile> multipartFiles, Long feedId) {
+        if (multipartFiles == null) {
+            return;
+        }
+
         List<MediaCategory> categories = checkFileType(multipartFiles);
         List<Media> medias = new ArrayList<>();
         Feed feed = feedProvider.getById(feedId);
@@ -52,7 +58,7 @@ public class MediaServiceImpl implements MediaService {
             String extension = "." + StringUtils.getFilenameExtension(multipartFile.getOriginalFilename());
             MediaCategory category = categories.get(i);
             try {
-                String filepath = category + filename;
+                String filepath = category + "/" + filename;
                 s3Service.upload(multipartFile, filepath);
             } catch (MediaTaskException ignored) {
 
@@ -88,8 +94,9 @@ public class MediaServiceImpl implements MediaService {
 
             if (memberId != null) {
                 member = memberProvider.getById(memberId);
+                media = member.getMedia();
 
-                if (!mediaRepository.existsById(member.getMedia().getId())) {
+                if (media == null) {
                     media = Media.builder()
                             .filename(filename)
                             .extension(extension)
@@ -98,7 +105,6 @@ public class MediaServiceImpl implements MediaService {
                             .member(member)
                             .build();
                 } else {
-                    media = mediaRepository.findById(member.getMedia().getId()).get();
                     media.setFilename(filename);
                     media.setExtension(extension);
                     media.setSize(multipartFile.getSize());
@@ -114,8 +120,9 @@ public class MediaServiceImpl implements MediaService {
 
             if (jobPostId != null) {
                 jobPost = jobPostProvider.getById(jobPostId);
+                media = jobPost.getMedia();
 
-                if (!mediaRepository.existsById(jobPost.getMedia().getId())) {
+                if (media == null) {
                     media = Media.builder()
                             .filename(filename)
                             .extension(extension)
@@ -124,7 +131,6 @@ public class MediaServiceImpl implements MediaService {
                             .jobPost(jobPost)
                             .build();
                 } else {
-                    media = mediaRepository.findById(member.getMedia().getId()).get();
                     media.setFilename(filename);
                     media.setExtension(extension);
                     media.setSize(multipartFile.getSize());
@@ -143,6 +149,10 @@ public class MediaServiceImpl implements MediaService {
     @Override
     @Transactional
     public void deleteExistFile(Media media) {
+        if (media == null) {
+            return;
+        }
+
         String filepath = checkFileType(media.getExtension()) + media.getFilename() + media.getExtension();
 
         try {
@@ -152,21 +162,34 @@ public class MediaServiceImpl implements MediaService {
         }
     }
 
+    @Override
+    @Transactional
+    public void deleteExistFiles(List<Media> medias) {
+        if (medias == null) {
+            return;
+        }
+
+        medias.forEach(this::deleteExistFile);
+    }
 
     @Override
-    @Transactional(readOnly = true)
-    public void delete(Long feedId) {
-        List<Media> medias = mediaRepository.findAllByFeedId(feedId);
-
-        medias.forEach(media -> {
-            String filepath = checkFileType(media.getExtension()) + media.getFilename() + media.getExtension();
-
-            try {
-                s3Service.delete(filepath);
-            } catch (MediaTaskException ignored) {
-
-            }
+    @Transactional
+    public void deleteAll(List<Media> media) {
+        media.forEach(m -> {
+            m.setMember(null);
+            m.setFeed(null);
+            m.setJobPost(null);
+            mediaRepository.delete(m);
         });
+    }
+
+    @Transactional
+    @Override
+    public void delete(Media media) {
+        media.setJobPost(null);
+        media.setMember(null);
+        media.setFeed(null);
+        mediaRepository.delete(media);
     }
 
     @Override
@@ -187,15 +210,31 @@ public class MediaServiceImpl implements MediaService {
 
     @Override
     public String getUrl(Media media) {
-        String filepath = checkFileType(media.getExtension()) + media.getFilename() + media.getExtension();
-
+        String filepath = checkFileType(media.getExtension()) + "/" + media.getFilename();
+        System.out.println(filepath);
         try {
-            return s3Service.generatePreSignedUrl(filepath);
+            String url = s3Service.generatePreSignedUrl(filepath);
+            System.out.println(url);
+            return url;
         } catch (MediaTaskException ignored) {
 
         }
 
         return null;
+    }
+
+    @Override
+    public List<String> getUrls(List<Media> media) {
+        return media.stream().map(this::getUrl).toList();
+    }
+
+    @Override
+    public List<Media> getMedias(List<String> preSignedUrls) {
+        if (preSignedUrls == null) {
+            return null;
+        }
+
+        return preSignedUrls.stream().map(this::getMedia).toList();
     }
 
     @Override
@@ -238,15 +277,23 @@ public class MediaServiceImpl implements MediaService {
         throw MediaException.INVALID_FORMAT.get();
     }
 
-    private MediaCategory checkFileType(String filepath) {
-        return filepath.matches("\\.(jpg|png|gif|bmp|webp|svg)$")
+    private MediaCategory checkFileType(String extension) {
+        return extension.toLowerCase().matches("\\.(jpg|png|gif|bmp|webp|svg)$")
                 ? MediaCategory.IMAGE : MediaCategory.VIDEO;
     }
 
     private String extractFilename(String preSignedUrl) {
-        String uriPath = URI.create(preSignedUrl).getPath();
+        try {
+            URL uriPath = new URL(preSignedUrl);
 
-        return uriPath.substring(uriPath.lastIndexOf("/") + 1);
+            return uriPath.getPath();
+        } catch (MalformedURLException e) {
+            return null;
+        }
+    }
+
+    private List<String> extractFilenames(List<String> preSignedUrls) {
+        return preSignedUrls.stream().map(this::extractFilename).toList();
     }
 
     private String extractFilepath(String preSignedUrl) {

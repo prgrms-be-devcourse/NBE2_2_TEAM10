@@ -12,6 +12,7 @@ import com.prgrms2.java.bitta.member.service.MemberProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -25,6 +26,7 @@ public class ApplyServiceImpl implements ApplyService {
     private final JobPostProvider jobPostProvider;
 
     @Override
+    @Transactional
     public List<ApplyDTO> readAll(Member member) {
         List<Apply> applies = applyRepository.findAllByMember(member);
 
@@ -36,6 +38,7 @@ public class ApplyServiceImpl implements ApplyService {
     }
 
     @Override
+    @Transactional
     public Map<String, Object> register(ApplyDTO applyDTO) {
         try {
             Apply apply = dtoToEntity(applyDTO);
@@ -53,26 +56,47 @@ public class ApplyServiceImpl implements ApplyService {
     }
 
     @Override
+    @Transactional
     public void delete(Long id) {
-        if (applyRepository.deleteByIdAndReturnCount(id) == 0) {
-            throw ApplyException.NOT_REMOVED.get();
+        Apply apply = applyRepository.findById(id).orElseThrow(ApplyException.NOT_FOUND::get);
+        if (apply.getMember() != null) {
+            apply.setMember(null);
         }
+        if (apply.getJobPost() != null) {
+            apply.setJobPost(null);
+        }
+        applyRepository.delete(apply);
     }
 
     @Override
+    public void delete(List<Apply> apply) {
+        apply.forEach(apply1 -> {
+            if (apply1.getMember() != null) {
+                apply1.setMember(null);
+            }
+            if (apply1.getJobPost() != null) {
+                apply1.setJobPost(null);
+            }
+        });
+        applyRepository.deleteAll(apply);
+    }
+
+    @Override
+    @Transactional
     public ApplyDTO read(Long id) {
-        Optional<ApplyDTO> applyDTO = applyRepository.getApplyDTO(id);
-        return applyDTO.orElseThrow(ApplyException.NOT_FOUND::get);
-    }
-
-    // 게시글 작성자의 ID 값 가져오는 메서드
-    @Override
-    public ApplyDTO readByIdAndMember(Long id, Member member) {
-        Optional<ApplyDTO> applyDTO = applyRepository.findByIdAndMember(id, member);
-        return applyDTO.orElseThrow(ApplyException.NOT_FOUND::get);
+        Optional<Apply> applyDTO = applyRepository.getApplyDTO(id);
+        return applyDTO.map(this::entityToDto).orElseThrow(ApplyException.NOT_FOUND::get);
     }
 
     @Override
+    @Transactional
+    public ApplyDTO findById(Long id) {
+        Optional<Apply> applyDTO = applyRepository.findById(id);
+        return applyDTO.map(this::entityToDto).orElseThrow(ApplyException.NOT_FOUND::get);
+    }
+
+    @Override
+    @Transactional
     public List<ApplyDTO> getApplyForJobPost(Long jobPostId) {
         JobPost jobPost = jobPostRepository.findById(jobPostId).orElseThrow();
 

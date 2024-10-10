@@ -1,19 +1,17 @@
 package com.prgrms2.java.bitta.controller;
 
 import com.prgrms2.java.bitta.scout.controller.ScoutRequestController;
-import com.prgrms2.java.bitta.scout.dto.ScoutRequestDTO;
+import com.prgrms2.java.bitta.scout.dto.ScoutDTO;
 import com.prgrms2.java.bitta.scout.service.ScoutRequestService;
 import com.prgrms2.java.bitta.feed.dto.FeedDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -36,7 +34,7 @@ public class ScoutControllerTest {
     @MockBean
     private ScoutRequestService scoutRequestService;
 
-    private ScoutRequestDTO scoutRequestDTO;
+    private ScoutDTO scoutDTO;
     private FeedDTO feedDTO;
 
     @BeforeEach
@@ -52,7 +50,7 @@ public class ScoutControllerTest {
                 .build();
 
 
-        scoutRequestDTO = ScoutRequestDTO.builder()
+        scoutDTO = ScoutDTO.builder()
                 .id(1L)
                 .feed(feedDTO)
                 .senderId(1L)
@@ -66,7 +64,7 @@ public class ScoutControllerTest {
     public void sendScoutRequest_ShouldReturn200() throws Exception {
 
         when(scoutRequestService.sendScoutRequest(anyLong(), anyLong(), any(String.class)))
-                .thenReturn(scoutRequestDTO);
+                .thenReturn(scoutDTO);
 
         mockMvc.perform(post("/api/v1/scout/send")
                         .param("feedId", "1")
@@ -83,7 +81,7 @@ public class ScoutControllerTest {
     @Test
     public void getAllScoutRequests_ShouldReturn200() throws Exception {
 
-        Page<ScoutRequestDTO> scoutRequestPage = new PageImpl<>(List.of(scoutRequestDTO));
+        Page<ScoutDTO> scoutRequestPage = new PageImpl<>(List.of(scoutDTO));
         when(scoutRequestService.getSentScoutRequests(anyLong(), any(Pageable.class)))
                 .thenReturn(scoutRequestPage);
         when(scoutRequestService.getReceivedScoutRequests(anyLong(), any(Pageable.class)))

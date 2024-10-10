@@ -39,7 +39,7 @@ public class Feed {
     private LocalDateTime createdAt;
 
     @Builder.Default
-    @OneToMany(mappedBy = "feed", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "feed", cascade = CascadeType.REMOVE)
     private List<Media> medias = new ArrayList<>();
 
     public void clearMedias() {
