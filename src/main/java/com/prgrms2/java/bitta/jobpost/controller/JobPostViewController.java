@@ -25,7 +25,7 @@ public class JobPostViewController {
     private final MemberRepository memberRepository;
 
     @GetMapping("jobpost")
-    public String getjobpost(Model model, PageRequestDTO pageRequestDTO) {
+    public String getjobpost(Model model) {
         List<JobPost> result = jobPostRepository.findAll();
         model.addAttribute("jobPosts", result);
 
