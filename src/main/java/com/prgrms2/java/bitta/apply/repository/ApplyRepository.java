@@ -21,13 +21,7 @@ public interface ApplyRepository extends JpaRepository<Apply, Long> {
     List<Apply> findAllByJobPostId(@Param("jobPostId") Long jobPostId);
 
     @Query("SELECT a FROM Apply a WHERE a.id = :id")
-    Optional<ApplyDTO> getApplyDTO(@Param("id") Long id);
-
-    @Query("DELETE FROM Apply a WHERE a.id = :id")
-    int deleteByIdAndReturnCount(Long id);
-
-    @Query("SELECT a FROM Apply a WHERE a.id = :id AND a.member = :member")
-    Optional<ApplyDTO> findByIdAndMember(Long id, Member member);
+    Optional<Apply> getApplyDTO(@Param("id") Long id);
 
     @Query("SELECT a FROM Apply a WHERE a.jobPost = :jobPost")
     List<ApplyDTO> findAllByJobPost(@Param("jobPost") JobPost jobPost);

@@ -44,9 +44,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PUT, "api/v1/member/{id}").hasRole("USER")
                         .requestMatchers(HttpMethod.PUT, "api/v1/feed/{id}").hasRole("USER")
                         .requestMatchers(
-                                "api/v1/member/{id}", "api/v1/member/test", "api/v1/apply/**",
-                                "api/v1/feed**", "api/v1/job-post/**", "api/v1/scout**",
-                                "member/profile", "apply/**", "feed/**", "job-post/**", "scout/**" ).hasRole("USER")
+                                "api/v1/member/{id}", "api/v1/member/test", "api/v1/apply**",
+                                "api/v1/feed**", "api/v1/job-post**", "api/v1/scout**",
+                                "member/profile", "apply**", "feed/**", "job-post**", "scout**" ).hasRole("USER")
                         .anyRequest().authenticated())
                 .addFilterBefore(new TokenAuthenticationFilter(tokenProvider), UsernamePasswordAuthenticationFilter.class)
                 .build();

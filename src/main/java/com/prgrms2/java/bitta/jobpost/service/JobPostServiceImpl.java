@@ -1,20 +1,26 @@
 package com.prgrms2.java.bitta.jobpost.service;
 
+import com.prgrms2.java.bitta.apply.entity.Apply;
+import com.prgrms2.java.bitta.apply.repository.ApplyRepository;
+import com.prgrms2.java.bitta.apply.service.ApplyService;
 import com.prgrms2.java.bitta.apply.util.ApplyProvider;
 import com.prgrms2.java.bitta.jobpost.dto.JobPostDTO;
 import com.prgrms2.java.bitta.global.dto.PageRequestDTO;
 import com.prgrms2.java.bitta.jobpost.entity.JobPost;
 import com.prgrms2.java.bitta.jobpost.exception.JobPostException;
 import com.prgrms2.java.bitta.jobpost.repository.JobPostRepository;
+import com.prgrms2.java.bitta.media.service.MediaService;
 import com.prgrms2.java.bitta.member.service.MemberProvider;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -24,16 +30,23 @@ public class JobPostServiceImpl implements JobPostService {
     private final JobPostRepository jobPostRepository;
     private final MemberProvider memberProvider;
     private final ApplyProvider applyProvider;
+    private final MediaService mediaService;
+    private final ApplyService applyService;
+    private final ApplyRepository applyRepository;
 
     @Override
+    @Transactional
     public Page<JobPostDTO> getList(PageRequestDTO pageRequestDTO) {
         Sort sort = Sort.by("id").descending();
         Pageable pageable = pageRequestDTO.getPageable(sort);
 
-        return jobPostRepository.getList(pageable);
+        Page<JobPost> jobPosts = jobPostRepository.getList(pageable);
+
+        return jobPosts.map(this::entityToDto);
     }
 
     @Override
+    @Transactional
     public JobPostDTO register(JobPostDTO jobPostDTO) {
         try {
             JobPost jobPost = dtoToEntity(jobPostDTO);
@@ -46,12 +59,14 @@ public class JobPostServiceImpl implements JobPostService {
     }
 
     @Override
+    @Transactional
     public JobPostDTO read(Long jobPostId) {
-        Optional<JobPostDTO> jobPostDTO = jobPostRepository.getJobPostDTO(jobPostId);
-        return jobPostDTO.orElseThrow(JobPostException.NOT_FOUND::get);
+        Optional<JobPost> jobPost = jobPostRepository.getJobPost(jobPostId);
+        return jobPost.map(this::entityToDto).orElseThrow(JobPostException.NOT_REGISTERED::get);
     }
 
     @Override
+    @Transactional
     public JobPostDTO modify(JobPostDTO jobPostDTO) {
         Optional<JobPost> modifyJobPost = jobPostRepository.findById(jobPostDTO.getId());
         JobPost jobPost = modifyJobPost.orElseThrow(JobPostException.NOT_FOUND::get);
@@ -72,27 +87,18 @@ public class JobPostServiceImpl implements JobPostService {
         }
     }
 
-
+    @Transactional
     @Override
-    public void remove(Long id) {
-        if (jobPostRepository.deleteByIdAndReturnCount(id) == 0) {
-            throw JobPostException.NOT_REMOVED.get();
+    public void removeJobPost(Long jobPostId) {
+        JobPost jobPost = jobPostRepository.findById(jobPostId).orElseThrow(JobPostException.NOT_FOUND::get);
+        List<Apply> applies = jobPost.getApply();
+        if (applies != null && !applies.isEmpty()) {
+            applies.forEach(apply -> apply.setJobPost(null)); applyRepository.deleteAllInBatch(applies);
         }
-    }
-
-    @Override   // 게시자의 다른 글 검색
-    public Page<JobPostDTO> getJobPostByMember(Long memberId, PageRequestDTO pageRequestDTO) {
-        Pageable pageable = PageRequest.of(pageRequestDTO.getPage(), pageRequestDTO.getSize());
-
-        return jobPostRepository.findJobPostByMember(memberId, pageable);
-    }
-
-    @Override   // 특정 키워드를 포함한 게시물 검색
-    public Page<JobPostDTO> searchJobPosts(String keyword, PageRequestDTO pageRequestDTO) {
-        Sort sort = Sort.by("id").descending();
-        Pageable pageable = pageRequestDTO.getPageable(sort);
-
-        return jobPostRepository.searchByKeyword(keyword, pageable);
+         if (jobPost.getMedia() != null) {
+             mediaService.delete(jobPost.getMedia()); jobPost.setMedia(null);
+         }
+        jobPostRepository.delete(jobPost);
     }
 
     private JobPostDTO entityToDto(JobPost jobPost) {
@@ -125,7 +131,7 @@ public class JobPostServiceImpl implements JobPostService {
                 .startDate(jobPostDTO.getStartDate())
                 .endDate(jobPostDTO.getEndDate())
                 .updatedAt(jobPostDTO.getUpdateAt())
-                .member(memberProvider.getById(jobPostDTO.getId()))
+                .member(memberProvider.getById(jobPostDTO.getMemberId()))
                 .apply(applyProvider.getAllByJobPost(jobPostDTO.getId()))
                 .build();
     }

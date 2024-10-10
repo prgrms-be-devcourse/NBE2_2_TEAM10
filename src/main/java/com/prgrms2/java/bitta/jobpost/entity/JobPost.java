@@ -31,7 +31,6 @@ public class JobPost {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name="member_id", nullable = false)
-    @Setter(AccessLevel.NONE)
     private Member member;              // 게시글 작성자
 
     @Column(length = 100, nullable = false)
@@ -63,15 +62,13 @@ public class JobPost {
     @Transient
     private boolean isClosed;   // 게시글의 마감 여부
 
-    // 이벤트 모집이 마감되면 true, 모집 중이면 false 반환
     public boolean isClosed() {
         return LocalDate.now().isAfter(this.endDate);
     }
 
-    @OneToOne(mappedBy = "jobPost", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "jobPost", cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Media media;
 
-    // 해당 게시글에 대한 신청 목록 가져야함
-    @OneToMany(mappedBy = "jobPost", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "jobPost", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private List<Apply> apply = new ArrayList<>();
 }
