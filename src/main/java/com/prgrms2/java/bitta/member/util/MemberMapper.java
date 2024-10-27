@@ -1,5 +1,6 @@
 package com.prgrms2.java.bitta.member.util;
 
+import com.prgrms2.java.bitta.member.dto.JoinDTO;
 import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
 import com.prgrms2.java.bitta.member.dto.MemberResponseDto;
 import com.prgrms2.java.bitta.member.entity.Member;
@@ -7,13 +8,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MemberMapper {
-    public Member dtoToEntity(MemberRequestDto.Register dto) {
+    public Member dtoToEntity(JoinDTO dto) {
         return Member.builder()
                 .username(dto.getUsername())
                 .password(dto.getPassword())
                 .nickname(dto.getNickname())
                 .address(dto.getAddress())
-                .role(dto.getRole())
                 .build();
     }
 

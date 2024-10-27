@@ -8,8 +8,6 @@ import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.exception.MemberException;
 import com.prgrms2.java.bitta.member.repository.MemberRepository;
 import com.prgrms2.java.bitta.member.util.MemberMapper;
-import com.prgrms2.java.bitta.token.dto.TokenResponseDto;
-import com.prgrms2.java.bitta.token.util.TokenProvider;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,50 +29,49 @@ public class MemberServiceImpl implements MemberService {
 
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
 
-    private final TokenProvider tokenProvider;
 
     private final PasswordEncoder passwordEncoder;
 
     private final MediaService mediaService;
 
     private final MemberMapper memberMapper;
+//
+//    @Override
+//    public TokenResponseDto validate(MemberRequestDto.Login loginDto) {
+//        UsernamePasswordAuthenticationToken authenticationToken
+//                = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
+//
+//        Authentication authentication = authenticationManagerBuilder
+//                .getObject().authenticate(authenticationToken);
+//
+//        return tokenProvider.generate(authentication);
+//    }
 
-    @Override
-    public TokenResponseDto validate(MemberRequestDto.Login loginDto) {
-        UsernamePasswordAuthenticationToken authenticationToken
-                = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
-
-        Authentication authentication = authenticationManagerBuilder
-                .getObject().authenticate(authenticationToken);
-
-        return tokenProvider.generate(authentication);
-    }
-
-    @Override
-    @Transactional
-    public void insert(MemberRequestDto.Register registerDto) {
-        registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-
-        try {
-            memberRepository.save(memberMapper.dtoToEntity(registerDto));
-        } catch (DataIntegrityViolationException | ConstraintViolationException e) {
-            throw MemberException.NOT_REGISTER.get();
-        }
-    }
-
-    @Override
-    @Transactional
-    public void insert(MemberRequestDto.Register registerDto, MultipartFile multipartFile) {
-        registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-
-        try {
-            Member member = memberRepository.save(memberMapper.dtoToEntity(registerDto));
-
-            mediaService.upload(multipartFile, member.getId(), null);
-        } catch (DataIntegrityViolationException | ConstraintViolationException | MediaTaskException e) {
-            throw MemberException.NOT_REGISTER.get();
-        }
-    }
+//    @Override
+//    @Transactional
+//    public void insert(MemberRequestDto.Register registerDto) {
+//        registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+//
+//        try {
+//            memberRepository.save(memberMapper.dtoToEntity(registerDto));
+//        } catch (DataIntegrityViolationException | ConstraintViolationException e) {
+//            throw MemberException.NOT_REGISTER.get();
+//        }
+//    }
+//
+//    @Override
+//    @Transactional
+//    public void insert(MemberRequestDto.Register registerDto, MultipartFile multipartFile) {
+//        registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
+//
+//        try {
+//            Member member = memberRepository.save(memberMapper.dtoToEntity(registerDto));
+//
+//            mediaService.upload(multipartFile, member.getId(), null);
+//        } catch (DataIntegrityViolationException | ConstraintViolationException | MediaTaskException e) {
+//            throw MemberException.NOT_REGISTER.get();
+//        }
+//    }
 
     @Override
     public MemberResponseDto.Information read(Long id) {
