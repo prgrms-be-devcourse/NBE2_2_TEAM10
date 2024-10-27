@@ -24,7 +24,7 @@ public class JobPostViewController {
     private final JobPostRepository jobPostRepository;
     private final MemberRepository memberRepository;
 
-    @GetMapping("jobpost")
+    @GetMapping("job-post")
     public String getjobpost(Model model) {
         List<JobPost> result = jobPostRepository.findAll();
         model.addAttribute("jobPosts", result);

@@ -1,9 +1,7 @@
 package com.prgrms2.java.bitta.global.util;
 
-import com.prgrms2.java.bitta.member.entity.Role;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.util.StringUtils;
 
 
 public class AuthenticationProvider {
@@ -17,15 +15,14 @@ public class AuthenticationProvider {
         return authentication.getName();
     }
 
-    public static Role getRoles() {
+    public static String getRoles() {
         final Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         if (authentication == null || authentication.getAuthorities().isEmpty()) {
-            throw new RuntimeException("");
+            return "ROLE_USER"; // 기본값을 설정하거나 빈 문자열 반환
         }
 
-        String role = authentication.getAuthorities().iterator().next().getAuthority();
-
-        return Role.valueOf(role);
+        // 첫 번째 권한의 이름을 문자열로 반환
+        return authentication.getAuthorities().iterator().next().getAuthority();
     }
 }
