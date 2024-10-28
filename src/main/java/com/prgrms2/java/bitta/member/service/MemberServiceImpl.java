@@ -15,6 +15,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,53 +26,36 @@ import org.springframework.web.multipart.MultipartFile;
 @Transactional(readOnly = true)
 @Slf4j
 public class MemberServiceImpl implements MemberService {
+
     private final MemberRepository memberRepository;
-
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
-
-
     private final PasswordEncoder passwordEncoder;
-
     private final MediaService mediaService;
-
     private final MemberMapper memberMapper;
-//
-//    @Override
-//    public TokenResponseDto validate(MemberRequestDto.Login loginDto) {
-//        UsernamePasswordAuthenticationToken authenticationToken
-//                = new UsernamePasswordAuthenticationToken(loginDto.getUsername(), loginDto.getPassword());
-//
-//        Authentication authentication = authenticationManagerBuilder
-//                .getObject().authenticate(authenticationToken);
-//
-//        return tokenProvider.generate(authentication);
-//    }
+    private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
-//    @Override
-//    @Transactional
-//    public void insert(MemberRequestDto.Register registerDto) {
-//        registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-//
-//        try {
-//            memberRepository.save(memberMapper.dtoToEntity(registerDto));
-//        } catch (DataIntegrityViolationException | ConstraintViolationException e) {
-//            throw MemberException.NOT_REGISTER.get();
-//        }
-//    }
-//
-//    @Override
-//    @Transactional
-//    public void insert(MemberRequestDto.Register registerDto, MultipartFile multipartFile) {
-//        registerDto.setPassword(passwordEncoder.encode(registerDto.getPassword()));
-//
-//        try {
-//            Member member = memberRepository.save(memberMapper.dtoToEntity(registerDto));
-//
-//            mediaService.upload(multipartFile, member.getId(), null);
-//        } catch (DataIntegrityViolationException | ConstraintViolationException | MediaTaskException e) {
-//            throw MemberException.NOT_REGISTER.get();
-//        }
-//    }
+    @Override
+    public void join(MemberRequestDto.Join joinDTO) {
+        String username = joinDTO.getUsername();
+        String password = joinDTO.getPassword();
+        String nickname = joinDTO.getNickname();
+        String address = joinDTO.getAddress();
+
+        Boolean isExist = memberRepository.existsByUsername(username);
+
+        if (isExist) {
+            return;
+        }
+
+        Member data = new Member();
+        data.setUsername(username);
+        data.setPassword(bCryptPasswordEncoder.encode(password));
+        data.setNickname(nickname);
+        data.setAddress(address);
+        data.setRole("ROLE_USER");
+
+        memberRepository.save(data);
+    }
 
     @Override
     public MemberResponseDto.Information read(Long id) {
@@ -89,15 +73,20 @@ public class MemberServiceImpl implements MemberService {
     }
 
     @Override
-    public void changePassword(MemberRequestDto.ChangePassword memberDto) {
-        Member member = memberRepository.findById(memberDto.getId())
+    public void changePassword(MemberRequestDto.ChangePassword changePasswordDTO) {
+        Long memberId = changePasswordDTO.getId();
+        String beforePassword = changePasswordDTO.getBeforePassword();
+        String afterPassword = changePasswordDTO.getAfterPassword();
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
-        if (passwordEncoder.matches(memberDto.getBeforePassword(), member.getPassword())) {
-            member.setPassword(passwordEncoder.encode(memberDto.getAfterPassword()));
+        if (bCryptPasswordEncoder.matches(beforePassword, member.getPassword())) {
+            member.setPassword(bCryptPasswordEncoder.encode(afterPassword));
+            memberRepository.save(member);
+        } else {
+            throw MemberException.BAD_CREDENTIALS.get();
         }
-
-        throw MemberException.BAD_CREDENTIALS.get();
     }
 
     @Override

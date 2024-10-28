@@ -6,13 +6,9 @@ import com.prgrms2.java.bitta.member.dto.MemberResponseDto;
 import org.springframework.web.multipart.MultipartFile;
 
 public interface MemberService {
-//    TokenResponseDto validate(MemberRequestDto.Login loginDto);
+    void join(MemberRequestDto.Join joinDTO);    //Join 기능 병합
 
     MemberResponseDto.Information read(Long id);
-
-//    void insert(MemberRequestDto.Register registerDto);
-
-//    void insert(MemberRequestDto.Register registerDto, MultipartFile multipartFile);
 
     void changePassword(MemberRequestDto.ChangePassword memberDto);
 
