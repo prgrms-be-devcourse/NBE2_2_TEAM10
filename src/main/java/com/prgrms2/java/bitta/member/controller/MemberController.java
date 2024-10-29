@@ -2,10 +2,8 @@ package com.prgrms2.java.bitta.member.controller;
 
 import com.prgrms2.java.bitta.global.exception.AuthenticationException;
 import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
-import com.prgrms2.java.bitta.member.entity.Role;
 import com.prgrms2.java.bitta.member.service.MemberProvider;
 import com.prgrms2.java.bitta.member.service.MemberService;
-import com.prgrms2.java.bitta.token.dto.TokenResponseDto;
 import com.prgrms2.java.bitta.global.util.AuthenticationProvider;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -36,37 +34,6 @@ public class MemberController {
     private final MemberProvider memberProvider;
 
     @Operation(
-            summary = "테스트",
-            description = "SecurityUtil 로부터 회원아이디를 얻는 테스트용 API입니다."
-    )
-    @PostMapping("/test")
-    public String test() {
-        return AuthenticationProvider.getUsername();
-    }
-
-    @Operation(
-            summary = "로그인",
-            description = "로그인 후 JWT 토큰을 발급합니다.",
-            responses = {
-                    @ApiResponse(
-                            responseCode = "200",
-                            description = "로그인 성공",
-                            content = @Content(mediaType = "application/json")),
-                    @ApiResponse(
-                            responseCode = "401",
-                            description = "로그인 실패",
-                            content = @Content)
-            }
-    )
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody MemberRequestDto.Login loginDto) {
-        TokenResponseDto tokenResponseDto = memberService.validate(loginDto);
-
-        return ResponseEntity.ok(Map.of("message", "로그인에 성공했습니다."
-                , "result", tokenResponseDto));
-    }
-
-    @Operation(
             summary = "회원가입",
             description = "회원가입을 진행합니다.",
             responses = {
@@ -82,17 +49,10 @@ public class MemberController {
                             content = @Content)
             }
     )
-    @PostMapping
-    public String register(@RequestBody MemberRequestDto.Register registerDto, Model model) {
-        memberService.insert(registerDto);
-
-        // 회원가입 후 username 추가
-        model.addAttribute("username", registerDto.getUsername());
-        model.addAttribute("successMessage", "회원가입에 성공했습니다.");
-
-        return "redirect:/member/join-complete";
-
-        //return ResponseEntity.ok(Map.of("message", "회원가입에 성공했습니다."));
+    @PostMapping("/join")
+    public String join(@RequestBody MemberRequestDto.Join joinDTO) {
+        memberService.join(joinDTO);
+        return "회원가입에 성공하였습니다.";
     }
 
     @Operation(
@@ -197,7 +157,9 @@ public class MemberController {
     }
 
     private boolean checkPermission(Long id) {
-        if (AuthenticationProvider.getRoles() == Role.ROLE_ADMIN) {
+        String role = AuthenticationProvider.getRoles();
+
+        if ("ROLE_USER".equals(role)) {  // 문자열로 역할을 비교
             return true;
         }
 

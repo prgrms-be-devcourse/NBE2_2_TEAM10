@@ -1,30 +1,17 @@
 package com.prgrms2.java.bitta.member.dto;
 
-import com.prgrms2.java.bitta.member.entity.Role;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 @Schema(title = "회원 요청 DTO", description = "회원 관련 요청에 사용하는 DTO입니다.")
 public class MemberRequestDto {
-    @Data
-    @NoArgsConstructor
-    @AllArgsConstructor
-    @Builder
-    @Schema(title = "로그인 DTO", description = "로그인 요청에 사용하는 DTO입니다.")
-    public static class Login {
-        @Schema(title = "아이디", description = "로그인에 사용할 아이디입니다.", example = "username")
-        private String username;
-
-        @Schema(title = "비밀번호", description = "로그인에 사용할 비밀번호입니다.", example = "password")
-        private String password;
-    }
 
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
     @Builder
     @Schema(title = "회원가입 DTO", description = "회원가입 요청에 사용하는 DTO입니다.")
-    public static class Register {
+    public static class Join {
         @Schema(title = "아이디", description = "회원가입에 사용할 아이디입니다.", example = "username")
         private String username;
 
@@ -36,10 +23,19 @@ public class MemberRequestDto {
 
         @Schema(title = "주소", description = "회원의 주소입니다.", example = "경기도 고양시 일산동구 중앙로 1256")
         private String address;
+    }
 
-        @Builder.Default
-        @Schema(title = "회원 권한", description = "회원이 갖는 액세스 권한입니다.", example = "USER")
-        private Role role = Role.ROLE_USER;
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    @Schema(title = "로그인 DTO", description = "로그인 요청에 사용하는 DTO 입니다.")
+    public static class login {
+        @Schema(title = "아이디", description = "로그인에 사용할 아이디입니다.", example = "username")
+        private String username;
+
+        @Schema(title = "비밀번호", description = "로그인에 사용할 비밀번호입니다.", example = "password")
+        private String password;
     }
 
     @Data
