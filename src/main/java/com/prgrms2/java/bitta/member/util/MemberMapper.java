@@ -7,13 +7,12 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class MemberMapper {
-    public Member dtoToEntity(MemberRequestDto.Register dto) {
+    public Member dtoToEntity(MemberRequestDto.Join JoinDTO) {
         return Member.builder()
-                .username(dto.getUsername())
-                .password(dto.getPassword())
-                .nickname(dto.getNickname())
-                .address(dto.getAddress())
-                .role(dto.getRole())
+                .username(JoinDTO.getUsername())
+                .password(JoinDTO.getPassword())
+                .nickname(JoinDTO.getNickname())
+                .address(JoinDTO.getAddress())
                 .build();
     }
 

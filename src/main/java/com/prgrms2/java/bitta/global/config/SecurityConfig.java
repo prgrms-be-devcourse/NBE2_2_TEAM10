@@ -88,15 +88,18 @@ public class SecurityConfig {
 
         http
                 .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/login", "/", "/join").permitAll()
+                        .requestMatchers("/api/v1/member/login", "/", "/join").permitAll()
                         .requestMatchers("/admin").hasRole("ADMIN")
                         .requestMatchers("/reissue").permitAll()
                         .anyRequest().authenticated());
 
         http
                 .addFilterBefore(new JWTFilter(jwtUtil), LoginFilter.class);
+
+        LoginFilter loginFilter = new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository);
+        loginFilter.setFilterProcessesUrl("/api/v1/member/login");
         http
-                .addFilterAt(new LoginFilter(authenticationManager(authenticationConfiguration), jwtUtil, refreshRepository), UsernamePasswordAuthenticationFilter.class);
+                .addFilterAt(loginFilter, UsernamePasswordAuthenticationFilter.class);
         http
                 .addFilterBefore(new CustomLogoutFilter(jwtUtil, refreshRepository), LogoutFilter.class);
 
