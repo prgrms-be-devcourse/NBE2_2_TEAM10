@@ -111,15 +111,6 @@ public class FeedServiceImpl implements FeedService {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<FeedDTO> readRandomFeeds(int limit) {
-        List<Feed> feeds = feedRepository.findRandomFeeds(limit);
-        return feeds.stream()
-                .map(this::entityToDto)
-                .collect(Collectors.toList());
-    }
-
-    @Override
     public boolean checkAuthority(Long feedId, String username) {
         return feedRepository.existsByIdAndMember_Username(feedId, username);
     }
