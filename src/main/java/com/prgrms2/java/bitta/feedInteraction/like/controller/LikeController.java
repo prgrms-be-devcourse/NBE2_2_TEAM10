@@ -1,4 +1,4 @@
-package com.example.feedinteraction.controller;
+package com.prgrms2.java.bitta.feedInteraction.like.controller;
 
 
 import com.prgrms2.java.bitta.feedInteraction.like.service.LikeService;

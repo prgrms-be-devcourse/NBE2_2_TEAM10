@@ -18,11 +18,8 @@ public class LikeService {
     private final LikeRepository likeRepository;
 
     @Transactional
-    public boolean toggleLike(FeedDTO feedDto, MemberResponseDto.Information memberDto) {
-        Long feedId = feedDto.getId();
-        Long memberId = memberDto.getId();
-
-        return likeRepository.findByFeedAndMember(feedDto.getId(), memberDto.getId())
+    public boolean toggleLike(Long feedId, Long memberId) {
+        return likeRepository.findByFeedAndMember(feedId, memberId)
                 .map(like -> {
                     like.setLiked(!like.isLiked());
                     return like.isLiked();
@@ -40,7 +37,7 @@ public class LikeService {
 
     @Transactional(readOnly = true)
     public long getLikeCount(Long feedId) {
-        return likeRepository.countByFeedandLiked(feedId);
+        return likeRepository.countByFeedIdandLiked(feedId);
     }
 
 
