@@ -293,7 +293,9 @@ public class FeedController {
     }
 
     private boolean checkPermission(Long id) {
-        if (AuthenticationProvider.getRoles() == Role.ROLE_ADMIN) {
+        String role = AuthenticationProvider.getRoles();
+
+        if ("ROLE_ADMIN".equals(role)) {
             return true;
         }
 

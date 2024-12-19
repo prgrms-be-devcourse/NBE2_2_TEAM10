@@ -1,7 +1,8 @@
 package com.prgrms2.java.bitta.token.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
+import com.prgrms2.java.bitta.member.dto.LoginDTO;
+import com.prgrms2.java.bitta.member.dto.MemberRequestDTO;
 import com.prgrms2.java.bitta.token.entity.RefreshEntity;
 import com.prgrms2.java.bitta.token.repository.RefreshRepository;
 import com.prgrms2.java.bitta.token.util.JWTUtil;
@@ -41,13 +42,13 @@ public class LoginFilter extends UsernamePasswordAuthenticationFilter {
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
 
-        MemberRequestDto.login loginDTO = new MemberRequestDto.login();
+        LoginDTO loginDTO = new LoginDTO();
 
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             ServletInputStream inputStream = request.getInputStream();
             String messageBody = StreamUtils.copyToString(inputStream, StandardCharsets.UTF_8);
-            loginDTO = objectMapper.readValue(messageBody, MemberRequestDto.login.class);
+            loginDTO = objectMapper.readValue(messageBody, LoginDTO.class);
 
         } catch (IOException e) {
             throw new RuntimeException(e);
