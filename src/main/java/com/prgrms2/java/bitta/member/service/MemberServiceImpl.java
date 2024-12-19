@@ -2,21 +2,16 @@ package com.prgrms2.java.bitta.member.service;
 
 import com.prgrms2.java.bitta.media.exception.MediaTaskException;
 import com.prgrms2.java.bitta.media.service.MediaService;
-import com.prgrms2.java.bitta.member.dto.MemberRequestDto;
-import com.prgrms2.java.bitta.member.dto.MemberResponseDto;
+import com.prgrms2.java.bitta.member.dto.MemberRequestDTO;
+import com.prgrms2.java.bitta.member.dto.MemberResponseDTO;
 import com.prgrms2.java.bitta.member.entity.Member;
 import com.prgrms2.java.bitta.member.exception.MemberException;
 import com.prgrms2.java.bitta.member.repository.MemberRepository;
-import com.prgrms2.java.bitta.member.util.MemberMapper;
 import jakarta.validation.ConstraintViolationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,88 +23,75 @@ import org.springframework.web.multipart.MultipartFile;
 public class MemberServiceImpl implements MemberService {
 
     private final MemberRepository memberRepository;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
-    private final PasswordEncoder passwordEncoder;
     private final MediaService mediaService;
-    private final MemberMapper memberMapper;
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
 
     @Override
-    public void join(MemberRequestDto.Join joinDTO) {
-        String username = joinDTO.getUsername();
-        String password = joinDTO.getPassword();
-        String nickname = joinDTO.getNickname();
-        String address = joinDTO.getAddress();
-
-        Boolean isExist = memberRepository.existsByUsername(username);
-
-        if (isExist) {
-            return;
+    @Transactional
+    public void join(MemberRequestDTO.Join joinDTO) {
+        if (memberRepository.existsByUsername(joinDTO.getUsername())) {
+            throw MemberException.DUPLICATE.get();
         }
 
-        Member data = new Member();
-        data.setUsername(username);
-        data.setPassword(bCryptPasswordEncoder.encode(password));
-        data.setNickname(nickname);
-        data.setAddress(address);
-        data.setRole("ROLE_USER");
+        Member member = Member.builder()
+                .username(joinDTO.getUsername())
+                .password(bCryptPasswordEncoder.encode(joinDTO.getPassword()))
+                .nickname(joinDTO.getNickname())
+                .address(joinDTO.getAddress())
+                .role("ROLE_USER")
+                .build();
 
-        memberRepository.save(data);
+        memberRepository.save(member);
     }
 
     @Override
-    public MemberResponseDto.Information read(Long id) {
-        Member member = memberRepository.findById(id)
+    public MemberResponseDTO read(String username) {
+        Member member = memberRepository.findByUsername(username)
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
-        MemberResponseDto.Information memberDto = memberMapper
-                .entityToDto(member);
+        MemberResponseDTO responseDTO = new MemberResponseDTO(member);
 
         if (member.getMedia() != null) {
-            memberDto.setProfileUrl(mediaService.getUrl(member.getMedia()));
+            responseDTO.setProfileUrl(mediaService.getUrl(member.getMedia()));
         }
 
-        return memberDto;
-    }
-
-    @Override
-    public void changePassword(MemberRequestDto.ChangePassword changePasswordDTO) {
-        Long memberId = changePasswordDTO.getId();
-        String beforePassword = changePasswordDTO.getBeforePassword();
-        String afterPassword = changePasswordDTO.getAfterPassword();
-
-        Member member = memberRepository.findById(memberId)
-                .orElseThrow(MemberException.NOT_FOUND::get);
-
-        if (bCryptPasswordEncoder.matches(beforePassword, member.getPassword())) {
-            member.setPassword(bCryptPasswordEncoder.encode(afterPassword));
-            memberRepository.save(member);
-        } else {
-            throw MemberException.BAD_CREDENTIALS.get();
-        }
+        return responseDTO;
     }
 
     @Override
     @Transactional
-    public void update(MemberRequestDto.Modify memberDto) {
-        Member member = memberRepository.findById(memberDto.getId())
+    public void changePassword(String username, MemberRequestDTO.ChangePassword changePasswordDTO) {
+        Member member = memberRepository.findByUsername(username)
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
-        member.setUsername(memberDto.getUsername());
-        member.setNickname(memberDto.getNickname());
-        member.setAddress(memberDto.getAddress());
+        if (!bCryptPasswordEncoder.matches(changePasswordDTO.getBeforePassword(), member.getPassword())) {
+            throw MemberException.BAD_CREDENTIALS.get();
+        }
+
+        member.setPassword(bCryptPasswordEncoder.encode(changePasswordDTO.getAfterPassword()));
+        memberRepository.save(member);
+    }
+
+    @Override
+    @Transactional
+    public void update(String username, MemberRequestDTO.Modify memberDTO) {
+        Member member = memberRepository.findByUsername(username)
+                .orElseThrow(MemberException.NOT_FOUND::get);
+
+        member.setNickname(memberDTO.getNickname());
+        member.setAddress(memberDTO.getAddress());
 
         try {
             memberRepository.save(member);
-        } catch (DataIntegrityViolationException | ConstraintViolationException | MediaTaskException e) {
+        } catch (DataIntegrityViolationException | ConstraintViolationException e) {
             throw MemberException.NOT_MODIFIED.get();
         }
     }
 
     @Override
     @Transactional
-    public void update(MemberRequestDto.Modify memberDto, MultipartFile profileImage) {
-        Member member = memberRepository.findById(memberDto.getId())
+    public void update(String username, MemberRequestDTO.Modify memberDTO, MultipartFile profileImage) {
+        Member member = memberRepository.findByUsername(username)
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
         if (member.getMedia() != null) {
@@ -117,10 +99,8 @@ public class MemberServiceImpl implements MemberService {
         }
 
         mediaService.upload(profileImage, member.getId(), null);
-
-        member.setUsername(memberDto.getUsername());
-        member.setNickname(memberDto.getNickname());
-        member.setAddress(memberDto.getAddress());
+        member.setNickname(memberDTO.getNickname());
+        member.setAddress(memberDTO.getAddress());
 
         try {
             memberRepository.save(member);
@@ -128,25 +108,21 @@ public class MemberServiceImpl implements MemberService {
             throw MemberException.NOT_MODIFIED.get();
         }
     }
-
-    @Transactional
     @Override
-    public void delete(Long id) {
-        Member member = memberRepository.findById(id)
+    @Transactional
+    public void delete(String username) {
+        Member member = memberRepository.findByUsername(username)
                 .orElseThrow(MemberException.NOT_FOUND::get);
 
         try {
-            memberRepository.deleteById(id);
-            mediaService.deleteExistFile(member.getMedia());
-            log.info("회원 삭제 완료 - ID: {}", id);
+            memberRepository.delete(member);
+            if (member.getMedia() != null) {
+                mediaService.deleteExistFile(member.getMedia());
+            }
+            log.info("회원 삭제 완료 - Username: {}", username);
         } catch (Exception e) {
-            log.error("회원 삭제 실패 - ID: {}", id, e);
+            log.error("회원 삭제 실패 - Username: {}", username, e);
             throw MemberException.REMOVE_FAILED.get();
         }
-    }
-
-    @Override
-    public boolean checkAuthority(Long id, String username) {
-        return memberRepository.existsByIdAndUsername(id, username);
     }
 }
